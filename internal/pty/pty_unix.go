@@ -8,6 +8,7 @@ import (
 
 	"github.com/creack/pty"
 	"golang.org/x/term"
+	"golang.org/x/sys/unix"
 )
 
 func NewPTY() (master, slave *os.File, err error) {
@@ -44,4 +45,17 @@ func SetRawMode(fd uintptr) (*term.State, error) {
 
 func RestoreMode(fd uintptr, state *term.State) error {
 	return term.Restore(int(fd), state)
+}
+
+// DisableEcho disables echo on the PTY master fd.
+// This prevents the shell from echoing input that liner already displays.
+func DisableEcho(master *os.File) error {
+	attrs, err := unix.IoctlGetTermios(int(master.Fd()), unix.TCGETS)
+	if err != nil {
+		return err
+	}
+	// Only disable echo flags. Keep ICANON and ISIG so the shell
+	// still processes signals (Ctrl+C) and canonical mode normally.
+	attrs.Lflag &^= unix.ECHO | unix.ECHOE | unix.ECHOK | unix.ECHOKE | unix.ECHOCTL | unix.ECHOPRT
+	return unix.IoctlSetTermios(int(master.Fd()), unix.TCSETS, attrs)
 }

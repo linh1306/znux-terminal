@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/creack/pty"
@@ -16,22 +17,18 @@ import (
 	goshell_input "github.com/nguyenlinh13602/goshell/internal/input"
 )
 
-// outputWriter implements render.OutputChan via a channel
+// outputWriter implements render.OutputChan via a channel.
 type outputWriter struct {
 	ch chan<- render.OutputOp
 }
 
 func (w *outputWriter) WriteOp(op render.OutputOp) {
-	select {
-	case w.ch <- op:
-	default:
-	}
+	w.ch <- op // blocking send — never drop output silently
 }
 
 func main() {
 	shellPath := getShellPath()
 
-	// Start shell with PTY — creack/pty handles fork+raw mode+exec
 	cmd := exec.Command(shellPath)
 	ptm, err := pty.Start(cmd)
 	if err != nil {
@@ -40,30 +37,32 @@ func main() {
 	}
 	defer ptm.Close()
 
-	// Set raw mode on stdin for reading keyboard input
-	oldState, err := gshell_pty.SetRawMode(os.Stdin.Fd())
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to set raw mode on stdin: %v\n", err)
-		os.Exit(1)
+	// Disable PTY echo: goshell echoes every keystroke itself, so leaving the
+	// shell's termios echo on would produce a second copy of the submitted
+	// command that races with our own output on Enter.
+	if err := gshell_pty.DisableEcho(ptm); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: DisableEcho failed: %v\n", err)
 	}
-	defer gshell_pty.RestoreMode(os.Stdin.Fd(), oldState)
+
+	ptyMu := &sync.Mutex{}
 
 	// Handle window resize
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGWINCH)
+	defer signal.Stop(sigChan)
 	go func() {
 		for range sigChan {
+			ptyMu.Lock()
 			gshell_pty.Resizepty(ptm)
+			ptyMu.Unlock()
 		}
 	}()
 
-	// Serialized output channel
 	ch := make(chan render.OutputOp, 200)
-
 	output := &outputWriter{ch: ch}
 	emulator := terminal.NewEmulator()
 
-	dispatcher := goshell_input.NewDispatcher(os.Stdin, ptm, emulator, output)
+	dispatcher := goshell_input.NewDispatcher(ptm, emulator, output, ptyMu)
 
 	// PTY → serialized output goroutine
 	go func() {
@@ -75,21 +74,20 @@ func main() {
 				return
 			}
 			emulator.Write(buf[:n])
-			select {
-			case ch <- render.OutputOp{Data: append([]byte(nil), buf[:n]...)}:
-			default:
+			ch <- render.OutputOp{Data: append([]byte(nil), buf[:n]...)}
+		}
+	}()
+
+	// Output writer goroutine — single goroutine owns all stdout writes.
+	go func() {
+		for op := range ch {
+			if _, err := os.Stdout.Write(op.Data); err != nil {
+				return
 			}
 		}
 	}()
 
-	// Output writer goroutine — owns stdout writes
-	go func() {
-		for op := range ch {
-			os.Stdout.Write(op.Data)
-		}
-	}()
-
-	if err := dispatcher.Run(); err != nil && err != io.EOF {
+	if err := dispatcher.RunWithLiner(); err != nil && err != io.EOF {
 		fmt.Fprintf(os.Stderr, "dispatcher error: %v\n", err)
 	}
 

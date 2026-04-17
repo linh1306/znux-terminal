@@ -59,9 +59,3 @@ type Spec struct {
 	Options     []Option
 	Args        []ArgSpec
 }
-
-// CachedGenerator wraps a generator function with caching
-type CachedGenerator struct {
-	generator func() []Suggestion
-	cache     []Suggestion
-}

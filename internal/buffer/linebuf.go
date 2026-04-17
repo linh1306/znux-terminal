@@ -2,7 +2,6 @@ package buffer
 
 import (
 	"strings"
-	"unicode/utf8"
 )
 
 // LineBuf holds the current input line with cursor position
@@ -19,8 +18,37 @@ func NewLineBuf() *LineBuf {
 	}
 }
 
-// Append adds runes at cursor position
+// normalizeCursor is a no-op: buf is []rune so cursor is always rune-aligned.
+func (l *LineBuf) normalizeCursor() {}
+
+// RuneWidth returns the terminal display width of a rune.
+// Returns 0 for non-printable control characters, 2 for wide characters (CJK, emoji).
+func RuneWidth(r rune) int {
+	switch {
+	case r < 32 || r == 127:
+		return 0
+	case r >= 0x1100 &&
+		(r <= 0x115F || // Hangul Jamo
+		r == 0x2329 || r == 0x232A ||
+		r >= 0x2E80 && r <= 0x303F || // CJK Radicals
+		r >= 0x3040 && r <= 0xA4CF || // CJK
+		r >= 0xAC00 && r <= 0xD7A3 || // Hangul Syllables
+		r >= 0xF900 && r <= 0xFAFF || // CJK Compatibility Ideographs
+		r >= 0xFE10 && r <= 0xFE1F || // Vertical forms
+		r >= 0xFE30 && r <= 0xFE6F || // CJK Compatibility Forms
+		r >= 0xFF00 && r <= 0xFF60 || // Fullwidth forms
+		r >= 0xFFE0 && r <= 0xFFE6 ||
+		r >= 0x20000 && r <= 0x2FFFD ||
+		r >= 0x30000 && r <= 0x3FFFD):
+		return 2
+	default:
+		return 1
+	}
+}
+
+// Append adds a rune at cursor position
 func (l *LineBuf) Append(r rune) {
+	l.normalizeCursor()
 	if l.cursor == len(l.buf) {
 		l.buf = append(l.buf, r)
 	} else {
@@ -32,6 +60,7 @@ func (l *LineBuf) Append(r rune) {
 
 // Insert inserts runes at cursor position
 func (l *LineBuf) Insert(rs []rune) {
+	l.normalizeCursor()
 	if l.cursor == len(l.buf) {
 		l.buf = append(l.buf, rs...)
 	} else {
@@ -42,6 +71,11 @@ func (l *LineBuf) Insert(rs []rune) {
 
 // Delete removes a character before cursor (backspace)
 func (l *LineBuf) Delete() bool {
+	if l.cursor == 0 {
+		return false
+	}
+	// Move cursor to rune boundary before deleting
+	l.normalizeCursor()
 	if l.cursor == 0 {
 		return false
 	}
@@ -61,16 +95,17 @@ func (l *LineBuf) DeleteAfter() bool {
 	return true
 }
 
-// MoveCursorLeft moves cursor left
+// MoveCursorLeft moves cursor left by one rune
 func (l *LineBuf) MoveCursorLeft() bool {
 	if l.cursor == 0 {
 		return false
 	}
 	l.cursor--
+	l.normalizeCursor()
 	return true
 }
 
-// MoveCursorRight moves cursor right
+// MoveCursorRight moves cursor right by one rune
 func (l *LineBuf) MoveCursorRight() bool {
 	if l.cursor >= len(l.buf) {
 		return false
@@ -91,16 +126,19 @@ func (l *LineBuf) MoveCursorToEnd() {
 
 // WordLeft moves cursor to start of previous word
 func (l *LineBuf) WordLeft() {
+	l.normalizeCursor()
 	for l.cursor > 0 && l.buf[l.cursor-1] == ' ' {
 		l.cursor--
 	}
 	for l.cursor > 0 && l.buf[l.cursor-1] != ' ' {
 		l.cursor--
+		l.normalizeCursor()
 	}
 }
 
 // WordRight moves cursor to start of next word
 func (l *LineBuf) WordRight() {
+	l.normalizeCursor()
 	for l.cursor < len(l.buf) && l.buf[l.cursor] != ' ' {
 		l.cursor++
 	}
@@ -175,6 +213,7 @@ func (l *LineBuf) SetCursor(pos int) {
 		l.cursor = len(l.buf)
 	} else {
 		l.cursor = pos
+		l.normalizeCursor()
 	}
 }
 
@@ -183,9 +222,23 @@ func (l *LineBuf) Len() int {
 	return len(l.buf)
 }
 
-// DisplayWidth returns the visual width of the buffer (for cursor positioning)
+// DisplayWidth returns the terminal visual width of the buffer content.
+// This accounts for double-width characters (CJK, emoji, Vietnamese diacritics).
 func (l *LineBuf) DisplayWidth() int {
-	return utf8.RuneCountInString(l.String())
+	w := 0
+	for _, r := range l.buf {
+		w += RuneWidth(r)
+	}
+	return w
+}
+
+// CursorDisplayWidth returns the terminal visual width from start to cursor position.
+func (l *LineBuf) CursorDisplayWidth() int {
+	w := 0
+	for i := 0; i < l.cursor && i < len(l.buf); i++ {
+		w += RuneWidth(l.buf[i])
+	}
+	return w
 }
 
 // TruncateFrom truncates from position to end
@@ -263,6 +316,22 @@ type ParsedCommand struct {
 	Subcommand string
 	Flags      []string
 	Args       []string
+}
+
+// ReplaceLastWord replaces the trailing whitespace-delimited word with `word`.
+// If the buffer ends with whitespace (or is empty), `word` is appended.
+// Cursor is moved to the end of the buffer.
+func (l *LineBuf) ReplaceLastWord(word string) {
+	i := len(l.buf) - 1
+	for i >= 0 && l.buf[i] != ' ' && l.buf[i] != '\t' {
+		i--
+	}
+	kept := l.buf[:i+1]
+	newBuf := make([]rune, 0, len(kept)+len([]rune(word)))
+	newBuf = append(newBuf, kept...)
+	newBuf = append(newBuf, []rune(word)...)
+	l.buf = newBuf
+	l.cursor = len(l.buf)
 }
 
 // AppendWord appends a word at the end (after space if needed)

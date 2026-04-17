@@ -266,7 +266,7 @@ var GitSpec = Spec{
 			Args: []ArgSpec{{Name: "directory"}},
 		},
 		{
-			Name:        " rm",
+			Name:        "rm",
 			Description: "Remove files from the working tree and index",
 			Options: []Option{
 				{Names: []string{"--cached"}, Description: "Remove only from index"},
@@ -389,9 +389,23 @@ func gitBranches() func() []Suggestion {
 	}
 }
 
-// gitRemotes returns a generator for remote names
+// gitRemotes returns a generator for remote names with caching
 func gitRemotes() func() []Suggestion {
+	type remoteCache struct {
+		suggestions []Suggestion
+		expiry      time.Time
+		mu          sync.Mutex
+	}
+	cache := remoteCache{}
+
 	return func() []Suggestion {
+		cache.mu.Lock()
+		defer cache.mu.Unlock()
+
+		if time.Now().Before(cache.expiry) && cache.suggestions != nil {
+			return cache.suggestions
+		}
+
 		cmd := exec.Command("git", "remote")
 		out, err := cmd.Output()
 		if err != nil {
@@ -406,6 +420,8 @@ func gitRemotes() func() []Suggestion {
 				suggestions = append(suggestions, Suggestion{Name: line, Kind: KindValue})
 			}
 		}
+		cache.suggestions = suggestions
+		cache.expiry = time.Now().Add(5 * time.Second)
 		return suggestions
 	}
 }

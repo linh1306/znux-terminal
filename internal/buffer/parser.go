@@ -153,10 +153,12 @@ func (p *Parser) GetCurrentContext(buf *LineBuf) Context {
 	if token.Value[0] == '-' {
 		return Context{Level: ContextFlagPartial, Command: tokens[0].Value}
 	}
-	if len(tokens) >= 2 && tokens[1].Value != "" {
-		return Context{Level: ContextArgPartial, Command: tokens[0].Value, Subcommand: tokens[1].Value}
+	// With exactly two tokens the second one is a partial subcommand
+	// (e.g. "git c" — user is still typing the subcommand name).
+	if numTokens == 2 {
+		return Context{Level: ContextSubcommandPartial, Command: tokens[0].Value, Subcommand: token.Value}
 	}
-	return Context{Level: ContextArgPartial, Command: tokens[0].Value}
+	return Context{Level: ContextArgPartial, Command: tokens[0].Value, Subcommand: tokens[1].Value}
 }
 
 // Context represents what kind of suggestion to provide
