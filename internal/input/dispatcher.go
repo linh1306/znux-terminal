@@ -23,6 +23,7 @@ type Dispatcher struct {
 	emulator    *terminal.Emulator
 	outputChan  render.OutputChan
 	config      *config.Config
+	done        chan struct{}
 
 	// Line editing state (used by liner_input.go)
 	linebuf   *buffer.LineBuf
@@ -66,12 +67,22 @@ func NewDispatcher(ptyOut *os.File, emulator *terminal.Emulator, output render.O
 		suggestions:   nil,
 		selected:      0,
 		showing:       false,
+		done:          make(chan struct{}),
 	}
 }
 
 // SetConfig sets the configuration (keybindings, theme)
 func (d *Dispatcher) SetConfig(cfg *config.Config) {
 	d.config = cfg
+}
+
+// Stop signals the input loop to exit, used when the underlying shell process exits.
+func (d *Dispatcher) Stop() {
+	select {
+	case <-d.done:
+	default:
+		close(d.done)
+	}
 }
 
 // ptyWrite writes to the PTY with mutex protection against concurrent resize.

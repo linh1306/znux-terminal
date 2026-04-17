@@ -78,15 +78,36 @@ func (d *Dispatcher) RunWithLiner() error {
 	// Show initial prompt
 	d.writePrompt()
 
+	type readResult struct {
+		b   byte
+		err error
+	}
+	byteCh := make(chan readResult, 8)
+	go func() {
+		for {
+			b, err := reader.ReadByte()
+			byteCh <- readResult{b, err}
+			if err != nil {
+				return
+			}
+		}
+	}()
+
 	for {
-		// Read input
-		b, err := reader.ReadByte()
-		if err != nil {
-			if err == io.EOF {
+		var res readResult
+		select {
+		case <-d.done:
+			return nil
+		case res = <-byteCh:
+		}
+
+		if res.err != nil {
+			if res.err == io.EOF {
 				return nil
 			}
-			return err
+			return res.err
 		}
+		b := res.b
 
 		// Handle escape sequences (arrow keys, etc.)
 		if b == 27 {
@@ -363,9 +384,13 @@ func (d *Dispatcher) processEscapeSeq(seq []byte, reader *bufio.Reader) {
 		return
 	}
 
-	// Plain Escape — dismiss suggestions
-	if len(seq) == 1 && d.showing {
-		d.hideSuggestions()
+	// Plain Escape — dismiss suggestions or exit
+	if len(seq) == 1 {
+		if d.showing {
+			d.hideSuggestions()
+		} else {
+			d.Stop()
+		}
 		return
 	}
 

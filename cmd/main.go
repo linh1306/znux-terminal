@@ -71,6 +71,7 @@ func main() {
 			n, err := ptm.Read(buf)
 			if err != nil {
 				close(ch)
+				dispatcher.Stop()
 				return
 			}
 			emulator.Write(buf[:n])
