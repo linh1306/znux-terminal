@@ -15,6 +15,11 @@ import (
 	"golang.org/x/term"
 )
 
+type readResult struct {
+	b   byte
+	err error
+}
+
 // navigateHistoryUp moves to the previous history entry.
 func (d *Dispatcher) navigateHistoryUp() {
 	if len(d.history) == 0 || d.historyPos == 0 {
@@ -78,10 +83,6 @@ func (d *Dispatcher) RunWithLiner() error {
 	// Show initial prompt
 	d.writePrompt()
 
-	type readResult struct {
-		b   byte
-		err error
-	}
 	byteCh := make(chan readResult, 8)
 	go func() {
 		for {
@@ -111,7 +112,7 @@ func (d *Dispatcher) RunWithLiner() error {
 
 		// Handle escape sequences (arrow keys, etc.)
 		if b == 27 {
-			d.handleEscape(reader)
+			d.handleEscape(byteCh)
 			continue
 		}
 
@@ -227,47 +228,28 @@ func (d *Dispatcher) feedByte(b byte) (runes []rune, valid bool) {
 }
 
 // handleEscape reads and processes an escape sequence from the terminal.
-func (d *Dispatcher) handleEscape(reader *bufio.Reader) {
+// Reads subsequent bytes from byteCh (same channel as the main loop) to avoid
+// racing with the reader goroutine.
+func (d *Dispatcher) handleEscape(byteCh <-chan readResult) {
 	seq := []byte{27}
-	deadline := time.Now().Add(50 * time.Millisecond)
+	timeout := time.After(50 * time.Millisecond)
 
-	// Read available bytes immediately
-	for len(seq) < 5 && time.Now().Before(deadline) {
-		n := reader.Buffered()
-		if n == 0 {
-			break
-		}
-		next, err := reader.ReadByte()
-		if err != nil {
-			break
-		}
-		seq = append(seq, next)
-		if isCompleteEscapeSeq(seq) {
-			break
-		}
-	}
-
-	// If incomplete, wait briefly for more bytes
-	for len(seq) < 5 && time.Now().Before(deadline) {
-		time.Sleep(5 * time.Millisecond)
-		n := reader.Buffered()
-		for n > 0 && len(seq) < 5 && time.Now().Before(deadline) {
-			next, err := reader.ReadByte()
-			if err != nil {
+	for len(seq) < 6 {
+		select {
+		case res := <-byteCh:
+			if res.err != nil {
 				break
 			}
-			seq = append(seq, next)
-			n--
+			seq = append(seq, res.b)
 			if isCompleteEscapeSeq(seq) {
-				break
+				goto done
 			}
-		}
-		if isCompleteEscapeSeq(seq) {
-			break
+		case <-timeout:
+			goto done
 		}
 	}
-
-	d.processEscapeSeq(seq, reader)
+done:
+	d.processEscapeSeq(seq)
 }
 
 // isCompleteEscapeSeq checks if an escape sequence is complete.
@@ -308,7 +290,7 @@ func isCompleteEscapeSeq(seq []byte) bool {
 }
 
 // processEscapeSeq handles the parsed escape sequence.
-func (d *Dispatcher) processEscapeSeq(seq []byte, reader *bufio.Reader) {
+func (d *Dispatcher) processEscapeSeq(seq []byte) {
 	// Bracketed paste start: ESC [ 2 0 0 ~
 	if len(seq) >= 5 && seq[0] == 27 && seq[1] == '[' && seq[2] == '2' && seq[3] == '0' && seq[4] == '0' {
 		d.pasteActive = true
