@@ -74,6 +74,14 @@ func (p *Popup) buildPopupContent(suggestions []specs.Suggestion, selected int) 
 		maxNameLen = 18
 	}
 
+	// Compute the offset into suggestions[] that corresponds to the first
+	// visible line, so we can highlight the correct item when the list scrolls.
+	offset := selected - (selected % p.maxHeight)
+	// Clamp offset so we never read past the end of the array
+	if offset > len(suggestions)-height {
+		offset = len(suggestions) - height
+	}
+
 	for i := 0; i < height; i++ {
 		if i == 0 {
 			result = append(result, "\r\033[K"...) // Carriage return + clear to end of line
@@ -81,7 +89,7 @@ func (p *Popup) buildPopupContent(suggestions []specs.Suggestion, selected int) 
 			result = append(result, "\033[1B\r\033[K"...) // down + home + clear
 		}
 
-		name := suggestions[i].Name
+		name := suggestions[i+offset].Name
 		if len(name) > 18 {
 			name = name[:18]
 		}
@@ -89,7 +97,7 @@ func (p *Popup) buildPopupContent(suggestions []specs.Suggestion, selected int) 
 		bullet := "○ "
 		prefix := "│ "
 
-		if i == selected {
+		if i+offset == selected {
 			bullet = "● "
 		}
 
@@ -99,8 +107,8 @@ func (p *Popup) buildPopupContent(suggestions []specs.Suggestion, selected int) 
 		result = append(result, []byte(name)...)
 
 		// Show description only for selected item when > 5 options
-		if i == selected && len(suggestions) > 5 {
-			desc := suggestions[i].Description
+		if i+offset == selected && len(suggestions) > 5 {
+			desc := suggestions[i+offset].Description
 			if len(desc) > 40 {
 				desc = desc[:40]
 			}
