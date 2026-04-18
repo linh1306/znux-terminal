@@ -1,0 +1,1830 @@
+name: docker
+subcommands:
+  - name: run
+    description: Run a command in a new container
+    options:
+      - names: ["-d", "--detach"]
+        description: Run in background
+      - names: ["-i", "--interactive"]
+        description: Keep STDIN open
+      - names: ["-t", "--tty"]
+        description: Allocate a pseudo-TTY
+      - names: ["-p", "--publish"]
+        description: "Publish port(s) HOST:CONTAINER"
+        args:
+          - name: port
+      - names: ["-P", "--publish-all"]
+        description: Publish all exposed ports
+      - names: ["-v", "--volume"]
+        description: Bind mount a volume
+        args:
+          - name: volume
+      - names: ["--mount"]
+        description: Attach a filesystem mount
+        args:
+          - name: mount
+      - names: ["--name"]
+        description: Container name
+        args:
+          - name: name
+      - names: ["--rm"]
+        description: Remove when exits
+      - names: ["-e", "--env"]
+        description: Set environment variable
+        args:
+          - name: KEY=VALUE
+      - names: ["--env-file"]
+        description: Read env vars from file
+        args:
+          - name: file
+            template: filesystem
+      - names: ["--network"]
+        description: Connect to network
+        args:
+          - name: network
+            generator: docker:networks
+      - names: ["-w", "--workdir"]
+        description: Working directory
+        args:
+          - name: dir
+      - names: ["-u", "--user"]
+        description: Username or UID
+        args:
+          - name: user
+      - names: ["--entrypoint"]
+        description: Override ENTRYPOINT
+        args:
+          - name: command
+      - names: ["--hostname", "-h"]
+        description: Container hostname
+        args:
+          - name: hostname
+      - names: ["--cpus"]
+        description: Number of CPUs
+        args:
+          - name: decimal
+      - names: ["-m", "--memory"]
+        description: Memory limit
+        args:
+          - name: bytes
+      - names: ["--restart"]
+        description: Restart policy
+        args:
+          - name: policy
+      - names: ["--privileged"]
+        description: Give extended privileges
+      - names: ["--read-only"]
+        description: Read-only root filesystem
+      - names: ["--label", "-l"]
+        description: Set label
+        args:
+          - name: KEY=VALUE
+      - names: ["--link"]
+        description: Link to container
+        args:
+          - name: "name:alias"
+      - names: ["--add-host"]
+        description: Add host-to-IP mapping
+        args:
+          - name: "host:IP"
+      - names: ["--cap-add"]
+        description: Add Linux capability
+        args:
+          - name: cap
+      - names: ["--cap-drop"]
+        description: Drop Linux capability
+        args:
+          - name: cap
+      - names: ["--cidfile"]
+        description: Write CID to file
+        args:
+          - name: file
+      - names: ["--dns"]
+        description: Custom DNS server
+        args:
+          - name: DNS
+      - names: ["--expose"]
+        description: Expose a port
+        args:
+          - name: port
+      - names: ["--gpus"]
+        description: GPU devices to add
+        args:
+          - name: gpus
+      - names: ["--health-cmd"]
+        description: Health check command
+        args:
+          - name: command
+      - names: ["--init"]
+        description: Run an init process
+      - names: ["--ip"]
+        description: IPv4 address
+        args:
+          - name: ip
+      - names: ["--log-driver"]
+        description: Log driver
+        args:
+          - name: driver
+      - names: ["--log-opt"]
+        description: Log driver options
+        args:
+          - name: KEY=VALUE
+      - names: ["--pid"]
+        description: PID namespace
+        args:
+          - name: pid
+      - names: ["--platform"]
+        description: Set platform
+        args:
+          - name: platform
+      - names: ["--pull"]
+        description: Pull before running
+        args:
+          - name: policy
+      - names: ["--security-opt"]
+        description: Security option
+        args:
+          - name: option
+      - names: ["--shm-size"]
+        description: /dev/shm size
+        args:
+          - name: bytes
+      - names: ["--sig-proxy"]
+        description: Proxy signals to process
+      - names: ["--stop-signal"]
+        description: Stop signal
+        args:
+          - name: signal
+      - names: ["--stop-timeout"]
+        description: Stop timeout
+        args:
+          - name: int
+      - names: ["--tmpfs"]
+        description: Mount tmpfs
+        args:
+          - name: dir
+      - names: ["--ulimit"]
+        description: Ulimit options
+        args:
+          - name: ulimit
+      - names: ["--userns"]
+        description: User namespace
+        args:
+          - name: string
+      - names: ["--uts"]
+        description: UTS namespace
+        args:
+          - name: string
+    args:
+      - name: image
+        generator: docker:images
+      - name: command
+
+  - name: exec
+    description: Run a command in a running container
+    options:
+      - names: ["-i", "--interactive"]
+        description: Keep STDIN open
+      - names: ["-t", "--tty"]
+        description: Allocate a pseudo-TTY
+      - names: ["-d", "--detach"]
+        description: Detached mode
+      - names: ["-e", "--env"]
+        description: Set environment variable
+        args:
+          - name: KEY=VALUE
+      - names: ["--env-file"]
+        description: Read env from file
+        args:
+          - name: file
+      - names: ["-u", "--user"]
+        description: Run as user
+        args:
+          - name: user
+      - names: ["-w", "--workdir"]
+        description: Working directory
+        args:
+          - name: dir
+      - names: ["--privileged"]
+        description: Extended privileges
+      - names: ["--detach-keys"]
+        description: Override detach key sequence
+        args:
+          - name: string
+    args:
+      - name: container
+        generator: docker:running-containers
+      - name: command
+
+  - name: ps
+    description: List containers
+    options:
+      - names: ["-a", "--all"]
+        description: Show all containers
+      - names: ["-q", "--quiet"]
+        description: Only show IDs
+      - names: ["-l", "--latest"]
+        description: Show latest
+      - names: ["-n"]
+        description: Show n last containers
+        args:
+          - name: n
+      - names: ["-s", "--size"]
+        description: Show total file sizes
+      - names: ["-f", "--filter"]
+        description: Filter
+        args:
+          - name: filter
+      - names: ["--format"]
+        description: Format output
+        args:
+          - name: template
+      - names: ["--no-trunc"]
+        description: Don't truncate output
+
+  - name: images
+    description: List images
+    options:
+      - names: ["-a", "--all"]
+        description: Show all images
+      - names: ["-q", "--quiet"]
+        description: Only show IDs
+      - names: ["-f", "--filter"]
+        description: Filter
+        args:
+          - name: filter
+      - names: ["--format"]
+        description: Format output
+        args:
+          - name: template
+      - names: ["--no-trunc"]
+        description: Don't truncate output
+      - names: ["--digests"]
+        description: Show digests
+    args:
+      - name: repository
+
+  - name: build
+    description: Build an image from a Dockerfile
+    options:
+      - names: ["-t", "--tag"]
+        description: Name and optionally a tag
+        args:
+          - name: "name:tag"
+      - names: ["-f", "--file"]
+        description: Dockerfile path
+        args:
+          - name: file
+            template: filesystem
+      - names: ["--no-cache"]
+        description: Build without cache
+      - names: ["--progress"]
+        description: "Build output type (auto|plain|tty)"
+        args:
+          - name: type
+      - names: ["--pull"]
+        description: Always pull newer image
+      - names: ["--rm"]
+        description: Remove intermediate containers
+      - names: ["--force-rm"]
+        description: Always remove intermediate containers
+      - names: ["--build-arg"]
+        description: Build-time variable
+        args:
+          - name: KEY=VALUE
+      - names: ["--target"]
+        description: Build target stage
+        args:
+          - name: stage
+      - names: ["--platform"]
+        description: Target platform
+        args:
+          - name: platform
+      - names: ["--cache-from"]
+        description: Images for cache
+        args:
+          - name: image
+      - names: ["--label"]
+        description: Set metadata
+        args:
+          - name: KEY=VALUE
+      - names: ["--network"]
+        description: Network mode for RUN
+        args:
+          - name: mode
+      - names: ["-q", "--quiet"]
+        description: Suppress build output
+      - names: ["--secret"]
+        description: Build secret
+        args:
+          - name: secret
+      - names: ["--ssh"]
+        description: SSH agent socket
+        args:
+          - name: "default|id"
+      - names: ["--output", "-o"]
+        description: Output destination
+        args:
+          - name: path
+      - names: ["--squash"]
+        description: Squash layers (experimental)
+      - names: ["--iidfile"]
+        description: Write image ID to file
+        args:
+          - name: file
+    args:
+      - name: path
+        template: folder
+
+  - name: pull
+    description: Pull an image or a repository from a registry
+    options:
+      - names: ["-a", "--all-tags"]
+        description: Pull all tags
+      - names: ["-q", "--quiet"]
+        description: Suppress verbose output
+      - names: ["--platform"]
+        description: Set platform
+        args:
+          - name: platform
+      - names: ["--disable-content-trust"]
+        description: Skip image verification
+    args:
+      - name: "name:tag"
+
+  - name: push
+    description: Push an image or a repository to a registry
+    options:
+      - names: ["-a", "--all-tags"]
+        description: Push all tags
+      - names: ["-q", "--quiet"]
+        description: Suppress verbose output
+      - names: ["--disable-content-trust"]
+        description: Skip image signing
+    args:
+      - name: "name:tag"
+        generator: docker:images
+
+  - name: stop
+    description: Stop one or more running containers
+    options:
+      - names: ["-t", "--time"]
+        description: Seconds before killing (default 10)
+        args:
+          - name: int
+    args:
+      - name: container
+        generator: docker:running-containers
+        variadic: true
+
+  - name: start
+    description: Start one or more stopped containers
+    options:
+      - names: ["-a", "--attach"]
+        description: Attach stdout/stderr
+      - names: ["-i", "--interactive"]
+        description: Attach container's STDIN
+    args:
+      - name: container
+        generator: docker:all-containers
+        variadic: true
+
+  - name: restart
+    description: Restart one or more containers
+    options:
+      - names: ["-t", "--time"]
+        description: Seconds before killing
+        args:
+          - name: int
+    args:
+      - name: container
+        generator: docker:all-containers
+        variadic: true
+
+  - name: rm
+    description: Remove one or more containers
+    options:
+      - names: ["-f", "--force"]
+        description: Force remove running container
+      - names: ["-l", "--link"]
+        description: Remove the specified link
+      - names: ["-v", "--volumes"]
+        description: Remove anonymous volumes
+    args:
+      - name: container
+        generator: docker:all-containers
+        variadic: true
+
+  - name: rmi
+    description: Remove one or more images
+    options:
+      - names: ["-f", "--force"]
+        description: Force remove
+      - names: ["--no-prune"]
+        description: Do not delete untagged parents
+    args:
+      - name: image
+        generator: docker:images
+        variadic: true
+
+  - name: logs
+    description: Fetch the logs of a container
+    options:
+      - names: ["-f", "--follow"]
+        description: Follow log output
+      - names: ["-n", "--tail"]
+        description: Lines from the end
+        args:
+          - name: n
+      - names: ["-t", "--timestamps"]
+        description: Show timestamps
+      - names: ["--since"]
+        description: Show logs since timestamp
+        args:
+          - name: timestamp
+      - names: ["--until"]
+        description: Show logs before timestamp
+        args:
+          - name: timestamp
+      - names: ["--details"]
+        description: Show extra details
+    args:
+      - name: container
+        generator: docker:all-containers
+
+  - name: inspect
+    description: Return low-level information on Docker objects
+    options:
+      - names: ["-f", "--format"]
+        description: Go template format
+        args:
+          - name: template
+      - names: ["-s", "--size"]
+        description: Show total file sizes
+      - names: ["--type"]
+        description: Return JSON for type
+        args:
+          - name: type
+    args:
+      - name: "name|id"
+        generator: docker:all-containers
+        variadic: true
+
+  - name: attach
+    description: Attach to a running container
+    options:
+      - names: ["--detach-keys"]
+        description: Override detach key
+        args:
+          - name: string
+      - names: ["--no-stdin"]
+        description: Do not attach STDIN
+      - names: ["--sig-proxy"]
+        description: Proxy received signals
+    args:
+      - name: container
+        generator: docker:running-containers
+
+  - name: commit
+    description: Create a new image from a container's changes
+    options:
+      - names: ["-a", "--author"]
+        description: Author
+        args:
+          - name: author
+      - names: ["-c", "--change"]
+        description: Apply Dockerfile instruction
+        args:
+          - name: instruction
+      - names: ["-m", "--message"]
+        description: Commit message
+        args:
+          - name: message
+      - names: ["-p", "--pause"]
+        description: Pause container during commit
+    args:
+      - name: container
+        generator: docker:all-containers
+      - name: "repository:tag"
+
+  - name: cp
+    description: Copy files/folders between a container and the local filesystem
+    options:
+      - names: ["-a", "--archive"]
+        description: Archive mode (copy all uid/gid info)
+      - names: ["-L", "--follow-link"]
+        description: Always follow symbol links
+      - names: ["-q", "--quiet"]
+        description: Suppress progress output
+    args:
+      - name: "CONTAINER:SRC_PATH or SRC_PATH"
+      - name: "DEST_PATH or CONTAINER:DEST_PATH"
+
+  - name: create
+    description: Create a new container
+    options:
+      - names: ["--name"]
+        description: Container name
+        args:
+          - name: name
+      - names: ["-p", "--publish"]
+        description: "Publish port(s)"
+        args:
+          - name: port
+      - names: ["-v", "--volume"]
+        description: Bind mount volume
+        args:
+          - name: volume
+      - names: ["-e", "--env"]
+        description: Set environment variable
+        args:
+          - name: KEY=VALUE
+      - names: ["--network"]
+        description: Connect to network
+        args:
+          - name: network
+      - names: ["-u", "--user"]
+        description: Username or UID
+        args:
+          - name: user
+      - names: ["--entrypoint"]
+        description: Override ENTRYPOINT
+        args:
+          - name: cmd
+      - names: ["--restart"]
+        description: Restart policy
+        args:
+          - name: policy
+      - names: ["-w", "--workdir"]
+        description: Working directory
+        args:
+          - name: dir
+    args:
+      - name: image
+        generator: docker:images
+      - name: command
+
+  - name: diff
+    description: Inspect changes to files on a container's filesystem
+    args:
+      - name: container
+        generator: docker:all-containers
+
+  - name: events
+    description: Get real time events from the server
+    options:
+      - names: ["-f", "--filter"]
+        description: Filter based on conditions
+        args:
+          - name: filter
+      - names: ["--format"]
+        description: Go template format
+        args:
+          - name: template
+      - names: ["--since"]
+        description: Show events since timestamp
+        args:
+          - name: string
+      - names: ["--until"]
+        description: Stream events until timestamp
+        args:
+          - name: string
+
+  - name: export
+    description: Export a container's filesystem as a tar archive
+    options:
+      - names: ["-o", "--output"]
+        description: Write to file
+        args:
+          - name: file
+    args:
+      - name: container
+        generator: docker:all-containers
+
+  - name: history
+    description: Show the history of an image
+    options:
+      - names: ["-H", "--human"]
+        description: Human readable sizes
+      - names: ["--no-trunc"]
+        description: Don't truncate output
+      - names: ["-q", "--quiet"]
+        description: Only show image IDs
+      - names: ["--format"]
+        description: Go template format
+        args:
+          - name: template
+    args:
+      - name: image
+        generator: docker:images
+
+  - name: info
+    description: Display system-wide information
+    options:
+      - names: ["-f", "--format"]
+        description: Go template format
+        args:
+          - name: template
+
+  - name: kill
+    description: Kill one or more running containers
+    options:
+      - names: ["-s", "--signal"]
+        description: Signal to send (default KILL)
+        args:
+          - name: signal
+    args:
+      - name: container
+        generator: docker:running-containers
+        variadic: true
+
+  - name: load
+    description: Load an image from a tar archive or STDIN
+    options:
+      - names: ["-i", "--input"]
+        description: Read from tar archive file
+        args:
+          - name: file
+            template: filesystem
+      - names: ["-q", "--quiet"]
+        description: Suppress load output
+
+  - name: login
+    description: Log in to a Docker registry
+    options:
+      - names: ["-p", "--password"]
+        description: Password
+        args:
+          - name: password
+      - names: ["--password-stdin"]
+        description: Take password from stdin
+      - names: ["-u", "--username"]
+        description: Username
+        args:
+          - name: username
+    args:
+      - name: server
+
+  - name: logout
+    description: Log out from a Docker registry
+    args:
+      - name: server
+
+  - name: pause
+    description: Pause all processes within one or more containers
+    args:
+      - name: container
+        generator: docker:running-containers
+        variadic: true
+
+  - name: unpause
+    description: Unpause all processes within one or more containers
+    args:
+      - name: container
+        generator: docker:all-containers
+        variadic: true
+
+  - name: port
+    description: List port mappings for the container
+    args:
+      - name: container
+        generator: docker:all-containers
+      - name: private_port
+
+  - name: rename
+    description: Rename a container
+    args:
+      - name: container
+        generator: docker:all-containers
+      - name: new_name
+
+  - name: save
+    description: Save one or more images to a tar archive
+    options:
+      - names: ["-o", "--output"]
+        description: Write to file
+        args:
+          - name: file
+    args:
+      - name: image
+        generator: docker:images
+        variadic: true
+
+  - name: search
+    description: Search Docker Hub for images
+    options:
+      - names: ["-f", "--filter"]
+        description: Filter based on conditions
+        args:
+          - name: filter
+      - names: ["--format"]
+        description: Go template format
+        args:
+          - name: template
+      - names: ["--limit"]
+        description: Max search results (default 25)
+        args:
+          - name: int
+      - names: ["--no-trunc"]
+        description: Don't truncate output
+    args:
+      - name: term
+
+  - name: stats
+    description: Display live resource usage statistics
+    options:
+      - names: ["-a", "--all"]
+        description: Show all containers
+      - names: ["--no-stream"]
+        description: Disable streaming, show once
+      - names: ["--no-trunc"]
+        description: Don't truncate output
+      - names: ["--format"]
+        description: Go template format
+        args:
+          - name: template
+    args:
+      - name: container
+        generator: docker:running-containers
+
+  - name: tag
+    description: Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE
+    args:
+      - name: source_image
+        generator: docker:images
+      - name: target_image
+
+  - name: top
+    description: Display the running processes of a container
+    args:
+      - name: container
+        generator: docker:running-containers
+      - name: ps_options
+
+  - name: update
+    description: Update configuration of one or more containers
+    options:
+      - names: ["--cpus"]
+        description: Number of CPUs
+        args:
+          - name: decimal
+      - names: ["-m", "--memory"]
+        description: Memory limit
+        args:
+          - name: bytes
+      - names: ["--memory-swap"]
+        description: Swap limit
+        args:
+          - name: bytes
+      - names: ["--restart"]
+        description: Restart policy
+        args:
+          - name: policy
+      - names: ["--blkio-weight"]
+        description: Block IO weight
+        args:
+          - name: uint16
+      - names: ["--cpu-shares"]
+        description: CPU shares
+        args:
+          - name: int
+      - names: ["--cpu-period"]
+        description: CPU CFS period
+        args:
+          - name: int
+      - names: ["--cpu-quota"]
+        description: CPU CFS quota
+        args:
+          - name: int
+      - names: ["--pids-limit"]
+        description: PID limit
+        args:
+          - name: int
+    args:
+      - name: container
+        generator: docker:all-containers
+        variadic: true
+
+  - name: wait
+    description: Block until one or more containers stop, then print exit codes
+    args:
+      - name: container
+        generator: docker:all-containers
+        variadic: true
+
+  - name: version
+    description: Show the Docker version information
+    options:
+      - names: ["-f", "--format"]
+        description: Format output
+        args:
+          - name: string
+
+  - name: image
+    description: Manage images
+    subcommands:
+      - name: build
+        description: Build an image from a Dockerfile
+        options:
+          - names: ["-t", "--tag"]
+            description: Name and tag
+            args:
+              - name: "name:tag"
+          - names: ["-f", "--file"]
+            description: Dockerfile path
+            args:
+              - name: file
+                template: filesystem
+          - names: ["--no-cache"]
+            description: Build without cache
+          - names: ["--pull"]
+            description: Always pull newer image
+          - names: ["--build-arg"]
+            description: Build-time variable
+            args:
+              - name: KEY=VALUE
+          - names: ["--target"]
+            description: Build target stage
+            args:
+              - name: stage
+          - names: ["--platform"]
+            description: Target platform
+            args:
+              - name: platform
+        args:
+          - name: path
+            template: folder
+      - name: history
+        description: Show image history
+        options:
+          - names: ["--no-trunc"]
+            description: Don't truncate
+          - names: ["-q", "--quiet"]
+            description: Only image IDs
+          - names: ["--format"]
+            description: Format
+            args:
+              - name: template
+        args:
+          - name: image
+            generator: docker:images
+      - name: import
+        description: Import contents from a tarball to create a filesystem image
+        options:
+          - names: ["-c", "--change"]
+            description: Apply Dockerfile instruction
+            args:
+              - name: instruction
+          - names: ["-m", "--message"]
+            description: Message
+            args:
+              - name: message
+        args:
+          - name: "file|URL|-"
+          - name: "repository:tag"
+      - name: inspect
+        description: Display detailed information on images
+        options:
+          - names: ["-f", "--format"]
+            description: Go template
+            args:
+              - name: template
+        args:
+          - name: image
+            generator: docker:images
+            variadic: true
+      - name: load
+        description: Load an image from a tar archive
+        options:
+          - names: ["-i", "--input"]
+            description: Read from file
+            args:
+              - name: file
+                template: filesystem
+          - names: ["-q", "--quiet"]
+            description: Suppress output
+      - name: ls
+        description: List images
+        options:
+          - names: ["-a", "--all"]
+            description: Show all images
+          - names: ["-q", "--quiet"]
+            description: Only show IDs
+          - names: ["-f", "--filter"]
+            description: Filter
+            args:
+              - name: filter
+          - names: ["--format"]
+            description: Format
+            args:
+              - name: template
+          - names: ["--no-trunc"]
+            description: Don't truncate
+          - names: ["--digests"]
+            description: Show digests
+        args:
+          - name: repository
+      - name: prune
+        description: Remove unused images
+        options:
+          - names: ["-a", "--all"]
+            description: Remove all unused images
+          - names: ["-f", "--force"]
+            description: Do not prompt
+          - names: ["--filter"]
+            description: Filter
+            args:
+              - name: filter
+      - name: pull
+        description: Pull an image or repository
+        options:
+          - names: ["-a", "--all-tags"]
+            description: Pull all tags
+          - names: ["-q", "--quiet"]
+            description: Suppress output
+          - names: ["--platform"]
+            description: Set platform
+            args:
+              - name: platform
+        args:
+          - name: "name:tag"
+      - name: push
+        description: Push an image or repository
+        options:
+          - names: ["-a", "--all-tags"]
+            description: Push all tags
+          - names: ["-q", "--quiet"]
+            description: Suppress output
+        args:
+          - name: "name:tag"
+            generator: docker:images
+      - name: rm
+        description: Remove one or more images
+        options:
+          - names: ["-f", "--force"]
+            description: Force remove
+          - names: ["--no-prune"]
+            description: Do not delete untagged parents
+        args:
+          - name: image
+            generator: docker:images
+            variadic: true
+      - name: save
+        description: Save images to tar archive
+        options:
+          - names: ["-o", "--output"]
+            description: Write to file
+            args:
+              - name: file
+        args:
+          - name: image
+            generator: docker:images
+            variadic: true
+      - name: tag
+        description: Tag source image into target image
+        args:
+          - name: source
+            generator: docker:images
+          - name: target
+
+  - name: container
+    description: Manage containers
+    subcommands:
+      - name: attach
+        description: Attach to running container
+        args:
+          - name: container
+            generator: docker:running-containers
+      - name: commit
+        description: Create image from container changes
+        args:
+          - name: container
+            generator: docker:all-containers
+          - name: "repository:tag"
+      - name: cp
+        description: Copy files/folders
+        args:
+          - name: src
+          - name: dest
+      - name: create
+        description: Create a new container
+        args:
+          - name: image
+            generator: docker:images
+      - name: diff
+        description: Inspect filesystem changes
+        args:
+          - name: container
+            generator: docker:all-containers
+      - name: exec
+        description: Execute command in container
+        args:
+          - name: container
+            generator: docker:running-containers
+          - name: command
+      - name: export
+        description: Export container filesystem
+        args:
+          - name: container
+            generator: docker:all-containers
+      - name: inspect
+        description: Display detailed info
+        args:
+          - name: container
+            generator: docker:all-containers
+            variadic: true
+      - name: kill
+        description: Kill running containers
+        args:
+          - name: container
+            generator: docker:running-containers
+            variadic: true
+      - name: logs
+        description: Fetch container logs
+        args:
+          - name: container
+            generator: docker:all-containers
+      - name: ls
+        description: List containers
+        options:
+          - names: ["-a", "--all"]
+            description: Show all containers
+          - names: ["-q", "--quiet"]
+            description: Only IDs
+      - name: pause
+        description: Pause container processes
+        args:
+          - name: container
+            generator: docker:running-containers
+            variadic: true
+      - name: port
+        description: List port mappings
+        args:
+          - name: container
+            generator: docker:all-containers
+      - name: prune
+        description: Remove stopped containers
+        options:
+          - names: ["-f", "--force"]
+            description: Do not prompt
+      - name: rename
+        description: Rename a container
+        args:
+          - name: container
+            generator: docker:all-containers
+          - name: new_name
+      - name: restart
+        description: Restart containers
+        args:
+          - name: container
+            generator: docker:all-containers
+            variadic: true
+      - name: rm
+        description: Remove containers
+        options:
+          - names: ["-f", "--force"]
+            description: Force remove
+          - names: ["-v", "--volumes"]
+            description: Remove volumes
+        args:
+          - name: container
+            generator: docker:all-containers
+            variadic: true
+      - name: run
+        description: Run command in new container
+        args:
+          - name: image
+            generator: docker:images
+          - name: command
+      - name: start
+        description: Start stopped containers
+        args:
+          - name: container
+            generator: docker:all-containers
+            variadic: true
+      - name: stats
+        description: Live resource usage statistics
+        args:
+          - name: container
+            generator: docker:running-containers
+      - name: stop
+        description: Stop running containers
+        args:
+          - name: container
+            generator: docker:running-containers
+            variadic: true
+      - name: top
+        description: Display running processes
+        args:
+          - name: container
+            generator: docker:running-containers
+      - name: unpause
+        description: Unpause container processes
+        args:
+          - name: container
+            generator: docker:all-containers
+            variadic: true
+      - name: update
+        description: Update container configuration
+        args:
+          - name: container
+            generator: docker:all-containers
+            variadic: true
+      - name: wait
+        description: Wait for containers to stop
+        args:
+          - name: container
+            generator: docker:all-containers
+            variadic: true
+
+  - name: network
+    description: Manage networks
+    subcommands:
+      - name: connect
+        description: Connect a container to a network
+        options:
+          - names: ["--alias"]
+            description: Add network-scoped alias
+            args:
+              - name: strings
+          - names: ["--ip"]
+            description: IPv4 address
+            args:
+              - name: string
+          - names: ["--ip6"]
+            description: IPv6 address
+            args:
+              - name: string
+          - names: ["--link"]
+            description: Link to another container
+            args:
+              - name: name
+        args:
+          - name: network
+            generator: docker:networks
+          - name: container
+            generator: docker:all-containers
+      - name: create
+        description: Create a network
+        options:
+          - names: ["-d", "--driver"]
+            description: Driver (default bridge)
+            args:
+              - name: driver
+          - names: ["--subnet"]
+            description: Subnet in CIDR format
+            args:
+              - name: string
+          - names: ["--gateway"]
+            description: IPv4 or IPv6 gateway
+            args:
+              - name: string
+          - names: ["--ip-range"]
+            description: IP range from subnet
+            args:
+              - name: string
+          - names: ["--internal"]
+            description: Restrict external access
+          - names: ["--attachable"]
+            description: Enable manual attachment
+          - names: ["--label"]
+            description: Set metadata
+            args:
+              - name: KEY=VALUE
+        args:
+          - name: network
+      - name: disconnect
+        description: Disconnect a container from a network
+        options:
+          - names: ["-f", "--force"]
+            description: Force disconnect
+        args:
+          - name: network
+            generator: docker:networks
+          - name: container
+            generator: docker:all-containers
+      - name: inspect
+        description: Display detailed network information
+        options:
+          - names: ["-f", "--format"]
+            description: Go template
+            args:
+              - name: template
+          - names: ["-v", "--verbose"]
+            description: Verbose output
+        args:
+          - name: network
+            generator: docker:networks
+            variadic: true
+      - name: ls
+        description: List networks
+        options:
+          - names: ["-f", "--filter"]
+            description: Filter
+            args:
+              - name: filter
+          - names: ["--format"]
+            description: Format
+            args:
+              - name: template
+          - names: ["-q", "--quiet"]
+            description: Only show IDs
+          - names: ["--no-trunc"]
+            description: Don't truncate
+      - name: prune
+        description: Remove all unused networks
+        options:
+          - names: ["-f", "--force"]
+            description: Do not prompt
+          - names: ["--filter"]
+            description: Filter
+            args:
+              - name: filter
+      - name: rm
+        description: Remove one or more networks
+        args:
+          - name: network
+            generator: docker:networks
+            variadic: true
+
+  - name: volume
+    description: Manage volumes
+    subcommands:
+      - name: create
+        description: Create a volume
+        options:
+          - names: ["-d", "--driver"]
+            description: Volume driver (default local)
+            args:
+              - name: driver
+          - names: ["--label"]
+            description: Set metadata
+            args:
+              - name: KEY=VALUE
+          - names: ["-o", "--opt"]
+            description: Driver specific options
+            args:
+              - name: KEY=VALUE
+        args:
+          - name: volume
+      - name: inspect
+        description: Display detailed volume information
+        options:
+          - names: ["-f", "--format"]
+            description: Go template
+            args:
+              - name: template
+        args:
+          - name: volume
+            generator: docker:volumes
+            variadic: true
+      - name: ls
+        description: List volumes
+        options:
+          - names: ["-f", "--filter"]
+            description: Filter
+            args:
+              - name: filter
+          - names: ["--format"]
+            description: Format
+            args:
+              - name: template
+          - names: ["-q", "--quiet"]
+            description: Only show names
+      - name: prune
+        description: Remove all unused local volumes
+        options:
+          - names: ["-f", "--force"]
+            description: Do not prompt
+          - names: ["--filter"]
+            description: Filter
+            args:
+              - name: filter
+      - name: rm
+        description: Remove one or more volumes
+        options:
+          - names: ["-f", "--force"]
+            description: Force removal
+        args:
+          - name: volume
+            generator: docker:volumes
+            variadic: true
+
+  - name: system
+    description: Manage Docker
+    subcommands:
+      - name: df
+        description: Show Docker disk usage
+        options:
+          - names: ["-v", "--verbose"]
+            description: Show detailed info
+          - names: ["--format"]
+            description: Format
+            args:
+              - name: template
+      - name: events
+        description: Get real time events from the server
+        options:
+          - names: ["-f", "--filter"]
+            description: Filter
+            args:
+              - name: filter
+          - names: ["--format"]
+            description: Format
+            args:
+              - name: template
+          - names: ["--since"]
+            description: Since timestamp
+            args:
+              - name: string
+          - names: ["--until"]
+            description: Until timestamp
+            args:
+              - name: string
+      - name: info
+        description: Display system-wide information
+        options:
+          - names: ["-f", "--format"]
+            description: Format
+            args:
+              - name: template
+      - name: prune
+        description: Remove unused data
+        options:
+          - names: ["-a", "--all"]
+            description: Remove all unused images
+          - names: ["-f", "--force"]
+            description: Do not prompt
+          - names: ["--filter"]
+            description: Filter
+            args:
+              - name: filter
+          - names: ["--volumes"]
+            description: Prune volumes
+
+  - name: builder
+    description: Manage builds
+    subcommands:
+      - name: build
+        description: Build an image from a Dockerfile
+        options:
+          - names: ["-t", "--tag"]
+            description: Name and tag
+            args:
+              - name: "name:tag"
+          - names: ["-f", "--file"]
+            description: Dockerfile path
+            args:
+              - name: file
+                template: filesystem
+          - names: ["--no-cache"]
+            description: Build without cache
+        args:
+          - name: path
+            template: folder
+      - name: prune
+        description: Remove build cache
+        options:
+          - names: ["-a", "--all"]
+            description: Remove all unused cache
+          - names: ["-f", "--force"]
+            description: Do not prompt
+          - names: ["--filter"]
+            description: Filter
+            args:
+              - name: filter
+          - names: ["--keep-storage"]
+            description: Disk space to keep
+            args:
+              - name: bytes
+
+  - name: context
+    description: Manage contexts
+    subcommands:
+      - name: create
+        description: Create a context
+        args:
+          - name: context
+      - name: export
+        description: Export a context
+        args:
+          - name: context
+          - name: file
+      - name: import
+        description: Import a context
+        args:
+          - name: context
+          - name: file
+            template: filesystem
+      - name: inspect
+        description: Display context info
+        args:
+          - name: context
+            variadic: true
+      - name: ls
+        description: List contexts
+        options:
+          - names: ["--format"]
+            description: Format
+            args:
+              - name: template
+      - name: rm
+        description: Remove one or more contexts
+        args:
+          - name: context
+            variadic: true
+      - name: show
+        description: Print the name of the current context
+      - name: update
+        description: Update a context
+        args:
+          - name: context
+      - name: use
+        description: Set the current docker context
+        args:
+          - name: context
+
+  - name: compose
+    description: Docker Compose
+    subcommands:
+      - name: up
+        description: Create and start containers
+        options:
+          - names: ["-d", "--detach"]
+            description: Detached mode
+          - names: ["--build"]
+            description: Build images before starting
+          - names: ["--no-build"]
+            description: Don't build images
+          - names: ["--force-recreate"]
+            description: Recreate containers
+          - names: ["--no-recreate"]
+            description: Don't recreate existing containers
+          - names: ["--remove-orphans"]
+            description: Remove orphan containers
+          - names: ["--scale"]
+            description: Scale service
+            args:
+              - name: "service=n"
+          - names: ["-t", "--timeout"]
+            description: Shutdown timeout
+            args:
+              - name: int
+          - names: ["--wait"]
+            description: Wait until healthy
+          - names: ["--no-color"]
+            description: No colors
+          - names: ["-q", "--quiet-pull"]
+            description: Quiet pull
+        args:
+          - name: service
+            variadic: true
+      - name: down
+        description: "Stop and remove containers, networks"
+        options:
+          - names: ["--remove-orphans"]
+            description: Remove orphan containers
+          - names: ["--rmi"]
+            description: "Remove images (local|all)"
+            args:
+              - name: type
+          - names: ["-t", "--timeout"]
+            description: Shutdown timeout
+            args:
+              - name: int
+          - names: ["-v", "--volumes"]
+            description: Remove volumes
+      - name: build
+        description: Build or rebuild services
+        options:
+          - names: ["--no-cache"]
+            description: No cache
+          - names: ["--pull"]
+            description: Always pull
+          - names: ["-q", "--quiet"]
+            description: Quiet
+          - names: ["--build-arg"]
+            description: Build-time variables
+            args:
+              - name: KEY=VALUE
+          - names: ["--progress"]
+            description: Progress type
+            args:
+              - name: type
+        args:
+          - name: service
+            variadic: true
+      - name: logs
+        description: View output from containers
+        options:
+          - names: ["-f", "--follow"]
+            description: Follow log output
+          - names: ["-t", "--timestamps"]
+            description: Show timestamps
+          - names: ["--tail"]
+            description: Lines from end
+            args:
+              - name: n
+          - names: ["--since"]
+            description: Since timestamp
+            args:
+              - name: timestamp
+          - names: ["--no-color"]
+            description: Monochrome output
+          - names: ["--no-log-prefix"]
+            description: Don't print prefix
+        args:
+          - name: service
+            variadic: true
+      - name: ps
+        description: List containers
+        options:
+          - names: ["-a", "--all"]
+            description: Show all stopped containers
+          - names: ["-q", "--quiet"]
+            description: Only show IDs
+          - names: ["--services"]
+            description: Display services
+          - names: ["--format"]
+            description: Format
+            args:
+              - name: template
+          - names: ["--filter"]
+            description: Filter by property
+            args:
+              - name: filter
+        args:
+          - name: service
+            variadic: true
+      - name: start
+        description: Start services
+        args:
+          - name: service
+            variadic: true
+      - name: stop
+        description: Stop services
+        options:
+          - names: ["-t", "--timeout"]
+            description: Shutdown timeout
+            args:
+              - name: int
+        args:
+          - name: service
+            variadic: true
+      - name: restart
+        description: Restart containers
+        options:
+          - names: ["-t", "--timeout"]
+            description: Shutdown timeout
+            args:
+              - name: int
+        args:
+          - name: service
+            variadic: true
+      - name: exec
+        description: Execute a command in a running container
+        options:
+          - names: ["-d", "--detach"]
+            description: Detached mode
+          - names: ["-e", "--env"]
+            description: Set environment variables
+            args:
+              - name: KEY=VALUE
+          - names: ["-u", "--user"]
+            description: Run as user
+            args:
+              - name: user
+          - names: ["-w", "--workdir"]
+            description: Working directory
+            args:
+              - name: dir
+          - names: ["--privileged"]
+            description: Extended privileges
+          - names: ["-T", "--no-TTY"]
+            description: Disable TTY
+          - names: ["--index"]
+            description: Container index
+            args:
+              - name: int
+        args:
+          - name: service
+          - name: command
+            variadic: true
+      - name: run
+        description: Run a one-off command on a service
+        options:
+          - names: ["-d", "--detach"]
+            description: Detached mode
+          - names: ["--rm"]
+            description: Remove container when exits
+          - names: ["-e", "--env"]
+            description: Set environment variables
+            args:
+              - name: KEY=VALUE
+          - names: ["-u", "--user"]
+            description: Run as user
+            args:
+              - name: user
+          - names: ["-w", "--workdir"]
+            description: Working directory
+            args:
+              - name: dir
+          - names: ["--entrypoint"]
+            description: Override entrypoint
+            args:
+              - name: cmd
+          - names: ["--no-deps"]
+            description: Don't start linked services
+          - names: ["-p", "--publish"]
+            description: Publish ports
+            args:
+              - name: port
+          - names: ["-l", "--label"]
+            description: Add label
+            args:
+              - name: KEY=VALUE
+          - names: ["-T", "--no-TTY"]
+            description: Disable TTY
+          - names: ["-v", "--volume"]
+            description: Bind mount volume
+            args:
+              - name: volume
+          - names: ["--service-ports"]
+            description: Enable service's ports
+        args:
+          - name: service
+          - name: command
+            variadic: true
+      - name: pull
+        description: Pull service images
+        options:
+          - names: ["-q", "--quiet"]
+            description: Quiet
+          - names: ["--ignore-pull-failures"]
+            description: Ignore pull failures
+          - names: ["--include-deps"]
+            description: Pull dependencies too
+        args:
+          - name: service
+            variadic: true
+      - name: push
+        description: Push service images
+        options:
+          - names: ["--ignore-push-failures"]
+            description: Ignore push failures
+        args:
+          - name: service
+            variadic: true
+      - name: images
+        description: List images used by created containers
+        args:
+          - name: service
+            variadic: true
+      - name: rm
+        description: Remove stopped service containers
+        options:
+          - names: ["-f", "--force"]
+            description: Don't ask to confirm
+          - names: ["-s", "--stop"]
+            description: Stop containers before removing
+          - names: ["-v", "--volumes"]
+            description: Remove anonymous volumes
+        args:
+          - name: service
+            variadic: true
+      - name: pause
+        description: Pause services
+        args:
+          - name: service
+            variadic: true
+      - name: unpause
+        description: Unpause services
+        args:
+          - name: service
+            variadic: true
+      - name: top
+        description: Display running processes
+        args:
+          - name: service
+            variadic: true
+      - name: kill
+        description: Force stop service containers
+        options:
+          - names: ["-s", "--signal"]
+            description: Signal to send
+            args:
+              - name: signal
+        args:
+          - name: service
+            variadic: true
+      - name: ls
+        description: List running compose projects
+        options:
+          - names: ["-a", "--all"]
+            description: Show all stopped projects
+          - names: ["-q", "--quiet"]
+            description: Only IDs
+      - name: config
+        description: Parse, resolve and render compose file to canonical format
+        options:
+          - names: ["--format"]
+            description: "Output format (yaml|json)"
+            args:
+              - name: format
+          - names: ["--images"]
+            description: Print image names
+          - names: ["--services"]
+            description: Print service names
+          - names: ["--volumes"]
+            description: Print volume names
+          - names: ["--profiles"]
+            description: Print profile names
+          - names: ["-q", "--quiet"]
+            description: Only validate
+          - names: ["-o", "--output"]
+            description: Save to file
+            args:
+              - name: file
+      - name: version
+        description: Show Docker Compose version
+      - name: events
+        description: Receive real time events from containers
+        options:
+          - names: ["--json"]
+            description: Output as JSON stream
+      - name: cp
+        description: Copy files/folders between service container and local filesystem
+        options:
+          - names: ["-a", "--archive"]
+            description: Archive mode
+          - names: ["-L", "--follow-link"]
+            description: Always follow symlinks
+        args:
+          - name: source path
+          - name: dest path
+      - name: create
+        description: Creates containers for a service
+        options:
+          - names: ["--build"]
+            description: Build images before creating
+          - names: ["--force-recreate"]
+            description: Recreate containers
+          - names: ["--no-build"]
+            description: Don't build images
+          - names: ["--no-recreate"]
+            description: Don't recreate existing
+        args:
+          - name: service
+            variadic: true
+      - name: port
+        description: Print the public port for a port binding
+        options:
+          - names: ["--protocol"]
+            description: TCP or UDP
+            args:
+              - name: proto
+          - names: ["--index"]
+            description: Container index
+            args:
+              - name: int
+        args:
+          - name: service
+          - name: private_port
+
+options:
+  - names: ["--config"]
+    description: Location of client config files
+    args:
+      - name: string
+  - names: ["-D", "--debug"]
+    description: Enable debug mode
+  - names: ["-H", "--host"]
+    description: Daemon socket to connect to
+    args:
+      - name: list
+  - names: ["-l", "--log-level"]
+    description: "Log level (debug|info|warn|error|fatal)"
+    args:
+      - name: string
+  - names: ["--tls"]
+    description: Use TLS
+  - names: ["--tlscacert"]
+    description: Trust certs signed by this CA
+    args:
+      - name: string
+  - names: ["--tlscert"]
+    description: Path to TLS certificate
+    args:
+      - name: string
+  - names: ["--tlskey"]
+    description: Path to TLS key
+    args:
+      - name: string
+  - names: ["--tlsverify"]
+    description: Use TLS and verify
+  - names: ["-v", "--version"]
+    description: Print version and quit
+  - names: ["--context", "-c"]
+    description: Name of context to use
+    args:
+      - name: string

@@ -14,6 +14,7 @@ require (
 require (
 	github.com/mattn/go-runewidth v0.0.3 // indirect
 	golang.org/x/sys v0.18.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 // Dùng vterm + go-runewidth để improve từng phần:

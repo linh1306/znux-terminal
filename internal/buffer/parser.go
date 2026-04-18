@@ -109,56 +109,55 @@ func (p *Parser) GetCurrentContext(buf *LineBuf) Context {
 		return Context{Level: ContextCommand}
 	}
 
-	// Strip trailing whitespace for analysis
+	endsWithSpace := text[len(text)-1] == ' ' || text[len(text)-1] == '\t'
+
+	// Tokenize trimmed text so trailing spaces don't produce empty tokens
 	trimmed := text
 	for len(trimmed) > 0 && (trimmed[len(trimmed)-1] == ' ' || trimmed[len(trimmed)-1] == '\t') {
 		trimmed = trimmed[:len(trimmed)-1]
 	}
-
 	if trimmed == "" {
 		return Context{Level: ContextCommand}
 	}
 
-	// Count tokens
 	tokens := p.tokenize(trimmed)
-	numTokens := len(tokens)
+	if len(tokens) == 0 {
+		return Context{Level: ContextCommand}
+	}
 
-	if numTokens == 1 {
-		// Partial command being typed
-		if buf.String()[len(buf.String())-1] == ' ' {
-			return Context{Level: ContextSubcommand, Command: tokens[0].Value}
+	command := tokens[0].Value
+
+	if len(tokens) == 1 {
+		if endsWithSpace {
+			// "git " → suggest subcommands
+			return Context{Level: ContextSubcommand, Command: command}
 		}
-		return Context{Level: ContextCommandPartial, Command: tokens[0].Value}
+		// "gi" → partial command name
+		return Context{Level: ContextCommandPartial, Command: command}
 	}
 
-	// Get last non-space character
-	lastRune := rune(0)
-	for i := len(text) - 1; i >= 0; i-- {
-		if text[i] != ' ' && text[i] != '\t' {
-			lastRune = rune(text[i])
-			break
-		}
+	// subcommand is the second token if it doesn't start with '-'
+	subcommand := ""
+	if len(tokens[1].Value) > 0 && tokens[1].Value[0] != '-' {
+		subcommand = tokens[1].Value
 	}
 
-	if lastRune == ' ' || lastRune == '\t' {
-		// Ends with space - expecting subcommand, flag, or arg
-		if numTokens == 2 {
-			return Context{Level: ContextSubcommand, Command: tokens[0].Value}
-		}
-		return Context{Level: ContextArg}
+	if endsWithSpace {
+		// "git checkout " or "git checkout main " → suggest args/branches
+		return Context{Level: ContextArg, Command: command, Subcommand: subcommand}
 	}
 
-	// Ends with text - partial token
-	token := tokens[len(tokens)-1]
-	if token.Value[0] == '-' {
-		return Context{Level: ContextFlagPartial, Command: tokens[0].Value}
+	// Ends with a partial token being typed
+	last := tokens[len(tokens)-1]
+	if len(last.Value) > 0 && last.Value[0] == '-' {
+		return Context{Level: ContextFlagPartial, Command: command, Subcommand: subcommand, Flag: last.Value}
 	}
-	// With exactly two tokens the second one is a partial subcommand
-	// (e.g. "git c" — user is still typing the subcommand name).
-	if numTokens == 2 {
-		return Context{Level: ContextSubcommandPartial, Command: tokens[0].Value, Subcommand: token.Value}
+	if len(tokens) == 2 {
+		// "git che" → still typing the subcommand
+		return Context{Level: ContextSubcommandPartial, Command: command, Subcommand: last.Value}
 	}
-	return Context{Level: ContextArgPartial, Command: tokens[0].Value, Subcommand: tokens[1].Value}
+	// "git checkout ma" → partial arg after a known subcommand
+	return Context{Level: ContextArgPartial, Command: command, Subcommand: subcommand}
 }
 
 // Context represents what kind of suggestion to provide

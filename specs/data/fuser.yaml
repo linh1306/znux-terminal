@@ -1,0 +1,35 @@
+name: fuser
+subcommands: []
+options:
+  - names: ["-k", "--kill"]
+    description: Kill processes accessing the file
+  - names: ["-v", "--verbose"]
+    description: Verbose output
+  - names: ["-s", "--silent"]
+    description: Silent operation
+  - names: ["-a", "--all"]
+    description: Show all files specified on command line
+  - names: ["-u", "--user"]
+    description: Append username of process owner
+  - names: ["-m", "--mount"]
+    description: Name a file on a mounted filesystem
+  - names: ["-M", "--ismountpoint"]
+    description: Request will be fulfilled only if name is a mount point
+  - names: ["-n", "--namespace"]
+    description: "Select namespace (file, udp, tcp)"
+    args:
+      - name: "file|udp|tcp"
+  - names: ["-4", "--ipv4"]
+    description: Search only IPv4 sockets
+  - names: ["-6", "--ipv6"]
+    description: Search only IPv6 sockets
+  - names: ["-c"]
+    description: "Same as -m (for POSIX compatibility)"
+  - names: ["-f"]
+    description: Silently ignored (for POSIX compatibility)
+  - names: ["-SIGNAL"]
+    description: "Send signal instead of SIGKILL (e.g. -HUP, -TERM)"
+args:
+  - name: file
+    template: filesystem
+    variadic: true

@@ -1,75 +1,172 @@
 package specs
 
+import (
+	"os/exec"
+	"strings"
+	"sync"
+	"time"
+)
+
 func init() {
-	Register("docker", &DockerSpec)
+	RegisterGenerator("docker:images", dockerImages())
+	RegisterGenerator("docker:running-containers", dockerRunningContainers())
+	RegisterGenerator("docker:all-containers", dockerAllContainers())
+	RegisterGenerator("docker:networks", dockerNetworks())
+	RegisterGenerator("docker:volumes", dockerVolumes())
 }
 
-var DockerSpec = Spec{
-	Name: "docker",
-	Subcommands: []Subcommand{
-		{Name: "run", Description: "Run a container", Options: []Option{
-			{Names: []string{"-d", "--detach"}, Description: "Run in background"},
-			{Names: []string{"-it", "--interactive", "--tty"}, Description: "Interactive mode"},
-			{Names: []string{"-p", "--publish"}, Description: "Publish port(s)"},
-			{Names: []string{"-v", "--volume"}, Description: "Bind mount volume"},
-			{Names: []string{"--name"}, Description: "Container name"},
-			{Names: []string{"--rm"}, Description: "Remove when exits"},
-			{Names: []string{"--env"}, Description: "Set environment variable"},
-			{Names: []string{"-e"}, Description: "Set environment variable"},
-			{Names: []string{"--network"}, Description: "Connect to network"},
-		}},
-		{Name: "ps", Description: "List containers", Options: []Option{
-			{Names: []string{"-a", "--all"}, Description: "Show all containers"},
-			{Names: []string{"-q", "--quiet"}, Description: "Only show IDs"},
-			{Names: []string{"-l", "--latest"}, Description: "Show latest"},
-		}},
-		{Name: "images", Description: "List images", Options: []Option{
-			{Names: []string{"-a", "--all"}, Description: "Show all images"},
-			{Names: []string{"-q", "--quiet"}, Description: "Only show IDs"},
-		}},
-		{Name: "build", Description: "Build an image", Options: []Option{
-			{Names: []string{"-t", "--tag"}, Description: "Name and tag"},
-			{Names: []string{"-f", "--file"}, Description: "Dockerfile path"},
-			{Names: []string{"--no-cache"}, Description: "Build without cache"},
-			{Names: []string{"--progress"}, Description: "Build output type"},
-		}},
-		{Name: "exec", Description: "Execute command in container", Options: []Option{
-			{Names: []string{"-it", "--interactive", "--tty"}, Description: "Interactive"},
-			{Names: []string{"-u", "--user"}, Description: "Run as user"},
-		}},
-		{Name: "logs", Description: "Fetch container logs", Options: []Option{
-			{Names: []string{"-f", "--follow"}, Description: "Follow log output"},
-			{Names: []string{"--tail"}, Description: "Number of lines"},
-		}},
-		{Name: "stop", Description: "Stop container(s)", Options: []Option{}},
-		{Name: "start", Description: "Start container(s)", Options: []Option{}},
-		{Name: "rm", Description: "Remove container(s)", Options: []Option{
-			{Names: []string{"-f", "--force"}, Description: "Force remove"},
-		}},
-		{Name: "rmi", Description: "Remove image(s)", Options: []Option{
-			{Names: []string{"-f", "--force"}, Description: "Force remove"},
-		}},
-		{Name: "pull", Description: "Pull image", Options: []Option{
-			{Names: []string{"--all-tags"}, Description: "Pull all tags"},
-		}},
-		{Name: "push", Description: "Push image", Options: []Option{}},
-		{Name: "network", Description: "Manage networks", Options: []Option{
-			{Names: []string{"ls"}, Description: "List networks"},
-			{Names: []string{"rm"}, Description: "Remove network"},
-			{Names: []string{"prune"}, Description: "Remove unused networks"},
-		}},
-		{Name: "volume", Description: "Manage volumes", Options: []Option{
-			{Names: []string{"ls"}, Description: "List volumes"},
-			{Names: []string{"rm"}, Description: "Remove volume"},
-			{Names: []string{"prune"}, Description: "Remove unused volumes"},
-		}},
-		{Name: "compose", Description: "Docker Compose", Options: []Option{
-			{Names: []string{"up"}, Description: "Create and start containers"},
-			{Names: []string{"down"}, Description: "Stop and remove containers"},
-			{Names: []string{"build"}, Description: "Build images"},
-			{Names: []string{"logs"}, Description: "View logs"},
-			{Names: []string{"ps"}, Description: "List containers"},
-			{Names: []string{"restart"}, Description: "Restart services"},
-		}},
-	},
+func dockerRunningContainers() func() []Suggestion {
+	return dockerContainerGenerator(false)
+}
+
+func dockerAllContainers() func() []Suggestion {
+	return dockerContainerGenerator(true)
+}
+
+func dockerContainerGenerator(all bool) func() []Suggestion {
+	type cache struct {
+		suggestions []Suggestion
+		expiry      time.Time
+		mu          sync.Mutex
+	}
+	c := cache{}
+
+	return func() []Suggestion {
+		c.mu.Lock()
+		defer c.mu.Unlock()
+
+		if time.Now().Before(c.expiry) && c.suggestions != nil {
+			return c.suggestions
+		}
+
+		args := []string{"ps", "--format", "{{.Names}}"}
+		if all {
+			args = []string{"ps", "-a", "--format", "{{.Names}}"}
+		}
+		out, err := exec.Command("docker", args...).Output()
+		if err != nil {
+			return nil
+		}
+
+		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+		suggestions := make([]Suggestion, 0, len(lines))
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line != "" {
+				suggestions = append(suggestions, Suggestion{Name: line, Kind: KindValue})
+			}
+		}
+
+		c.suggestions = suggestions
+		c.expiry = time.Now().Add(5 * time.Second)
+		return suggestions
+	}
+}
+
+func dockerImages() func() []Suggestion {
+	type cache struct {
+		suggestions []Suggestion
+		expiry      time.Time
+		mu          sync.Mutex
+	}
+	c := cache{}
+
+	return func() []Suggestion {
+		c.mu.Lock()
+		defer c.mu.Unlock()
+
+		if time.Now().Before(c.expiry) && c.suggestions != nil {
+			return c.suggestions
+		}
+
+		out, err := exec.Command("docker", "images", "--format", "{{.Repository}}:{{.Tag}}").Output()
+		if err != nil {
+			return nil
+		}
+
+		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+		suggestions := make([]Suggestion, 0, len(lines))
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line != "" && line != "<none>:<none>" {
+				suggestions = append(suggestions, Suggestion{Name: line, Kind: KindValue})
+			}
+		}
+
+		c.suggestions = suggestions
+		c.expiry = time.Now().Add(10 * time.Second)
+		return suggestions
+	}
+}
+
+func dockerNetworks() func() []Suggestion {
+	type cache struct {
+		suggestions []Suggestion
+		expiry      time.Time
+		mu          sync.Mutex
+	}
+	c := cache{}
+
+	return func() []Suggestion {
+		c.mu.Lock()
+		defer c.mu.Unlock()
+
+		if time.Now().Before(c.expiry) && c.suggestions != nil {
+			return c.suggestions
+		}
+
+		out, err := exec.Command("docker", "network", "ls", "--format", "{{.Name}}").Output()
+		if err != nil {
+			return nil
+		}
+
+		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+		suggestions := make([]Suggestion, 0, len(lines))
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line != "" {
+				suggestions = append(suggestions, Suggestion{Name: line, Kind: KindValue})
+			}
+		}
+
+		c.suggestions = suggestions
+		c.expiry = time.Now().Add(10 * time.Second)
+		return suggestions
+	}
+}
+
+func dockerVolumes() func() []Suggestion {
+	type cache struct {
+		suggestions []Suggestion
+		expiry      time.Time
+		mu          sync.Mutex
+	}
+	c := cache{}
+
+	return func() []Suggestion {
+		c.mu.Lock()
+		defer c.mu.Unlock()
+
+		if time.Now().Before(c.expiry) && c.suggestions != nil {
+			return c.suggestions
+		}
+
+		out, err := exec.Command("docker", "volume", "ls", "--format", "{{.Name}}").Output()
+		if err != nil {
+			return nil
+		}
+
+		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+		suggestions := make([]Suggestion, 0, len(lines))
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line != "" {
+				suggestions = append(suggestions, Suggestion{Name: line, Kind: KindValue})
+			}
+		}
+
+		c.suggestions = suggestions
+		c.expiry = time.Now().Add(10 * time.Second)
+		return suggestions
+	}
 }

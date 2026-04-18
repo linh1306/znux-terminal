@@ -1,0 +1,1514 @@
+name: git
+subcommands:
+  - name: add
+    description: Add file contents to the index
+    options:
+      - names: ["-A", "--all"]
+        description: Add all files
+      - names: ["-p", "--patch"]
+        description: Interactively choose hunks
+      - names: ["-n", "--dry-run"]
+        description: Show what would be added
+      - names: ["-u", "--update"]
+        description: Update tracked files
+      - names: ["-f", "--force"]
+        description: Allow adding ignored files
+      - names: ["-i", "--interactive"]
+        description: Interactive mode
+      - names: ["-e", "--edit"]
+        description: Open diff in editor
+      - names: ["--chmod"]
+        description: Override file mode (+x or -x)
+    args:
+      - name: pathspec
+        template: filesystem
+
+  - name: status
+    description: Show the working tree status
+    options:
+      - names: ["-s", "--short"]
+        description: Give output in short format
+      - names: ["-b", "--branch"]
+        description: Show branch and tracking info
+      - names: ["-u", "--untracked-files"]
+        description: Show untracked files
+      - names: ["--porcelain"]
+        description: Machine-readable output
+      - names: ["--ignored"]
+        description: Show ignored files
+
+  - name: commit
+    description: Record changes to the repository
+    options:
+      - names: ["-m", "--message"]
+        description: Commit message
+        args:
+          - name: message
+      - names: ["-a", "--all"]
+        description: Automatically stage modified files
+      - names: ["--amend"]
+        description: Amend the previous commit
+      - names: ["--no-edit"]
+        description: Use the selected commit message without editing
+      - names: ["-C", "--reuse-message"]
+        description: Reuse commit message
+        args:
+          - name: commit
+            generator: git:branches
+      - names: ["--allow-empty"]
+        description: Allow empty commit
+      - names: ["--allow-empty-message"]
+        description: Allow empty commit message
+      - names: ["-s", "--signoff"]
+        description: Add Signed-off-by
+      - names: ["--no-gpg-sign"]
+        description: Do not GPG-sign commit
+      - names: ["-n", "--no-verify"]
+        description: Bypass pre-commit hook
+      - names: ["--fixup"]
+        description: Create fixup commit
+        args:
+          - name: commit
+            generator: git:branches
+      - names: ["--squash"]
+        description: Create squash commit
+        args:
+          - name: commit
+            generator: git:branches
+
+  - name: push
+    description: Update remote refs
+    options:
+      - names: ["-u", "--set-upstream"]
+        description: Set upstream for the branch
+      - names: ["-f", "--force"]
+        description: Force push
+      - names: ["--force-with-lease"]
+        description: Force push if remote matches expected
+      - names: ["--tags"]
+        description: Push all tags
+      - names: ["--all"]
+        description: Push all branches
+      - names: ["-d", "--delete"]
+        description: Delete remote ref
+      - names: ["--dry-run"]
+        description: Show what would be pushed
+      - names: ["-n"]
+        description: Dry run
+      - names: ["--follow-tags"]
+        description: Push reachable annotated tags
+      - names: ["--no-verify"]
+        description: Bypass pre-push hook
+      - names: ["--atomic"]
+        description: Request atomic transaction
+    args:
+      - name: remote
+        generator: git:remotes
+      - name: branch
+        generator: git:branches
+
+  - name: pull
+    description: Fetch from and integrate with another repository
+    options:
+      - names: ["--rebase"]
+        description: Rebase instead of merge
+      - names: ["--no-rebase"]
+        description: Merge instead of rebase
+      - names: ["--no-commit"]
+        description: Perform the merge but don't commit
+      - names: ["--ff-only"]
+        description: Fast-forward only
+      - names: ["--all"]
+        description: Fetch all remotes
+      - names: ["--tags"]
+        description: Fetch all tags
+      - names: ["--prune"]
+        description: Remove deleted remote branches
+      - names: ["--squash"]
+        description: Squash into one commit
+      - names: ["-v", "--verbose"]
+        description: Verbose output
+    args:
+      - name: remote
+        generator: git:remotes
+      - name: branch
+        generator: git:branches
+
+  - name: fetch
+    description: Download objects and refs from another repository
+    options:
+      - names: ["--all"]
+        description: Fetch all remotes
+      - names: ["--prune"]
+        description: Remove deleted remote branches
+      - names: ["--tags"]
+        description: Fetch all tags
+      - names: ["-f", "--force"]
+        description: Force fetch
+      - names: ["-v", "--verbose"]
+        description: Verbose
+      - names: ["--depth"]
+        description: Deepen fetch
+        args:
+          - name: depth
+      - names: ["--unshallow"]
+        description: Convert shallow to full
+      - names: ["--dry-run"]
+        description: Show what would be fetched
+    args:
+      - name: remote
+        generator: git:remotes
+
+  - name: checkout
+    description: Switch branches or restore working tree files
+    options:
+      - names: ["-b"]
+        description: Create and switch to a new branch
+        args:
+          - name: branch
+      - names: ["-B"]
+        description: Create/reset and switch to a branch
+        args:
+          - name: branch
+      - names: ["-t", "--track"]
+        description: Set up tracking mode
+      - names: ["--orphan"]
+        description: Create orphan branch
+        args:
+          - name: branch
+      - names: ["-f", "--force"]
+        description: Force checkout
+      - names: ["-p", "--patch"]
+        description: Interactively select hunks
+      - names: ["--"]
+        description: Treat remaining args as file paths
+    args:
+      - name: branch
+        generator: git:branches
+        variadic: true
+
+  - name: switch
+    description: Switch branches
+    options:
+      - names: ["-c", "--create"]
+        description: Create and switch to a new branch
+        args:
+          - name: branch
+      - names: ["-C", "--force-create"]
+        description: Create/reset and switch to a branch
+        args:
+          - name: branch
+      - names: ["-t", "--track"]
+        description: Set up tracking
+      - names: ["--orphan"]
+        description: Create orphan branch
+        args:
+          - name: branch
+      - names: ["-d", "--detach"]
+        description: Detach HEAD
+      - names: ["-f", "--force"]
+        description: Force switch
+      - names: ["--discard-changes"]
+        description: Discard local changes
+    args:
+      - name: branch
+        generator: git:branches
+
+  - name: branch
+    description: List, create, or delete branches
+    options:
+      - names: ["-a", "--all"]
+        description: List both remote and local branches
+      - names: ["-r", "--remotes"]
+        description: List remote branches
+      - names: ["-d", "--delete"]
+        description: Delete a branch
+      - names: ["-D"]
+        description: Force delete a branch
+      - names: ["-m", "--move"]
+        description: Rename a branch
+      - names: ["-M"]
+        description: Force rename a branch
+      - names: ["-c", "--copy"]
+        description: Copy a branch
+      - names: ["-v", "--verbose"]
+        description: Show commit hash and subject
+      - names: ["--merged"]
+        description: List branches merged into HEAD
+      - names: ["--no-merged"]
+        description: List branches not merged into HEAD
+      - names: ["--contains"]
+        description: List branches containing commit
+        args:
+          - name: commit
+      - names: ["-u", "--set-upstream-to"]
+        description: Set upstream
+        args:
+          - name: upstream
+      - names: ["--unset-upstream"]
+        description: Remove upstream config
+      - names: ["--sort"]
+        description: Sort order
+        args:
+          - name: key
+    args:
+      - name: branch
+        generator: git:branches
+
+  - name: merge
+    description: Join two or more development histories
+    options:
+      - names: ["--no-ff"]
+        description: Create a merge commit even if fast-forward
+      - names: ["--ff-only"]
+        description: Fast-forward only
+      - names: ["--squash"]
+        description: Squash all commits into one
+      - names: ["--abort"]
+        description: Abort the current merge
+      - names: ["--continue"]
+        description: Continue after resolving conflicts
+      - names: ["-m"]
+        description: Commit message
+        args:
+          - name: message
+      - names: ["--strategy"]
+        description: Merge strategy
+        args:
+          - name: strategy
+      - names: ["-v", "--verbose"]
+        description: Verbose
+      - names: ["--stat"]
+        description: Show diffstat
+      - names: ["--no-stat"]
+        description: No diffstat
+      - names: ["--log"]
+        description: Include log message
+    args:
+      - name: branch
+        generator: git:branches
+
+  - name: rebase
+    description: Reapply commits on top of another base
+    options:
+      - names: ["-i", "--interactive"]
+        description: Interactive rebase
+      - names: ["--continue"]
+        description: Continue after resolving conflicts
+      - names: ["--abort"]
+        description: Abort the rebase
+      - names: ["--skip"]
+        description: Skip the current patch
+      - names: ["--quit"]
+        description: Abort but keep HEAD
+      - names: ["--autosquash"]
+        description: Automatically squash fixup commits
+      - names: ["--autostash"]
+        description: Stash before rebase and pop after
+      - names: ["--no-autostash"]
+        description: Do not autostash
+      - names: ["--onto"]
+        description: Rebase onto
+        args:
+          - name: newbase
+            generator: git:branches
+      - names: ["-m", "--merge"]
+        description: Use merging strategies
+      - names: ["--strategy"]
+        description: Use given merge strategy
+        args:
+          - name: strategy
+      - names: ["--exec"]
+        description: Exec command after each commit
+        args:
+          - name: cmd
+      - names: ["--root"]
+        description: Rebase from root
+      - names: ["--keep-base"]
+        description: Keep base commit
+    args:
+      - name: branch
+        generator: git:branches
+
+  - name: cherry-pick
+    description: Apply the changes introduced by some existing commits
+    options:
+      - names: ["-e", "--edit"]
+        description: Edit commit message
+      - names: ["-n", "--no-commit"]
+        description: Apply changes without committing
+      - names: ["-x"]
+        description: Append source commit info to message
+      - names: ["-s", "--signoff"]
+        description: Add Signed-off-by
+      - names: ["--continue"]
+        description: Continue after resolving conflicts
+      - names: ["--abort"]
+        description: Abort the cherry-pick
+      - names: ["--quit"]
+        description: Forget current operation
+      - names: ["--skip"]
+        description: Skip current commit
+      - names: ["-m", "--mainline"]
+        description: Mainline parent number
+        args:
+          - name: parent-number
+      - names: ["--strategy"]
+        description: Merge strategy
+        args:
+          - name: strategy
+    args:
+      - name: commit
+        generator: git:branches
+        variadic: true
+
+  - name: log
+    description: Show commit logs
+    options:
+      - names: ["--oneline"]
+        description: One line per commit
+      - names: ["--graph"]
+        description: Show ASCII graph
+      - names: ["-n", "--max-count"]
+        description: Limit the number of commits
+        args:
+          - name: number
+      - names: ["--author"]
+        description: Filter by author
+        args:
+          - name: author
+      - names: ["--since", "--after"]
+        description: Show commits after date
+        args:
+          - name: date
+      - names: ["--until", "--before"]
+        description: Show commits before date
+        args:
+          - name: date
+      - names: ["--grep"]
+        description: Filter by commit message
+        args:
+          - name: pattern
+      - names: ["-p", "--patch"]
+        description: Show patch for each commit
+      - names: ["--stat"]
+        description: Show stats
+      - names: ["--name-only"]
+        description: Show file names only
+      - names: ["--name-status"]
+        description: Show file names and status
+      - names: ["--abbrev-commit"]
+        description: Abbreviate commit hash
+      - names: ["--decorate"]
+        description: Show ref names
+      - names: ["--all"]
+        description: Show all branches
+      - names: ["--follow"]
+        description: Follow file renames
+      - names: ["--merges"]
+        description: Show only merge commits
+      - names: ["--no-merges"]
+        description: Skip merge commits
+      - names: ["--first-parent"]
+        description: Follow only first parent
+      - names: ["--reverse"]
+        description: Show in reverse order
+      - names: ["-S"]
+        description: Search for changes to string
+        args:
+          - name: string
+      - names: ["--format", "--pretty"]
+        description: Pretty-print format
+        args:
+          - name: format
+    args:
+      - name: revision
+
+  - name: diff
+    description: Show changes between commits, commit and working tree, etc
+    options:
+      - names: ["--staged", "--cached"]
+        description: Show staged changes
+      - names: ["--name-only"]
+        description: Show only names of changed files
+      - names: ["--name-status"]
+        description: Show names and status
+      - names: ["--stat"]
+        description: Show diffstat
+      - names: ["-p", "--patch"]
+        description: Generate patch
+      - names: ["--no-patch", "-s"]
+        description: Suppress patch output
+      - names: ["-w", "--ignore-all-space"]
+        description: Ignore whitespace
+      - names: ["-b", "--ignore-space-change"]
+        description: Ignore whitespace changes
+      - names: ["--word-diff"]
+        description: Show word diff
+      - names: ["--color-words"]
+        description: Highlight word changes
+      - names: ["--check"]
+        description: Check for whitespace errors
+      - names: ["--shortstat"]
+        description: Shortstat only
+      - names: ["-U", "--unified"]
+        description: Lines of context
+        args:
+          - name: n
+    args:
+      - name: commit
+        generator: git:branches
+      - name: commit
+        generator: git:branches
+
+  - name: stash
+    description: Stash changes in a dirty working directory
+    subcommands:
+      - name: push
+        description: Save changes to stash
+        options:
+          - names: ["-m", "--message"]
+            description: Stash message
+            args:
+              - name: message
+          - names: ["-u", "--include-untracked"]
+            description: Include untracked files
+          - names: ["-a", "--all"]
+            description: Include ignored files
+          - names: ["-p", "--patch"]
+            description: Interactive selection
+          - names: ["-k", "--keep-index"]
+            description: Keep index
+        args:
+          - name: pathspec
+            template: filesystem
+      - name: pop
+        description: Apply and remove stash
+        options:
+          - names: ["--index"]
+            description: Try to restore index
+          - names: ["-q", "--quiet"]
+            description: Quiet
+      - name: apply
+        description: Apply a stash without removing
+        options:
+          - names: ["--index"]
+            description: Restore index state
+      - name: list
+        description: List all stashes
+      - name: drop
+        description: Remove a stash
+        args:
+          - name: stash
+      - name: show
+        description: Show stash diff
+        options:
+          - names: ["-p", "--patch"]
+            description: Show patch
+          - names: ["--stat"]
+            description: Show stat
+        args:
+          - name: stash
+      - name: clear
+        description: Remove all stashes
+      - name: branch
+        description: Create branch from stash
+        args:
+          - name: branch
+          - name: stash
+
+  - name: reset
+    description: Reset current HEAD to the specified state
+    options:
+      - names: ["--soft"]
+        description: Keep changes staged
+      - names: ["--mixed"]
+        description: Keep changes unstaged (default)
+      - names: ["--hard"]
+        description: Discard all changes
+      - names: ["--merge"]
+        description: Reset and preserve uncommitted changes
+      - names: ["--keep"]
+        description: Reset but keep local changes
+      - names: ["-N", "--intent-to-add"]
+        description: Record intent to add
+      - names: ["-p", "--patch"]
+        description: Interactive selection
+      - names: ["-q", "--quiet"]
+        description: Quiet
+    args:
+      - name: commit
+        generator: git:branches
+      - name: pathspec
+        template: filesystem
+
+  - name: restore
+    description: Restore working tree files
+    options:
+      - names: ["-s", "--source"]
+        description: Restore from source
+        args:
+          - name: tree
+      - names: ["-S", "--staged"]
+        description: Restore staged content
+      - names: ["-W", "--worktree"]
+        description: Restore working tree
+      - names: ["-p", "--patch"]
+        description: Interactive selection
+      - names: ["--ours"]
+        description: Use ours version in conflict
+      - names: ["--theirs"]
+        description: Use theirs version in conflict
+    args:
+      - name: pathspec
+        template: filesystem
+        variadic: true
+
+  - name: remote
+    description: Manage set of tracked repositories
+    subcommands:
+      - name: add
+        description: Add a remote
+        options:
+          - names: ["-f", "--fetch"]
+            description: Fetch after adding
+          - names: ["-t"]
+            description: Track branch
+            args:
+              - name: branch
+        args:
+          - name: name
+          - name: url
+      - name: remove
+        description: Remove a remote
+        args:
+          - name: name
+            generator: git:remotes
+      - name: rename
+        description: Rename a remote
+        args:
+          - name: old
+            generator: git:remotes
+          - name: new
+      - name: set-url
+        description: Change remote URL
+        options:
+          - names: ["--push"]
+            description: Change push URL
+          - names: ["--add"]
+            description: Add URL instead of replacing
+          - names: ["--delete"]
+            description: Delete matching URL
+        args:
+          - name: name
+            generator: git:remotes
+          - name: newurl
+      - name: get-url
+        description: Retrieve remote URLs
+        options:
+          - names: ["--push"]
+            description: Show push URL
+          - names: ["--all"]
+            description: Show all URLs
+        args:
+          - name: name
+            generator: git:remotes
+      - name: show
+        description: Show information about remote
+        args:
+          - name: name
+            generator: git:remotes
+      - name: prune
+        description: Remove stale remote-tracking branches
+        options:
+          - names: ["-n", "--dry-run"]
+            description: Dry run
+        args:
+          - name: name
+            generator: git:remotes
+      - name: update
+        description: Fetch updates for remotes
+        args:
+          - name: group
+    options:
+      - names: ["-v", "--verbose"]
+        description: Show remote URL
+
+  - name: tag
+    description: Create, list, delete, or verify a tag
+    options:
+      - names: ["-a", "--annotate"]
+        description: Create an annotated tag
+      - names: ["-d", "--delete"]
+        description: Delete a tag
+      - names: ["-m", "--message"]
+        description: Tag message
+        args:
+          - name: message
+      - names: ["-f", "--force"]
+        description: Force replace existing tag
+      - names: ["-l", "--list"]
+        description: List tags
+      - names: ["-v", "--verify"]
+        description: Verify GPG signature
+      - names: ["--sort"]
+        description: Sort order
+        args:
+          - name: key
+      - names: ["--contains"]
+        description: Only tags containing commit
+        args:
+          - name: commit
+      - names: ["-n"]
+        description: Print annotation lines
+        args:
+          - name: num
+    args:
+      - name: tagname
+
+  - name: show
+    description: Show various types of objects
+    options:
+      - names: ["--stat"]
+        description: Show diffstat
+      - names: ["--name-only"]
+        description: Show file names only
+      - names: ["--name-status"]
+        description: Show names and status
+      - names: ["-p", "--patch"]
+        description: Show patch
+      - names: ["--no-patch", "-s"]
+        description: Suppress patch
+      - names: ["--format", "--pretty"]
+        description: Output format
+        args:
+          - name: format
+      - names: ["--abbrev-commit"]
+        description: Abbreviate commit hash
+    args:
+      - name: object
+        generator: git:branches
+
+  - name: blame
+    description: Show what revision and author last modified each line
+    options:
+      - names: ["-L"]
+        description: Annotate only given line range
+        args:
+          - name: range
+      - names: ["-w"]
+        description: Ignore whitespace changes
+      - names: ["-M"]
+        description: Detect moved lines
+      - names: ["-C"]
+        description: Detect copied lines
+      - names: ["-e", "--show-email"]
+        description: Show author email
+      - names: ["--date"]
+        description: Date format
+        args:
+          - name: format
+      - names: ["-s"]
+        description: Suppress author name
+      - names: ["-n", "--show-number"]
+        description: Show original line number
+      - names: ["-p", "--porcelain"]
+        description: Machine-readable output
+    args:
+      - name: file
+        template: filesystem
+
+  - name: bisect
+    description: Use binary search to find the commit that introduced a bug
+    subcommands:
+      - name: start
+        description: Start bisect session
+      - name: good
+        description: Mark commit as good
+        args:
+          - name: commit
+      - name: bad
+        description: Mark commit as bad
+        args:
+          - name: commit
+      - name: reset
+        description: Reset bisect state
+      - name: log
+        description: Show bisect log
+      - name: skip
+        description: Skip commits
+        args:
+          - name: commit
+            variadic: true
+      - name: run
+        description: Automate bisect with a script
+        args:
+          - name: script
+      - name: visualize
+        description: Open gitk for bisect state
+      - name: replay
+        description: Replay bisect log
+        args:
+          - name: logfile
+
+  - name: submodule
+    description: Initialize, update or inspect submodules
+    subcommands:
+      - name: add
+        description: Add a submodule
+        options:
+          - names: ["-b", "--branch"]
+            description: Branch to track
+            args:
+              - name: branch
+          - names: ["-f", "--force"]
+            description: Force add
+          - names: ["--name"]
+            description: Logical name
+            args:
+              - name: name
+          - names: ["--depth"]
+            description: Shallow clone depth
+            args:
+              - name: depth
+        args:
+          - name: repository
+          - name: path
+      - name: init
+        description: Initialize submodules
+        args:
+          - name: path
+            variadic: true
+      - name: update
+        description: Update submodules
+        options:
+          - names: ["--init"]
+            description: Initialize before updating
+          - names: ["--recursive"]
+            description: Recurse into nested submodules
+          - names: ["--remote"]
+            description: Use remote tracking branch
+          - names: ["--force"]
+            description: Discard local changes
+          - names: ["--rebase"]
+            description: Rebase local commits
+          - names: ["--merge"]
+            description: Merge remote changes
+          - names: ["--depth"]
+            description: Shallow clone depth
+            args:
+              - name: depth
+        args:
+          - name: path
+            variadic: true
+      - name: status
+        description: Show status of submodules
+        options:
+          - names: ["--recursive"]
+            description: Recurse into nested submodules
+          - names: ["--cached"]
+            description: Use index instead of HEAD
+      - name: foreach
+        description: Run command in each submodule
+        options:
+          - names: ["--recursive"]
+            description: Recurse into nested submodules
+        args:
+          - name: command
+      - name: sync
+        description: Sync submodule URLs
+        options:
+          - names: ["--recursive"]
+            description: Recurse into nested submodules
+        args:
+          - name: path
+            variadic: true
+      - name: deinit
+        description: Unregister a submodule
+        options:
+          - names: ["-f", "--force"]
+            description: Force deinit
+          - names: ["--all"]
+            description: Unregister all
+        args:
+          - name: path
+            variadic: true
+      - name: absorbgitdirs
+        description: Move .git dir of submodule into superproject
+      - name: set-branch
+        description: Set branch for submodule
+        options:
+          - names: ["-b", "--branch"]
+            description: Branch name
+            args:
+              - name: branch
+          - names: ["-d", "--default"]
+            description: Remove branch config
+        args:
+          - name: path
+      - name: set-url
+        description: Set URL for submodule
+        args:
+          - name: path
+          - name: newurl
+      - name: summary
+        description: Show commit summary
+        options:
+          - names: ["--cached"]
+            description: Use index
+          - names: ["-n"]
+            description: Limit commits
+            args:
+              - name: n
+        args:
+          - name: commit
+    options:
+      - names: ["-q", "--quiet"]
+        description: Quiet
+
+  - name: clean
+    description: Remove untracked files from the working tree
+    options:
+      - names: ["-n", "--dry-run"]
+        description: Show what would be removed
+      - names: ["-d"]
+        description: Remove directories too
+      - names: ["-f", "--force"]
+        description: Force clean
+      - names: ["-x"]
+        description: Also remove ignored files
+      - names: ["-X"]
+        description: Remove only ignored files
+      - names: ["-i", "--interactive"]
+        description: Interactive mode
+      - names: ["-q", "--quiet"]
+        description: Quiet
+      - names: ["-e"]
+        description: Exclude pattern
+        args:
+          - name: pattern
+    args:
+      - name: pathspec
+        template: filesystem
+
+  - name: config
+    description: Get and set repository or global options
+    options:
+      - names: ["--global"]
+        description: Use global config
+      - names: ["--local"]
+        description: Use local repo config
+      - names: ["--system"]
+        description: Use system config
+      - names: ["--list", "-l"]
+        description: List all config
+      - names: ["--get"]
+        description: Get value for key
+        args:
+          - name: name
+      - names: ["--unset"]
+        description: Remove a variable
+        args:
+          - name: name
+      - names: ["--add"]
+        description: Add without altering existing
+        args:
+          - name: name
+      - names: ["--edit"]
+        description: Open config in editor
+      - names: ["--type"]
+        description: Value type
+        args:
+          - name: type
+      - names: ["-e"]
+        description: Open config in editor
+    args:
+      - name: name
+      - name: value
+
+  - name: clone
+    description: Clone a repository into a new directory
+    options:
+      - names: ["--depth"]
+        description: Shallow clone depth
+        args:
+          - name: depth
+      - names: ["-b", "--branch"]
+        description: Branch to clone
+        args:
+          - name: branch
+      - names: ["--single-branch"]
+        description: Clone only one branch
+      - names: ["--no-single-branch"]
+        description: Clone all branches
+      - names: ["--recursive", "--recurse-submodules"]
+        description: Clone submodules too
+      - names: ["--bare"]
+        description: Create a bare repository
+      - names: ["--mirror"]
+        description: Mirror the repository
+      - names: ["--origin", "-o"]
+        description: Remote name
+        args:
+          - name: name
+      - names: ["--local", "-l"]
+        description: Use local filesystem
+      - names: ["-v", "--verbose"]
+        description: Verbose
+      - names: ["-q", "--quiet"]
+        description: Quiet
+      - names: ["--filter"]
+        description: Partial clone filter
+        args:
+          - name: filter
+      - names: ["--jobs", "-j"]
+        description: Parallel jobs
+        args:
+          - name: n
+    args:
+      - name: repository
+      - name: directory
+
+  - name: init
+    description: Create an empty Git repository
+    options:
+      - names: ["-b", "--initial-branch"]
+        description: Initial branch name
+        args:
+          - name: name
+      - names: ["--bare"]
+        description: Create a bare repository
+      - names: ["--shared"]
+        description: Share repository
+      - names: ["--template"]
+        description: Template directory
+        args:
+          - name: dir
+            template: folder
+      - names: ["-q", "--quiet"]
+        description: Quiet
+    args:
+      - name: directory
+
+  - name: rm
+    description: Remove files from the working tree and index
+    options:
+      - names: ["--cached"]
+        description: Remove only from index
+      - names: ["-f", "--force"]
+        description: Force remove
+      - names: ["-r"]
+        description: Recursive remove
+      - names: ["-n", "--dry-run"]
+        description: Dry run
+      - names: ["-q", "--quiet"]
+        description: Quiet
+    args:
+      - name: pathspec
+        template: filesystem
+        variadic: true
+
+  - name: mv
+    description: Move or rename a file, directory, or symlink
+    options:
+      - names: ["-f", "--force"]
+        description: Force rename
+      - names: ["-n", "--dry-run"]
+        description: Dry run
+      - names: ["-k"]
+        description: Skip errors
+      - names: ["-v", "--verbose"]
+        description: Verbose
+    args:
+      - name: source
+        template: filesystem
+      - name: destination
+
+  - name: apply
+    description: Apply a patch to files
+    options:
+      - names: ["--stat"]
+        description: Show diffstat
+      - names: ["--check"]
+        description: Check if patch applies
+      - names: ["--index"]
+        description: Apply to index and working tree
+      - names: ["--cached"]
+        description: Apply to index only
+      - names: ["-R", "--reverse"]
+        description: Apply patch in reverse
+      - names: ["--reject"]
+        description: Leave rejected hunks in .rej files
+      - names: ["-v", "--verbose"]
+        description: Verbose
+      - names: ["--ignore-space-change", "-l"]
+        description: Ignore whitespace
+      - names: ["--whitespace"]
+        description: Whitespace handling
+        args:
+          - name: action
+      - names: ["--directory"]
+        description: Prepend path prefix
+        args:
+          - name: root
+    args:
+      - name: patch
+        template: filesystem
+        variadic: true
+
+  - name: am
+    description: Apply a series of patches from a mailbox
+    options:
+      - names: ["--continue", "-r", "--resolved"]
+        description: Continue after conflict
+      - names: ["--abort"]
+        description: Abort and restore original branch
+      - names: ["--skip"]
+        description: Skip current patch
+      - names: ["-3", "--3way"]
+        description: Use 3-way merge
+      - names: ["-s", "--signoff"]
+        description: Add Signed-off-by
+      - names: ["--no-verify"]
+        description: Bypass commit hooks
+      - names: ["-q", "--quiet"]
+        description: Quiet
+      - names: ["-k", "--keep"]
+        description: Keep email subject
+      - names: ["--keep-cr"]
+        description: Keep CR in patch
+    args:
+      - name: mbox
+        template: filesystem
+
+  - name: format-patch
+    description: Prepare patches for email submission
+    options:
+      - names: ["-n", "--numbered"]
+        description: Name output in [PATCH n/m] format
+      - names: ["-N", "--no-numbered"]
+        description: Name output in [PATCH] format
+      - names: ["-o", "--output-directory"]
+        description: Output directory
+        args:
+          - name: dir
+            template: folder
+      - names: ["-s", "--signoff"]
+        description: Add Signed-off-by
+      - names: ["--cover-letter"]
+        description: Generate cover letter
+      - names: ["--to"]
+        description: Add To header
+        args:
+          - name: email
+      - names: ["--cc"]
+        description: Add Cc header
+        args:
+          - name: email
+      - names: ["--subject-prefix"]
+        description: Subject prefix
+        args:
+          - name: prefix
+      - names: ["--stdout"]
+        description: Print to stdout
+      - names: ["--base"]
+        description: Record base commit
+        args:
+          - name: commit
+    args:
+      - name: revision range
+
+  - name: shortlog
+    description: Summarize git log output
+    options:
+      - names: ["-s", "--summary"]
+        description: Suppress commit descriptions
+      - names: ["-n", "--numbered"]
+        description: Sort by number of commits
+      - names: ["-e", "--email"]
+        description: Show email of each author
+      - names: ["-g", "--walk-reflogs"]
+        description: Show reflog entries
+
+  - name: grep
+    description: Print lines matching a pattern
+    options:
+      - names: ["-e"]
+        description: Pattern
+        args:
+          - name: pattern
+      - names: ["-i", "--ignore-case"]
+        description: Case insensitive
+      - names: ["-v", "--invert-match"]
+        description: Invert match
+      - names: ["-n", "--line-number"]
+        description: Show line numbers
+      - names: ["-l", "--files-with-matches", "--name-only"]
+        description: Show matching filenames
+      - names: ["-L", "--files-without-match"]
+        description: Show non-matching filenames
+      - names: ["-c", "--count"]
+        description: Show count
+      - names: ["-A"]
+        description: Lines after
+        args:
+          - name: n
+      - names: ["-B"]
+        description: Lines before
+        args:
+          - name: n
+      - names: ["-C"]
+        description: Context lines
+        args:
+          - name: n
+      - names: ["-w", "--word-regexp"]
+        description: Match whole words
+      - names: ["--heading"]
+        description: Show filename heading
+    args:
+      - name: pattern
+      - name: pathspec
+        template: filesystem
+
+  - name: notes
+    description: Add or inspect object notes
+    subcommands:
+      - name: add
+        description: Add note
+        args:
+          - name: object
+      - name: edit
+        description: Edit note
+        args:
+          - name: object
+      - name: remove
+        description: Remove note
+        args:
+          - name: object
+      - name: show
+        description: Show note
+        args:
+          - name: object
+      - name: list
+        description: List notes
+        args:
+          - name: object
+      - name: copy
+        description: Copy note
+        args:
+          - name: from
+          - name: to
+      - name: merge
+        description: Merge notes
+        args:
+          - name: notes-ref
+      - name: prune
+        description: Remove orphaned notes
+      - name: get-ref
+        description: Print current notes ref
+
+  - name: gc
+    description: Cleanup unnecessary files and optimize local repository
+    options:
+      - names: ["--aggressive"]
+        description: More time optimizing
+      - names: ["--auto"]
+        description: Only if housekeeping needed
+      - names: ["--prune"]
+        description: Prune loose objects
+        args:
+          - name: date
+      - names: ["--quiet"]
+        description: Quiet
+      - names: ["--force"]
+        description: Force gc
+      - names: ["--keep-largest-pack"]
+        description: Ignore --max-pack-size for largest pack
+
+  - name: fsck
+    description: Verify the connectivity and validity of objects in the database
+    options:
+      - names: ["--unreachable"]
+        description: Show unreachable objects
+      - names: ["--dangling"]
+        description: Print dangling objects
+      - names: ["--full"]
+        description: Check all object files
+      - names: ["--connectivity-only"]
+        description: Check connectivity only
+      - names: ["--strict"]
+        description: Enable stricter checks
+      - names: ["--verbose"]
+        description: Verbose
+      - names: ["--lost-found"]
+        description: Write dangling objects to .git/lost-found/
+      - names: ["--progress"]
+        description: Show progress
+
+  - name: archive
+    description: Create an archive of files from a named tree
+    options:
+      - names: ["--format"]
+        description: Archive format (tar, zip)
+        args:
+          - name: fmt
+      - names: ["--prefix"]
+        description: Prepend prefix to each filename
+        args:
+          - name: prefix
+      - names: ["-o", "--output"]
+        description: Write to file
+        args:
+          - name: file
+      - names: ["--worktree-attributes"]
+        description: Look up .gitattributes in working directory
+      - names: ["-v", "--verbose"]
+        description: Verbose
+      - names: ["-9"]
+        description: Best compression
+      - names: ["-0"]
+        description: Store only
+    args:
+      - name: tree-ish
+        generator: git:branches
+      - name: path
+        template: filesystem
+
+  - name: rev-parse
+    description: Pick out and massage parameters
+    options:
+      - names: ["--is-inside-work-tree"]
+        description: Check if inside work tree
+      - names: ["--show-toplevel"]
+        description: Show top-level directory
+      - names: ["--git-dir"]
+        description: Show .git directory
+      - names: ["--abbrev-ref"]
+        description: Shorten ref
+      - names: ["--short"]
+        description: Short hash
+      - names: ["--symbolic"]
+        description: Symbolic form
+      - names: ["--all"]
+        description: Show all refs
+      - names: ["--branches"]
+        description: Show branches
+      - names: ["--tags"]
+        description: Show tags
+      - names: ["--remotes"]
+        description: Show remotes
+      - names: ["--verify"]
+        description: Verify valid ref
+    args:
+      - name: name
+
+  - name: ls-files
+    description: Show information about files in the index and working tree
+    options:
+      - names: ["--stage", "-s"]
+        description: Show staged contents
+      - names: ["--others", "-o"]
+        description: Show other (untracked) files
+      - names: ["-c", "--cached"]
+        description: Show cached files
+      - names: ["-m", "--modified"]
+        description: Show modified files
+      - names: ["-d", "--deleted"]
+        description: Show deleted files
+      - names: ["-i", "--ignored"]
+        description: Show ignored files
+      - names: ["-t"]
+        description: Identify file status
+      - names: ["--full-name"]
+        description: Show full path
+      - names: ["--error-unmatch"]
+        description: Error if file not in index
+    args:
+      - name: pathspec
+        template: filesystem
+
+  - name: ls-tree
+    description: List the contents of a tree object
+    options:
+      - names: ["-r", "--recursive"]
+        description: Recurse into subtrees
+      - names: ["--name-only"]
+        description: Show only file names
+      - names: ["-l", "--long"]
+        description: Show object size
+      - names: ["-t"]
+        description: Show tree entries
+      - names: ["--full-name"]
+        description: Show full path
+      - names: ["--full-tree"]
+        description: Do not limit to cwd
+      - names: ["-z"]
+        description: NUL line terminator
+    args:
+      - name: tree
+        generator: git:branches
+      - name: path
+        template: filesystem
+
+  - name: describe
+    description: Give an object a human-readable name
+    options:
+      - names: ["--always"]
+        description: Show unique commit
+      - names: ["--tags"]
+        description: Use tags
+      - names: ["--long"]
+        description: Always show long format
+      - names: ["--abbrev"]
+        description: Use n digits
+        args:
+          - name: n
+      - names: ["--match"]
+        description: Only use tags matching
+        args:
+          - name: pattern
+      - names: ["--exclude"]
+        description: Exclude tags matching
+        args:
+          - name: pattern
+      - names: ["--dirty"]
+        description: Append -dirty if dirty
+        args:
+          - name: mark
+      - names: ["--all"]
+        description: Use any ref
+    args:
+      - name: commit
+        generator: git:branches
+
+  - name: reflog
+    description: Manage reflog information
+    subcommands:
+      - name: show
+        description: Show reflog
+        args:
+          - name: ref
+            generator: git:branches
+      - name: expire
+        description: Prune old entries
+        options:
+          - names: ["--expire"]
+            description: Expire entries older than
+            args:
+              - name: time
+          - names: ["--all"]
+            description: Process all refs
+      - name: delete
+        description: Delete reflog entry
+        args:
+          - name: ref
+      - name: exists
+        description: Check if ref has reflog
+        args:
+          - name: ref
+    options:
+      - names: ["--date"]
+        description: Date format
+        args:
+          - name: format
+    args:
+      - name: ref
+        generator: git:branches
+
+  - name: worktree
+    description: Manage multiple working trees
+    subcommands:
+      - name: add
+        description: Create a worktree
+        options:
+          - names: ["-b"]
+            description: Create branch
+            args:
+              - name: branch
+          - names: ["-B"]
+            description: Create/force branch
+            args:
+              - name: branch
+          - names: ["--detach"]
+            description: Detach HEAD
+          - names: ["--track"]
+            description: Set up tracking
+          - names: ["-f", "--force"]
+            description: Force add
+        args:
+          - name: path
+          - name: commit-ish
+            generator: git:branches
+      - name: list
+        description: List worktrees
+      - name: remove
+        description: Remove a worktree
+        options:
+          - names: ["-f", "--force"]
+            description: Force remove
+        args:
+          - name: worktree
+      - name: prune
+        description: Prune worktree info
+        options:
+          - names: ["-n", "--dry-run"]
+            description: Dry run
+          - names: ["-v", "--verbose"]
+            description: Verbose
+          - names: ["--expire"]
+            description: Expire admin files older than
+            args:
+              - name: time
+      - name: lock
+        description: Lock a worktree
+        options:
+          - names: ["--reason"]
+            description: Lock reason
+            args:
+              - name: string
+        args:
+          - name: worktree
+      - name: unlock
+        description: Unlock a worktree
+        args:
+          - name: worktree
+      - name: move
+        description: Move a worktree
+        args:
+          - name: worktree
+          - name: new-path
+      - name: repair
+        description: Repair worktree admin files
+        args:
+          - name: path
+            variadic: true
+
+options:
+  - names: ["-C"]
+    description: Run as if started in path
+    args:
+      - name: path
+  - names: ["--version"]
+    description: Print git version
+  - names: ["--help"]
+    description: Print help
+  - names: ["-c"]
+    description: Pass config parameter
+    args:
+      - name: name=value
+  - names: ["--exec-path"]
+    description: Path to core git programs
+  - names: ["--git-dir"]
+    description: Set path to repository
+    args:
+      - name: path
+  - names: ["--work-tree"]
+    description: Set working tree path
+    args:
+      - name: path
+  - names: ["--no-pager"]
+    description: Do not pipe output through pager
+  - names: ["--paginate", "-p"]
+    description: Pipe output through pager
+  - names: ["--no-replace-objects"]
+    description: Do not use replacement refs

@@ -31,7 +31,7 @@ type Suggestion struct {
 // ArgSpec describes an argument specification
 type ArgSpec struct {
 	Name       string
-	Generator  func() []Suggestion // nil = no dynamic suggestion
+	Generator  string // name registered in generator registry; empty = no dynamic suggestion
 	IsVariadic bool
 	Template   Template
 }

@@ -1,0 +1,12 @@
+name: cd
+subcommands: []
+options:
+  - names: ["-L"]
+    description: Follow symbolic links (default)
+  - names: ["-P"]
+    description: Use physical directory structure without following symbolic links
+  - names: ["-e"]
+    description: Exit with non-zero status if directory cannot be determined
+args:
+  - name: directory
+    template: folder

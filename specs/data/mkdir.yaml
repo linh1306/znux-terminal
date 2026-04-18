@@ -1,0 +1,15 @@
+name: mkdir
+subcommands: []
+options:
+  - names: ["-p", "--parents"]
+    description: Create parent directories as needed, no error if existing
+  - names: ["-v", "--verbose"]
+    description: Print a message for each created directory
+  - names: ["-m", "--mode"]
+    description: Set file mode (as in chmod)
+    args:
+      - name: mode
+args:
+  - name: directory
+    template: folder
+    variadic: true

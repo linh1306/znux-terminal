@@ -1,6 +1,8 @@
 package suggest
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/nguyenlinh13602/goshell/internal/buffer"
@@ -29,14 +31,22 @@ func (e *Engine) GetSuggestions(buf *buffer.LineBuf, ctx *buffer.Context) []spec
 		return nil
 
 	case buffer.ContextSubcommand, buffer.ContextSubcommandPartial:
-		if spec := specs.Get(ctx.Command); spec != nil {
-			partial := ""
-			if ctx.Level == buffer.ContextSubcommandPartial {
-				partial = ctx.Subcommand
-			}
-			return e.getSubcommandSuggestions(spec, partial)
+		spec := specs.Get(ctx.Command)
+		if spec == nil {
+			return nil
 		}
-		return nil
+		partial := ""
+		if ctx.Level == buffer.ContextSubcommandPartial {
+			partial = ctx.Subcommand
+		}
+		// If the spec has subcommands, try matching them first.
+		if len(spec.Subcommands) > 0 {
+			if subs := e.getSubcommandSuggestions(spec, partial); len(subs) > 0 {
+				return subs
+			}
+		}
+		// No matching subcommands — the partial token is an arg (e.g. "cd ./").
+		return e.suggestFromArgSpecs(spec.Args, partial)
 
 	case buffer.ContextFlag, buffer.ContextFlagPartial:
 		return e.getFlagSuggestions(ctx)
@@ -54,9 +64,7 @@ func (e *Engine) matchCommand(prefix string) []specs.Suggestion {
 	var suggestions []specs.Suggestion
 	prefix = strings.ToLower(prefix)
 
-	// Commands that have specs
-	registered := []string{"git", "docker", "kubectl", "npm", "go"}
-	for _, cmd := range registered {
+	for _, cmd := range specs.RegisteredCommands() {
 		if strings.HasPrefix(cmd, prefix) {
 			suggestions = append(suggestions, specs.Suggestion{
 				Name: cmd,
@@ -65,7 +73,6 @@ func (e *Engine) matchCommand(prefix string) []specs.Suggestion {
 		}
 	}
 
-	// If no match, could add more commands here
 	return suggestions
 }
 
@@ -140,44 +147,90 @@ func (e *Engine) getArgSuggestions(ctx *buffer.Context) []specs.Suggestion {
 		return nil
 	}
 
-	var suggestions []specs.Suggestion
-
-	// Find the subcommand being typed
-	var currentSubcommand *specs.Subcommand
+	// Prefer subcommand args if a subcommand is active
 	if ctx.Subcommand != "" {
 		for _, sub := range spec.Subcommands {
 			if sub.Name == ctx.Subcommand {
-				currentSubcommand = &sub
-				break
+				return e.suggestFromArgSpecs(sub.Args, "")
 			}
 		}
 	}
 
-	// If we have a subcommand with args that have generators
-	if currentSubcommand != nil {
-		for _, arg := range currentSubcommand.Args {
-			if arg.Generator != nil {
-				dynamic := arg.Generator()
-				for _, s := range dynamic {
-					suggestions = append(suggestions, s)
+	return e.suggestFromArgSpecs(spec.Args, "")
+}
+
+// suggestFromArgSpecs produces suggestions from a list of ArgSpec, filtered by partial.
+func (e *Engine) suggestFromArgSpecs(args []specs.ArgSpec, partial string) []specs.Suggestion {
+	var suggestions []specs.Suggestion
+	for _, arg := range args {
+		if arg.Generator != "" {
+			if fn := specs.GetGenerator(arg.Generator); fn != nil {
+				for _, s := range fn() {
+					if partial == "" || strings.HasPrefix(s.Name, partial) {
+						suggestions = append(suggestions, s)
+					}
 				}
 			}
-			if arg.Template == specs.TemplateFileSystem || arg.Template == specs.TemplateFolder {
-				// File system suggestions would be handled by shell
-				// For now, return nil to let shell handle it
-			}
+		}
+		switch arg.Template {
+		case specs.TemplateFileSystem:
+			suggestions = append(suggestions, e.getFileSuggestions(partial, false)...)
+		case specs.TemplateFolder:
+			suggestions = append(suggestions, e.getFileSuggestions(partial, true)...)
 		}
 	}
+	return suggestions
+}
 
-	// Also check top-level args
-	for _, arg := range spec.Args {
-		if arg.Generator != nil {
-			dynamic := arg.Generator()
-			for _, s := range dynamic {
-				suggestions = append(suggestions, s)
-			}
-		}
+// getFileSuggestions lists files/directories matching the partial path.
+func (e *Engine) getFileSuggestions(partial string, onlyDirs bool) []specs.Suggestion {
+	// Split partial into directory and filename prefix
+	var dir, prefix string
+	lastSlash := strings.LastIndex(partial, "/")
+	if lastSlash < 0 {
+		dir = "."
+		prefix = partial
+	} else {
+		dir = partial[:lastSlash+1]
+		prefix = partial[lastSlash+1:]
 	}
 
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+
+	var suggestions []specs.Suggestion
+	for _, entry := range entries {
+		name := entry.Name()
+		// Hide dotfiles unless user explicitly types "."
+		if strings.HasPrefix(name, ".") && !strings.HasPrefix(prefix, ".") {
+			continue
+		}
+		if prefix != "" && !strings.HasPrefix(name, prefix) {
+			continue
+		}
+		if onlyDirs && !entry.IsDir() {
+			continue
+		}
+
+		// Build the full suggestion path preserving the original dir prefix
+		var full string
+		if dir == "." {
+			full = name
+		} else {
+			full = filepath.Join(dir, name)
+			// filepath.Join strips trailing slash — restore it for dirs
+		}
+		if entry.IsDir() {
+			full += "/"
+		}
+
+		kind := specs.KindFile
+		if entry.IsDir() {
+			kind = specs.KindFolder
+		}
+		suggestions = append(suggestions, specs.Suggestion{Name: full, Kind: kind, Description: entry.Type().String()})
+	}
 	return suggestions
 }

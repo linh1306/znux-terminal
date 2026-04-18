@@ -1,0 +1,120 @@
+name: npm
+subcommands:
+  - name: install
+    description: Install dependencies
+    options:
+      - names: ["-g", "--global"]
+        description: Install globally
+      - names: ["--save"]
+        description: Save to dependencies
+      - names: ["--save-dev"]
+        description: Save to devDependencies
+      - names: ["--save-optional"]
+        description: Save to optionalDependencies
+      - names: ["--no-save"]
+        description: Don't save
+      - names: ["-D", "--save-dev"]
+        description: Save to devDependencies
+      - names: ["-P", "--save-prod"]
+        description: Save to dependencies
+      - names: ["-O", "--save-optional"]
+        description: Save to optionalDependencies
+      - names: ["--legacy-peer-deps"]
+        description: Legacy peer deps
+      - names: ["--force"]
+        description: Force install
+
+  - name: uninstall
+    description: Remove dependencies
+    options:
+      - names: ["-g", "--global"]
+        description: Uninstall globally
+      - names: ["--save"]
+        description: Remove from dependencies
+      - names: ["--save-dev"]
+        description: Remove from devDependencies
+
+  - name: run
+    description: Run a script
+    options:
+      - names: ["--if-present"]
+        description: Run if script exists
+      - names: ["--ignore-scripts"]
+        description: Ignore scripts
+
+  - name: test
+    description: Run tests
+    options:
+      - names: ["--watch"]
+        description: Watch mode
+
+  - name: start
+    description: Run start script
+
+  - name: dev
+    description: Run dev script
+
+  - name: build
+    description: Run build script
+
+  - name: publish
+    description: Publish package
+    options:
+      - names: ["--access"]
+        description: "Access (public/restricted)"
+      - names: ["--tag"]
+        description: Distribution tag
+      - names: ["--dry-run"]
+        description: Dry run
+
+  - name: init
+    description: Initialize package
+    options:
+      - names: ["-y", "--yes"]
+        description: Accept defaults
+      - names: ["-n"]
+        description: No modifications
+
+  - name: version
+    description: Bump version
+    options:
+      - names: ["--major"]
+        description: Major version bump
+      - names: ["--minor"]
+        description: Minor version bump
+      - names: ["--patch"]
+        description: Patch version bump
+      - names: ["--git-tag-version"]
+        description: Git tag
+
+  - name: audit
+    description: Check for vulnerabilities
+    options:
+      - names: ["--fix"]
+        description: Fix automatically
+
+  - name: ci
+    description: Clean install
+    options:
+      - names: ["--legacy-peer-deps"]
+        description: Legacy peer deps
+
+  - name: update
+    description: Update packages
+    options:
+      - names: ["-g", "--global"]
+        description: Update global
+
+  - name: list
+    description: List installed packages
+    options:
+      - names: ["-g", "--global"]
+        description: Global packages
+      - names: ["--depth"]
+        description: Max depth
+
+  - name: outdated
+    description: Check outdated packages
+    options:
+      - names: ["--depth"]
+        description: Max depth
