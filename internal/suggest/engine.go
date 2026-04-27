@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/nguyenlinh13602/goshell/internal/buffer"
-	"github.com/nguyenlinh13602/goshell/specs"
+	"github.com/nguyenlinh13602/goshell/internal/suggest/specs"
 )
 
 // Engine provides suggestions based on current input

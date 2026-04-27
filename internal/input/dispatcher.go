@@ -11,7 +11,7 @@ import (
 	"github.com/nguyenlinh13602/goshell/internal/render"
 	"github.com/nguyenlinh13602/goshell/internal/suggest"
 	"github.com/nguyenlinh13602/goshell/internal/terminal"
-	"github.com/nguyenlinh13602/goshell/specs"
+	"github.com/nguyenlinh13602/goshell/internal/suggest/specs"
 )
 
 // Dispatcher manages the input loop and coordinates between PTY and suggest engine.
@@ -50,11 +50,14 @@ type Dispatcher struct {
 	// (i.e., the point after the shell prompt). Used to perform relative
 	// cursor motions when redrawing without erasing the shell-rendered prompt.
 	screenCol int
+
+	// currentCWD tracks the shell's current working directory via OSC 6973
+	currentCWD string
 }
 
 // NewDispatcher creates a new input dispatcher
 func NewDispatcher(ptyOut *os.File, emulator *terminal.Emulator, output render.OutputChan, ptyMu *sync.Mutex) *Dispatcher {
-	return &Dispatcher{
+	d := &Dispatcher{
 		ptyOut:        ptyOut,
 		ptyMu:         ptyMu,
 		emulator:      emulator,
@@ -69,6 +72,18 @@ func NewDispatcher(ptyOut *os.File, emulator *terminal.Emulator, output render.O
 		showing:       false,
 		done:          make(chan struct{}),
 	}
+	emulator.SetOSCHandler(d)
+	return d
+}
+
+// OnCWD implements terminal.OSCHandler, called when shell sends OSC 6973 CWD
+func (d *Dispatcher) OnCWD(path string) {
+	d.currentCWD = path
+}
+
+// GetCWD returns the shell's current working directory
+func (d *Dispatcher) GetCWD() string {
+	return d.currentCWD
 }
 
 // SetConfig sets the configuration (keybindings, theme)

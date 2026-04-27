@@ -3,7 +3,7 @@ package render
 import (
 	"fmt"
 
-	"github.com/nguyenlinh13602/goshell/specs"
+	"github.com/nguyenlinh13602/goshell/internal/suggest/specs"
 )
 
 // Popup renders autocomplete suggestions using ANSI escape codes
