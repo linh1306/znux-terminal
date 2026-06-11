@@ -10,36 +10,37 @@ import (
 	"github.com/nguyenlinh13602/goshell/internal/config"
 	"github.com/nguyenlinh13602/goshell/internal/render"
 	"github.com/nguyenlinh13602/goshell/internal/suggest"
-	"github.com/nguyenlinh13602/goshell/internal/terminal"
 	"github.com/nguyenlinh13602/goshell/internal/suggest/specs"
+	"github.com/nguyenlinh13602/goshell/internal/terminal"
 )
 
 // Dispatcher manages the input loop and coordinates between PTY and suggest engine.
 // Line editing is handled by liner (in liner_input.go).
 // This struct retains suggestion engine, popup rendering, and PTY write coordination.
 type Dispatcher struct {
-	ptyOut      *os.File
-	ptyMu       *sync.Mutex // protects PTY writes from concurrent resize
-	emulator    *terminal.Emulator
-	outputChan  render.OutputChan
-	config      *config.Config
-	done        chan struct{}
+	ptyOut     *os.File
+	ptyMu      *sync.Mutex // protects PTY writes from concurrent resize
+	stopOnce   sync.Once
+	emulator   *terminal.Emulator
+	outputChan render.OutputChan
+	config     *config.Config
+	done       chan struct{}
 
 	// Line editing state (used by liner_input.go)
-	linebuf   *buffer.LineBuf
-	parser    *buffer.Parser
-	runeBuf   []byte // UTF-8 byte accumulator for multi-byte characters
+	linebuf *buffer.LineBuf
+	parser  *buffer.Parser
+	runeBuf []byte // UTF-8 byte accumulator for multi-byte characters
 
 	// Suggestion support
 	suggestEngine *suggest.Engine
-	popup          *render.Popup
-	suggestions    []specs.Suggestion
-	selected       int
-	showing        bool
+	popup         *render.Popup
+	suggestions   []specs.Suggestion
+	selected      int
+	showing       bool
 
 	// Bracketed paste state
-	pasteActive  bool
-	pasteBuffer  strings.Builder
+	pasteActive bool
+	pasteBuffer strings.Builder
 
 	// History navigation state
 	history      []string
@@ -93,11 +94,12 @@ func (d *Dispatcher) SetConfig(cfg *config.Config) {
 
 // Stop signals the input loop to exit, used when the underlying shell process exits.
 func (d *Dispatcher) Stop() {
-	select {
-	case <-d.done:
-	default:
+	d.stopOnce.Do(func() {
 		close(d.done)
-	}
+		if d.ptyOut != nil {
+			_ = d.ptyOut.Close()
+		}
+	})
 }
 
 // ptyWrite writes to the PTY with mutex protection against concurrent resize.

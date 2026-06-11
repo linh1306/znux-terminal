@@ -8,14 +8,13 @@ require (
 	github.com/creack/pty v1.1.24
 	github.com/hinshun/vt10x v0.0.0-20220301184237-5011da428d02
 	github.com/peterh/liner v1.2.2
+	golang.org/x/sys v0.18.0
 	golang.org/x/term v0.18.0
+	gopkg.in/yaml.v3 v3.0.1
+	mvdan.cc/sh/v3 v3.8.0
 )
 
-require (
-	github.com/mattn/go-runewidth v0.0.3 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
+require github.com/mattn/go-runewidth v0.0.3 // indirect
 
 // Dùng vterm + go-runewidth để improve từng phần:
 //   - Giữ architecture hiện tại

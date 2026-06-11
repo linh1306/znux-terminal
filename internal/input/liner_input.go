@@ -80,9 +80,6 @@ func (d *Dispatcher) RunWithLiner() error {
 	// Reset screen cursor tracking — input starts right after shell prompt.
 	d.screenCol = 0
 
-	// Show initial prompt
-	d.writePrompt()
-
 	byteCh := make(chan readResult, 8)
 	go func() {
 		for {
@@ -121,8 +118,9 @@ func (d *Dispatcher) RunWithLiner() error {
 			line.AppendHistory("")
 			d.linebuf.Reset()
 			d.hideSuggestions()
-			// Move to next line and let the shell print its new prompt.
-			d.outputChan.WriteOp(render.OutputOp{Data: []byte("^C\r\n")})
+			// Show the interrupt marker locally; the shell will print the new
+			// line and prompt after receiving SIGINT.
+			d.outputChan.WriteOp(render.OutputOp{Data: []byte("^C")})
 			d.screenCol = 0
 			d.ptyWrite([]byte{3})
 			continue
@@ -366,13 +364,13 @@ func (d *Dispatcher) processEscapeSeq(seq []byte) {
 		return
 	}
 
-	// Plain Escape — dismiss suggestions or exit
-	if len(seq) == 1 {
-		if d.showing {
-			d.hideSuggestions()
-		} else {
-			d.Stop()
-		}
+	// Plain Escape exits the program. Treat repeated ESC presses the same way
+	// so they are not forwarded to the shell as visible ^[ characters.
+	if len(seq) == 1 || seq[1] == 27 {
+		d.hideSuggestions()
+		d.outputChan.WriteOp(render.OutputOp{Data: []byte("\r\n")})
+		d.screenCol = 0
+		d.Stop()
 		return
 	}
 

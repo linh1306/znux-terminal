@@ -1,7 +1,6 @@
 package specs
 
 import (
-	"os/exec"
 	"strings"
 	"sync"
 	"time"
@@ -43,7 +42,7 @@ func dockerContainerGenerator(all bool) func() []Suggestion {
 		if all {
 			args = []string{"ps", "-a", "--format", "{{.Names}}"}
 		}
-		out, err := exec.Command("docker", args...).Output()
+		out, err := commandOutput(generatorTimeout, "docker", args...)
 		if err != nil {
 			return nil
 		}
@@ -79,7 +78,7 @@ func dockerImages() func() []Suggestion {
 			return c.suggestions
 		}
 
-		out, err := exec.Command("docker", "images", "--format", "{{.Repository}}:{{.Tag}}").Output()
+		out, err := commandOutput(generatorTimeout, "docker", "images", "--format", "{{.Repository}}:{{.Tag}}")
 		if err != nil {
 			return nil
 		}
@@ -115,7 +114,7 @@ func dockerNetworks() func() []Suggestion {
 			return c.suggestions
 		}
 
-		out, err := exec.Command("docker", "network", "ls", "--format", "{{.Name}}").Output()
+		out, err := commandOutput(generatorTimeout, "docker", "network", "ls", "--format", "{{.Name}}")
 		if err != nil {
 			return nil
 		}
@@ -151,7 +150,7 @@ func dockerVolumes() func() []Suggestion {
 			return c.suggestions
 		}
 
-		out, err := exec.Command("docker", "volume", "ls", "--format", "{{.Name}}").Output()
+		out, err := commandOutput(generatorTimeout, "docker", "volume", "ls", "--format", "{{.Name}}")
 		if err != nil {
 			return nil
 		}

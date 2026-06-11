@@ -1,0 +1,29 @@
+name: rm
+subcommands: []
+options:
+  - names: ["-f", "--force"]
+    description: Ignore nonexistent files and arguments, never prompt
+  - names: ["-i"]
+    description: Prompt before every removal
+  - names: ["-I"]
+    description: Prompt once before removing many files or recursively removing
+  - names: ["--interactive"]
+    description: "Prompt according to when: never, once, or always"
+    args:
+      - name: when
+  - names: ["--one-file-system"]
+    description: Skip directories on a different file system when removing recursively
+  - names: ["--no-preserve-root"]
+    description: Do not treat / specially
+  - names: ["--preserve-root"]
+    description: Refuse to remove /, the default behavior
+  - names: ["-r", "-R", "--recursive"]
+    description: Remove directories and their contents recursively
+  - names: ["-d", "--dir"]
+    description: Remove empty directories
+  - names: ["-v", "--verbose"]
+    description: Explain what is being done
+args:
+  - name: file
+    template: filesystem
+    variadic: true

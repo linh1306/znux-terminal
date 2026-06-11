@@ -1,3 +1,5 @@
+//go:build !windows
+
 package main
 
 import (
@@ -8,8 +10,8 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
-	"github.com/creack/pty"
 	gshell_pty "github.com/nguyenlinh13602/goshell/internal/pty"
 	"github.com/nguyenlinh13602/goshell/internal/render"
 	"github.com/nguyenlinh13602/goshell/internal/terminal"
@@ -27,10 +29,11 @@ func (w *outputWriter) WriteOp(op render.OutputOp) {
 }
 
 func main() {
+	clearScreen()
+
 	shellPath := getShellPath()
 
-	cmd := exec.Command(shellPath)
-	ptm, err := pty.Start(cmd)
+	cmd, ptm, err := gshell_pty.SpawnProcess(shellPath, nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to start PTY: %v\n", err)
 		os.Exit(1)
@@ -92,7 +95,37 @@ func main() {
 		fmt.Fprintf(os.Stderr, "dispatcher error: %v\n", err)
 	}
 
-	cmd.Wait()
+	waitOrTerminate(cmd)
+}
+
+func clearScreen() {
+	fmt.Print("\033[H\033[2J\033[3J")
+}
+
+func waitOrTerminate(cmd *exec.Cmd) {
+	if cmd.Process == nil {
+		return
+	}
+
+	done := make(chan error, 1)
+	go func() {
+		done <- cmd.Wait()
+	}()
+
+	select {
+	case <-done:
+		return
+	default:
+	}
+
+	_ = cmd.Process.Signal(syscall.SIGHUP)
+
+	select {
+	case <-done:
+	case <-time.After(200 * time.Millisecond):
+		_ = cmd.Process.Kill()
+		<-done
+	}
 }
 
 func getShellPath() string {

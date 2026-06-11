@@ -1,7 +1,6 @@
 package specs
 
 import (
-	"os/exec"
 	"strings"
 	"sync"
 	"time"
@@ -28,7 +27,7 @@ func gitBranches() func() []Suggestion {
 			return c.suggestions
 		}
 
-		out, err := exec.Command("git", "branch", "-a", "--no-color", "--format=%(refname:short)").Output()
+		out, err := commandOutput(generatorTimeout, "git", "branch", "-a", "--no-color", "--format=%(refname:short)")
 		if err != nil {
 			return nil
 		}
@@ -64,7 +63,7 @@ func gitRemotes() func() []Suggestion {
 			return c.suggestions
 		}
 
-		out, err := exec.Command("git", "remote").Output()
+		out, err := commandOutput(generatorTimeout, "git", "remote")
 		if err != nil {
 			return nil
 		}

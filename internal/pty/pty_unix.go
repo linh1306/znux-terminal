@@ -3,12 +3,15 @@
 package pty
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"github.com/creack/pty"
-	"golang.org/x/term"
 	"golang.org/x/sys/unix"
+	"golang.org/x/term"
 )
 
 func NewPTY() (master, slave *os.File, err error) {
@@ -22,12 +25,74 @@ func NewPTY() (master, slave *os.File, err error) {
 // the controlling terminal (Setctty). The child execs the shell.
 // The master is returned for the parent to read/write.
 func SpawnProcess(shellPath string, _ *os.File) (*exec.Cmd, *os.File, error) {
-	cmd := exec.Command(shellPath)
+	cmd := shellCommand(shellPath)
 	master, err := pty.Start(cmd)
 	if err != nil {
 		return nil, nil, err
 	}
 	return cmd, master, nil
+}
+
+func shellCommand(shellPath string) *exec.Cmd {
+	base := filepath.Base(shellPath)
+	switch base {
+	case "bash":
+		if rcPath, err := writeBashPromptRC(); err == nil {
+			return exec.Command(shellPath, "--rcfile", rcPath, "-i")
+		}
+	case "zsh":
+		if zdotdir, err := writeZshPromptRC(); err == nil {
+			cmd := exec.Command(shellPath, "-i")
+			cmd.Env = append(os.Environ(), "ZDOTDIR="+zdotdir)
+			return cmd
+		}
+	}
+
+	cmd := exec.Command(shellPath)
+	cmd.Env = append(os.Environ(),
+		"PS1=\033[1;36m◆\033[0m \033[1;92m\\W\033[0m \033[1;36m◆\033[0m ",
+		"PROMPT=\033[1;36m◆\033[0m \033[1;92m%1~\033[0m \033[1;36m◆\033[0m ",
+	)
+	return cmd
+}
+
+func writeBashPromptRC() (string, error) {
+	dir, err := os.MkdirTemp("", "znux-terminal-bash-")
+	if err != nil {
+		return "", err
+	}
+	rcPath := filepath.Join(dir, "bashrc")
+	home := os.Getenv("HOME")
+	content := fmt.Sprintf(
+		"if [ -f %s ]; then . %s; fi\nunset PROMPT_COMMAND\nPS1='\\[\\033[1;36m\\]◆\\[\\033[0m\\] \\[\\033[1;92m\\]\\W\\[\\033[0m\\] \\[\\033[1;36m\\]◆\\[\\033[0m\\] '\n",
+		shellQuote(filepath.Join(home, ".bashrc")),
+		shellQuote(filepath.Join(home, ".bashrc")),
+	)
+	if err := os.WriteFile(rcPath, []byte(content), 0600); err != nil {
+		return "", err
+	}
+	return rcPath, nil
+}
+
+func writeZshPromptRC() (string, error) {
+	dir, err := os.MkdirTemp("", "znux-terminal-zsh-")
+	if err != nil {
+		return "", err
+	}
+	home := os.Getenv("HOME")
+	content := fmt.Sprintf(
+		"if [ -f %s ]; then source %s; fi\nPROMPT='%%{\\033[1;36m%%}◆%%{\\033[0m%%} %%{\\033[1;92m%%}%%1~%%{\\033[0m%%} %%{\\033[1;36m%%}◆%%{\\033[0m%%} '\nPS1=\"$PROMPT\"\n",
+		shellQuote(filepath.Join(home, ".zshrc")),
+		shellQuote(filepath.Join(home, ".zshrc")),
+	)
+	if err := os.WriteFile(filepath.Join(dir, ".zshrc"), []byte(content), 0600); err != nil {
+		return "", err
+	}
+	return dir, nil
+}
+
+func shellQuote(s string) string {
+	return "'" + strings.ReplaceAll(s, "'", "'\\''") + "'"
 }
 
 // Resizepty resizes the PTY to match the current terminal size.

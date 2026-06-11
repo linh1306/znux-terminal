@@ -1,7 +1,11 @@
 package buffer
 
 import (
+	"bytes"
+	"strings"
 	"unicode"
+
+	"mvdan.cc/sh/v3/syntax"
 )
 
 // Parser handles command line parsing
@@ -30,8 +34,60 @@ func (p *Parser) ParseInput(buf *LineBuf) *ParseResult {
 	return result
 }
 
-// tokenize splits input into tokens
+// tokenize splits input into shell words. It uses mvdan.cc/sh for complete
+// shell fragments and falls back to a small tolerant scanner while the user is
+// still typing incomplete input.
 func (p *Parser) tokenize(text string) []Token {
+	if tokens, ok := p.syntaxTokens(text); ok {
+		return tokens
+	}
+	return p.fallbackTokenize(text)
+}
+
+func (p *Parser) syntaxTokens(text string) ([]Token, bool) {
+	parser := syntax.NewParser(syntax.Variant(syntax.LangBash))
+	file, err := parser.Parse(strings.NewReader(text+"\n"), "")
+	if err != nil {
+		return nil, false
+	}
+
+	var lastCall *syntax.CallExpr
+	syntax.Walk(file, func(node syntax.Node) bool {
+		if call, ok := node.(*syntax.CallExpr); ok {
+			lastCall = call
+		}
+		return true
+	})
+	if lastCall == nil || len(lastCall.Args) == 0 {
+		return nil, true
+	}
+
+	tokens := make([]Token, 0, len(lastCall.Args))
+	for _, word := range lastCall.Args {
+		value := word.Lit()
+		if value == "" {
+			value = p.renderWord(word)
+		}
+		if value == "" {
+			continue
+		}
+		tokens = append(tokens, p.classifyToken(value))
+	}
+	return tokens, true
+}
+
+func (p *Parser) renderWord(word *syntax.Word) string {
+	var buf bytes.Buffer
+	printer := syntax.NewPrinter()
+	if err := printer.Print(&buf, word); err != nil {
+		return ""
+	}
+	return buf.String()
+}
+
+// fallbackTokenize splits input into tokens when the shell parser reports
+// incomplete syntax such as an unclosed quote.
+func (p *Parser) fallbackTokenize(text string) []Token {
 	var tokens []Token
 	var current []rune
 	inQuote := false

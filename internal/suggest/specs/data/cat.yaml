@@ -1,0 +1,27 @@
+name: cat
+subcommands: []
+options:
+  - names: ["-A", "--show-all"]
+    description: Equivalent to -vET
+  - names: ["-b", "--number-nonblank"]
+    description: Number nonempty output lines
+  - names: ["-e"]
+    description: Equivalent to -vE
+  - names: ["-E", "--show-ends"]
+    description: Display $ at end of each line
+  - names: ["-n", "--number"]
+    description: Number all output lines
+  - names: ["-s", "--squeeze-blank"]
+    description: Suppress repeated empty output lines
+  - names: ["-t"]
+    description: Equivalent to -vT
+  - names: ["-T", "--show-tabs"]
+    description: Display tab characters as ^I
+  - names: ["-u"]
+    description: Ignored, for POSIX compatibility
+  - names: ["-v", "--show-nonprinting"]
+    description: Use ^ and M- notation except for LFD and TAB
+args:
+  - name: file
+    template: filesystem
+    variadic: true
