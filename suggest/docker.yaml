@@ -1,178 +1,180 @@
 name: docker
 subcommands:
   - name: run
-    description: Run a command in a new container
+    description: "Chạy lệnh trong container mới"
     options:
       - names: ["-d", "--detach"]
-        description: Run in background
+        description: "Chạy trong nền"
       - names: ["-i", "--interactive"]
-        description: Keep STDIN open
+        description: "Giữ STDIN mở"
       - names: ["-t", "--tty"]
-        description: Allocate a pseudo-TTY
+        description: "Cấp phát pseudo-TTY"
       - names: ["-p", "--publish"]
-        description: "Publish port(s) HOST:CONTAINER"
+        description: "Công bố port HOST:CONTAINER"
         args:
           - name: port
       - names: ["-P", "--publish-all"]
-        description: Publish all exposed ports
+        description: "Publish tất cả port được expose"
       - names: ["-v", "--volume"]
-        description: Bind mount a volume
+        description: "Bind mount một volume"
         args:
           - name: volume
       - names: ["--mount"]
-        description: Attach a filesystem mount
+        description: "Gắn một mount hệ tệp"
         args:
           - name: mount
       - names: ["--name"]
-        description: Container name
+        description: "Tên container"
         args:
           - name: name
       - names: ["--rm"]
-        description: Remove when exits
+        description: "Xóa khi thoát"
       - names: ["-e", "--env"]
-        description: Set environment variable
+        description: "Đặt biến môi trường"
         args:
           - name: KEY=VALUE
       - names: ["--env-file"]
-        description: Read env vars from file
+        description: "Đọc biến môi trường từ file"
         args:
           - name: file
-            template: filesystem
+            sources:
+              - type: path
+                include: [folder, file]
       - names: ["--network"]
-        description: Connect to network
+        description: "Kết nối vào network"
         args:
           - name: network
             generator: docker:networks
       - names: ["-w", "--workdir"]
-        description: Working directory
+        description: "Thư mục làm việc"
         args:
           - name: dir
       - names: ["-u", "--user"]
-        description: Username or UID
+        description: "Tên người dùng hoặc UID"
         args:
           - name: user
       - names: ["--entrypoint"]
-        description: Override ENTRYPOINT
+        description: "Ghi đè ENTRYPOINT"
         args:
           - name: command
       - names: ["--hostname", "-h"]
-        description: Container hostname
+        description: "Hostname của container"
         args:
           - name: hostname
       - names: ["--cpus"]
-        description: Number of CPUs
+        description: "Số CPU"
         args:
           - name: decimal
       - names: ["-m", "--memory"]
-        description: Memory limit
+        description: "Giới hạn bộ nhớ"
         args:
           - name: bytes
       - names: ["--restart"]
-        description: Restart policy
+        description: "Chính sách khởi động lại"
         args:
           - name: policy
       - names: ["--privileged"]
-        description: Give extended privileges
+        description: "Cấp quyền mở rộng"
       - names: ["--read-only"]
-        description: Read-only root filesystem
+        description: "Hệ tệp root chỉ đọc"
       - names: ["--label", "-l"]
-        description: Set label
+        description: "Đặt label"
         args:
           - name: KEY=VALUE
       - names: ["--link"]
-        description: Link to container
+        description: "Liên kết tới container"
         args:
           - name: "name:alias"
       - names: ["--add-host"]
-        description: Add host-to-IP mapping
+        description: "Thêm ánh xạ host sang IP"
         args:
           - name: "host:IP"
       - names: ["--cap-add"]
-        description: Add Linux capability
+        description: "Thêm capability Linux"
         args:
           - name: cap
       - names: ["--cap-drop"]
-        description: Drop Linux capability
+        description: "Bỏ capability Linux"
         args:
           - name: cap
       - names: ["--cidfile"]
-        description: Write CID to file
+        description: "Ghi CID vào file"
         args:
           - name: file
       - names: ["--dns"]
-        description: Custom DNS server
+        description: "Máy chủ DNS tùy chỉnh"
         args:
           - name: DNS
       - names: ["--expose"]
-        description: Expose a port
+        description: "Expose một port"
         args:
           - name: port
       - names: ["--gpus"]
-        description: GPU devices to add
+        description: "Thiết bị GPU cần thêm"
         args:
           - name: gpus
       - names: ["--health-cmd"]
-        description: Health check command
+        description: "Lệnh health check"
         args:
           - name: command
       - names: ["--init"]
-        description: Run an init process
+        description: "Chạy tiến trình init"
       - names: ["--ip"]
-        description: IPv4 address
+        description: "Địa chỉ IPv4"
         args:
           - name: ip
       - names: ["--log-driver"]
-        description: Log driver
+        description: "Driver ghi log"
         args:
           - name: driver
       - names: ["--log-opt"]
-        description: Log driver options
+        description: "Tùy chọn driver ghi log"
         args:
           - name: KEY=VALUE
       - names: ["--pid"]
-        description: PID namespace
+        description: "Namespace PID"
         args:
           - name: pid
       - names: ["--platform"]
-        description: Set platform
+        description: "Đặt platform"
         args:
           - name: platform
       - names: ["--pull"]
-        description: Pull before running
+        description: "Pull trước khi chạy"
         args:
           - name: policy
       - names: ["--security-opt"]
-        description: Security option
+        description: "Tùy chọn bảo mật"
         args:
           - name: option
       - names: ["--shm-size"]
-        description: /dev/shm size
+        description: "Kích thước /dev/shm"
         args:
           - name: bytes
       - names: ["--sig-proxy"]
-        description: Proxy signals to process
+        description: "Chuyển tiếp signal tới tiến trình"
       - names: ["--stop-signal"]
-        description: Stop signal
+        description: "Signal dừng"
         args:
           - name: signal
       - names: ["--stop-timeout"]
-        description: Stop timeout
+        description: "Thời gian chờ dừng"
         args:
           - name: int
       - names: ["--tmpfs"]
-        description: Mount tmpfs
+        description: "Mount tmpfs"
         args:
           - name: dir
       - names: ["--ulimit"]
-        description: Ulimit options
+        description: "Tùy chọn ulimit"
         args:
           - name: ulimit
       - names: ["--userns"]
-        description: User namespace
+        description: "Namespace người dùng"
         args:
           - name: string
       - names: ["--uts"]
-        description: UTS namespace
+        description: "Namespace UTS"
         args:
           - name: string
     args:
@@ -181,34 +183,34 @@ subcommands:
       - name: command
 
   - name: exec
-    description: Run a command in a running container
+    description: "Chạy một command trong một container đang chạy"
     options:
       - names: ["-i", "--interactive"]
-        description: Keep STDIN open
+        description: "Giữ STDIN mở"
       - names: ["-t", "--tty"]
-        description: Allocate a pseudo-TTY
+        description: "Cấp phát pseudo-TTY"
       - names: ["-d", "--detach"]
-        description: Detached mode
+        description: "Chế độ tách nền"
       - names: ["-e", "--env"]
-        description: Set environment variable
+        description: "Đặt biến môi trường"
         args:
           - name: KEY=VALUE
       - names: ["--env-file"]
-        description: Read env from file
+        description: "Đọc env từ file"
         args:
           - name: file
       - names: ["-u", "--user"]
-        description: Run as user
+        description: "Chạy với người dùng"
         args:
           - name: user
       - names: ["-w", "--workdir"]
-        description: Working directory
+        description: "Thư mục làm việc"
         args:
           - name: dir
       - names: ["--privileged"]
-        description: Extended privileges
+        description: "Quyền mở rộng"
       - names: ["--detach-keys"]
-        description: Override detach key sequence
+        description: "Ghi đè chuỗi phím detach"
         args:
           - name: string
     args:
@@ -217,159 +219,162 @@ subcommands:
       - name: command
 
   - name: ps
-    description: List containers
+    description: "Liệt kê container"
     options:
       - names: ["-a", "--all"]
-        description: Show all containers
+        description: "Hiển thị tất cả container"
       - names: ["-q", "--quiet"]
-        description: Only show IDs
+        description: "Chỉ hiển thị ID"
       - names: ["-l", "--latest"]
-        description: Show latest
+        description: "Hiển thị mới nhất"
       - names: ["-n"]
-        description: Show n last containers
+        description: "Hiển thị n container gần nhất"
         args:
           - name: n
       - names: ["-s", "--size"]
-        description: Show total file sizes
+        description: "Hiển thị tổng kích thước file"
       - names: ["-f", "--filter"]
-        description: Filter
+        description: "Bộ lọc"
         args:
           - name: filter
       - names: ["--format"]
-        description: Format output
+        description: "Định dạng output"
         args:
           - name: template
       - names: ["--no-trunc"]
-        description: Don't truncate output
+        description: "Không cắt ngắn output"
 
   - name: images
-    description: List images
+    description: "Liệt kê image"
     options:
       - names: ["-a", "--all"]
-        description: Show all images
+        description: "Hiển thị tất cả image"
       - names: ["-q", "--quiet"]
-        description: Only show IDs
+        description: "Chỉ hiển thị ID"
       - names: ["-f", "--filter"]
-        description: Filter
+        description: "Bộ lọc"
         args:
           - name: filter
       - names: ["--format"]
-        description: Format output
+        description: "Định dạng output"
         args:
           - name: template
       - names: ["--no-trunc"]
-        description: Don't truncate output
+        description: "Không cắt ngắn output"
       - names: ["--digests"]
-        description: Show digests
+        description: "Hiển thị digest"
     args:
       - name: repository
 
   - name: build
-    description: Build an image from a Dockerfile
+    description: "Build image từ Dockerfile"
     options:
       - names: ["-t", "--tag"]
-        description: Name and optionally a tag
+        description: "Tên và tùy chọn tag"
         args:
           - name: "name:tag"
       - names: ["-f", "--file"]
-        description: Dockerfile path
+        description: "Đường dẫn Dockerfile"
         args:
           - name: file
-            template: filesystem
+            sources:
+              - type: path
+                include: [folder, file]
       - names: ["--no-cache"]
-        description: Build without cache
+        description: "Build không dùng cache"
       - names: ["--progress"]
-        description: "Build output type (auto|plain|tty)"
+        description: "Kiểu output build (auto|plain|tty)"
         args:
           - name: type
       - names: ["--pull"]
-        description: Always pull newer image
+        description: "Luôn pull image mới hơn"
       - names: ["--rm"]
-        description: Remove intermediate containers
+        description: "Xóa container trung gian"
       - names: ["--force-rm"]
-        description: Always remove intermediate containers
+        description: "Luôn xóa container trung gian"
       - names: ["--build-arg"]
-        description: Build-time variable
+        description: "Biến tại thời điểm build"
         args:
           - name: KEY=VALUE
       - names: ["--target"]
-        description: Build target stage
+        description: "Stage target khi build"
         args:
           - name: stage
       - names: ["--platform"]
-        description: Target platform
+        description: "Platform target"
         args:
           - name: platform
       - names: ["--cache-from"]
-        description: Images for cache
+        description: "Image dùng cho cache"
         args:
           - name: image
       - names: ["--label"]
-        description: Set metadata
+        description: "Đặt metadata"
         args:
           - name: KEY=VALUE
       - names: ["--network"]
-        description: Network mode for RUN
+        description: "Chế độ network cho RUN"
         args:
           - name: mode
       - names: ["-q", "--quiet"]
-        description: Suppress build output
+        description: "Ẩn output build"
       - names: ["--secret"]
-        description: Build secret
+        description: "Secret dùng khi build"
         args:
           - name: secret
       - names: ["--ssh"]
-        description: SSH agent socket
+        description: "Socket SSH agent"
         args:
           - name: "default|id"
       - names: ["--output", "-o"]
-        description: Output destination
+        description: "Đích xuất"
         args:
           - name: path
       - names: ["--squash"]
-        description: Squash layers (experimental)
+        description: "Gộp layer (thử nghiệm)"
       - names: ["--iidfile"]
-        description: Write image ID to file
+        description: "Ghi ID image vào file"
         args:
           - name: file
     args:
       - name: path
-        template: folder
-
+        sources:
+          - type: path
+            include: [folder]
   - name: pull
-    description: Pull an image or a repository from a registry
+    description: "Pull image hoặc repository từ registry"
     options:
       - names: ["-a", "--all-tags"]
-        description: Pull all tags
+        description: "Pull tất cả tag"
       - names: ["-q", "--quiet"]
-        description: Suppress verbose output
+        description: "Ẩn output chi tiết"
       - names: ["--platform"]
-        description: Set platform
+        description: "Đặt platform"
         args:
           - name: platform
       - names: ["--disable-content-trust"]
-        description: Skip image verification
+        description: "Bỏ qua xác minh image"
     args:
       - name: "name:tag"
 
   - name: push
-    description: Push an image or a repository to a registry
+    description: "Push image hoặc repository lên registry"
     options:
       - names: ["-a", "--all-tags"]
-        description: Push all tags
+        description: "Push tất cả tag"
       - names: ["-q", "--quiet"]
-        description: Suppress verbose output
+        description: "Ẩn output chi tiết"
       - names: ["--disable-content-trust"]
-        description: Skip image signing
+        description: "Bỏ qua ký image"
     args:
       - name: "name:tag"
         generator: docker:images
 
   - name: stop
-    description: Stop one or more running containers
+    description: "Dừng một hoặc nhiều container đang chạy"
     options:
       - names: ["-t", "--time"]
-        description: Seconds before killing (default 10)
+        description: "Số giây trước khi kill (mặc định 10)"
         args:
           - name: int
     args:
@@ -378,22 +383,22 @@ subcommands:
         variadic: true
 
   - name: start
-    description: Start one or more stopped containers
+    description: "Khởi động một hoặc nhiều container đã dừng"
     options:
       - names: ["-a", "--attach"]
-        description: Attach stdout/stderr
+        description: "Gắn stdout/stderr"
       - names: ["-i", "--interactive"]
-        description: Attach container's STDIN
+        description: "Gắn STDIN của container"
     args:
       - name: container
         generator: docker:all-containers
         variadic: true
 
   - name: restart
-    description: Restart one or more containers
+    description: "Khởi động lại một hoặc nhiều container"
     options:
       - names: ["-t", "--time"]
-        description: Seconds before killing
+        description: "Số giây trước khi kill"
         args:
           - name: int
     args:
@@ -402,67 +407,67 @@ subcommands:
         variadic: true
 
   - name: rm
-    description: Remove one or more containers
+    description: "Xóa một hoặc nhiều container"
     options:
       - names: ["-f", "--force"]
-        description: Force remove running container
+        description: "Buộc xóa container đang chạy"
       - names: ["-l", "--link"]
-        description: Remove the specified link
+        description: "Xóa liên kết được chỉ định"
       - names: ["-v", "--volumes"]
-        description: Remove anonymous volumes
+        description: "Xóa volume ẩn danh"
     args:
       - name: container
         generator: docker:all-containers
         variadic: true
 
   - name: rmi
-    description: Remove one or more images
+    description: "Xóa một hoặc nhiều image"
     options:
       - names: ["-f", "--force"]
-        description: Force remove
+        description: "Buộc xóa"
       - names: ["--no-prune"]
-        description: Do not delete untagged parents
+        description: "Không xóa parent chưa gắn tag"
     args:
       - name: image
         generator: docker:images
         variadic: true
 
   - name: logs
-    description: Fetch the logs of a container
+    description: "Lấy log của container"
     options:
       - names: ["-f", "--follow"]
-        description: Follow log output
+        description: "Theo dõi output log"
       - names: ["-n", "--tail"]
-        description: Lines from the end
+        description: "Số dòng tính từ cuối"
         args:
           - name: n
       - names: ["-t", "--timestamps"]
-        description: Show timestamps
+        description: "Hiển thị timestamp"
       - names: ["--since"]
-        description: Show logs since timestamp
+        description: "Hiển thị log kể từ timestamp"
         args:
           - name: timestamp
       - names: ["--until"]
-        description: Show logs before timestamp
+        description: "Hiển thị log trước timestamp"
         args:
           - name: timestamp
       - names: ["--details"]
-        description: Show extra details
+        description: "Hiển thị chi tiết bổ sung"
     args:
       - name: container
         generator: docker:all-containers
 
   - name: inspect
-    description: Return low-level information on Docker objects
+    description: "Trả về thông tin cấp thấp về object Docker"
     options:
       - names: ["-f", "--format"]
-        description: Go template format
+        description: "Định dạng Go template"
         args:
           - name: template
       - names: ["-s", "--size"]
-        description: Show total file sizes
+        description: "Hiển thị tổng kích thước file"
       - names: ["--type"]
-        description: Return JSON for type
+        description: "Trả về JSON cho kiểu"
         args:
           - name: type
     args:
@@ -471,92 +476,92 @@ subcommands:
         variadic: true
 
   - name: attach
-    description: Attach to a running container
+    description: "Gắn vào container đang chạy"
     options:
       - names: ["--detach-keys"]
-        description: Override detach key
+        description: "Ghi đè phím detach"
         args:
           - name: string
       - names: ["--no-stdin"]
-        description: Do not attach STDIN
+        description: "Không gắn STDIN"
       - names: ["--sig-proxy"]
-        description: Proxy received signals
+        description: "Chuyển tiếp signal đã nhận"
     args:
       - name: container
         generator: docker:running-containers
 
   - name: commit
-    description: Create a new image from a container's changes
+    description: "Tạo image mới từ thay đổi của container"
     options:
       - names: ["-a", "--author"]
-        description: Author
+        description: "Tác giả"
         args:
           - name: author
       - names: ["-c", "--change"]
-        description: Apply Dockerfile instruction
+        description: "Áp dụng chỉ thị Dockerfile"
         args:
           - name: instruction
       - names: ["-m", "--message"]
-        description: Commit message
+        description: "Thông điệp commit"
         args:
           - name: message
       - names: ["-p", "--pause"]
-        description: Pause container during commit
+        description: "Tạm dừng container trong lúc commit"
     args:
       - name: container
         generator: docker:all-containers
       - name: "repository:tag"
 
   - name: cp
-    description: Copy files/folders between a container and the local filesystem
+    description: "Sao chép tệp/thư mục giữa container và hệ tệp local"
     options:
       - names: ["-a", "--archive"]
-        description: Archive mode (copy all uid/gid info)
+        description: "Chế độ archive (sao chép toàn bộ thông tin uid/gid)"
       - names: ["-L", "--follow-link"]
-        description: Always follow symbol links
+        description: "Luôn đi theo liên kết tượng trưng"
       - names: ["-q", "--quiet"]
-        description: Suppress progress output
+        description: "Ẩn output tiến trình"
     args:
       - name: "CONTAINER:SRC_PATH or SRC_PATH"
       - name: "DEST_PATH or CONTAINER:DEST_PATH"
 
   - name: create
-    description: Create a new container
+    description: "Tạo container mới"
     options:
       - names: ["--name"]
-        description: Container name
+        description: "Tên container"
         args:
           - name: name
       - names: ["-p", "--publish"]
-        description: "Publish port(s)"
+        description: "Công bố port(s)"
         args:
           - name: port
       - names: ["-v", "--volume"]
-        description: Bind mount volume
+        description: "Bind mount volume"
         args:
           - name: volume
       - names: ["-e", "--env"]
-        description: Set environment variable
+        description: "Đặt biến môi trường"
         args:
           - name: KEY=VALUE
       - names: ["--network"]
-        description: Connect to network
+        description: "Kết nối vào network"
         args:
           - name: network
       - names: ["-u", "--user"]
-        description: Username or UID
+        description: "Tên người dùng hoặc UID"
         args:
           - name: user
       - names: ["--entrypoint"]
-        description: Override ENTRYPOINT
+        description: "Ghi đè ENTRYPOINT"
         args:
           - name: cmd
       - names: ["--restart"]
-        description: Restart policy
+        description: "Chính sách khởi động lại"
         args:
           - name: policy
       - names: ["-w", "--workdir"]
-        description: Working directory
+        description: "Thư mục làm việc"
         args:
           - name: dir
     args:
@@ -565,36 +570,36 @@ subcommands:
       - name: command
 
   - name: diff
-    description: Inspect changes to files on a container's filesystem
+    description: "Kiểm tra thay đổi file trên hệ tệp của container"
     args:
       - name: container
         generator: docker:all-containers
 
   - name: events
-    description: Get real time events from the server
+    description: "Lấy sự kiện thời gian thực từ server"
     options:
       - names: ["-f", "--filter"]
-        description: Filter based on conditions
+        description: "Lọc theo điều kiện"
         args:
           - name: filter
       - names: ["--format"]
-        description: Go template format
+        description: "Định dạng Go template"
         args:
           - name: template
       - names: ["--since"]
-        description: Show events since timestamp
+        description: "Hiển thị events since timestamp"
         args:
           - name: string
       - names: ["--until"]
-        description: Stream events until timestamp
+        description: "Stream sự kiện đến timestamp"
         args:
           - name: string
 
   - name: export
-    description: Export a container's filesystem as a tar archive
+    description: "Export hệ tệp của container thành archive tar"
     options:
       - names: ["-o", "--output"]
-        description: Write to file
+        description: "Ghi tới file"
         args:
           - name: file
     args:
@@ -602,16 +607,16 @@ subcommands:
         generator: docker:all-containers
 
   - name: history
-    description: Show the history of an image
+    description: "Hiển thị lịch sử của image"
     options:
       - names: ["-H", "--human"]
-        description: Human readable sizes
+        description: "Kích thước dễ đọc"
       - names: ["--no-trunc"]
-        description: Don't truncate output
+        description: "Không cắt ngắn output"
       - names: ["-q", "--quiet"]
-        description: Only show image IDs
+        description: "Chỉ hiển thị ID image"
       - names: ["--format"]
-        description: Go template format
+        description: "Định dạng Go template"
         args:
           - name: template
     args:
@@ -619,18 +624,18 @@ subcommands:
         generator: docker:images
 
   - name: info
-    description: Display system-wide information
+    description: "Hiển thị thông tin toàn hệ thống"
     options:
       - names: ["-f", "--format"]
-        description: Go template format
+        description: "Định dạng Go template"
         args:
           - name: template
 
   - name: kill
-    description: Kill one or more running containers
+    description: "Kill một hoặc nhiều container đang chạy"
     options:
       - names: ["-s", "--signal"]
-        description: Signal to send (default KILL)
+        description: "Signal cần gửi (mặc định KILL)"
         args:
           - name: signal
     args:
@@ -639,70 +644,72 @@ subcommands:
         variadic: true
 
   - name: load
-    description: Load an image from a tar archive or STDIN
+    description: "Load image từ archive tar hoặc STDIN"
     options:
       - names: ["-i", "--input"]
-        description: Read from tar archive file
+        description: "Đọc từ file archive tar"
         args:
           - name: file
-            template: filesystem
+            sources:
+              - type: path
+                include: [folder, file]
       - names: ["-q", "--quiet"]
-        description: Suppress load output
+        description: "Ẩn output load"
 
   - name: login
-    description: Log in to a Docker registry
+    description: "Đăng nhập vào Docker registry"
     options:
       - names: ["-p", "--password"]
-        description: Password
+        description: "Mật khẩu"
         args:
           - name: password
       - names: ["--password-stdin"]
-        description: Take password from stdin
+        description: "Nhận mật khẩu từ stdin"
       - names: ["-u", "--username"]
-        description: Username
+        description: "Tên người dùng"
         args:
           - name: username
     args:
       - name: server
 
   - name: logout
-    description: Log out from a Docker registry
+    description: "Đăng xuất khỏi Docker registry"
     args:
       - name: server
 
   - name: pause
-    description: Pause all processes within one or more containers
+    description: "Tạm dừng tất cả tiến trình trong một hoặc nhiều container"
     args:
       - name: container
         generator: docker:running-containers
         variadic: true
 
   - name: unpause
-    description: Unpause all processes within one or more containers
+    description: "Tiếp tục tất cả tiến trình trong một hoặc nhiều container"
     args:
       - name: container
         generator: docker:all-containers
         variadic: true
 
   - name: port
-    description: List port mappings for the container
+    description: "Liệt kê ánh xạ port của container"
     args:
       - name: container
         generator: docker:all-containers
       - name: private_port
 
   - name: rename
-    description: Rename a container
+    description: "Đổi tên container"
     args:
       - name: container
         generator: docker:all-containers
       - name: new_name
 
   - name: save
-    description: Save one or more images to a tar archive
+    description: "Lưu một hoặc nhiều image vào archive tar"
     options:
       - names: ["-o", "--output"]
-        description: Write to file
+        description: "Ghi tới file"
         args:
           - name: file
     args:
@@ -711,36 +718,36 @@ subcommands:
         variadic: true
 
   - name: search
-    description: Search Docker Hub for images
+    description: "Tìm image trên Docker Hub"
     options:
       - names: ["-f", "--filter"]
-        description: Filter based on conditions
+        description: "Lọc theo điều kiện"
         args:
           - name: filter
       - names: ["--format"]
-        description: Go template format
+        description: "Định dạng Go template"
         args:
           - name: template
       - names: ["--limit"]
-        description: Max search results (default 25)
+        description: "Số kết quả tìm kiếm tối đa (mặc định 25)"
         args:
           - name: int
       - names: ["--no-trunc"]
-        description: Don't truncate output
+        description: "Không cắt ngắn output"
     args:
       - name: term
 
   - name: stats
-    description: Display live resource usage statistics
+    description: "Hiển thị thống kê sử dụng resource trực tiếp"
     options:
       - names: ["-a", "--all"]
-        description: Show all containers
+        description: "Hiển thị tất cả container"
       - names: ["--no-stream"]
-        description: Disable streaming, show once
+        description: "Tắt streaming, chỉ hiển thị một lần"
       - names: ["--no-trunc"]
-        description: Don't truncate output
+        description: "Không cắt ngắn output"
       - names: ["--format"]
-        description: Go template format
+        description: "Định dạng Go template"
         args:
           - name: template
     args:
@@ -748,56 +755,56 @@ subcommands:
         generator: docker:running-containers
 
   - name: tag
-    description: Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE
+    description: "Tạo tag TARGET_IMAGE trỏ tới SOURCE_IMAGE"
     args:
       - name: source_image
         generator: docker:images
       - name: target_image
 
   - name: top
-    description: Display the running processes of a container
+    description: "Hiển thị tiến trình đang chạy của container"
     args:
       - name: container
         generator: docker:running-containers
       - name: ps_options
 
   - name: update
-    description: Update configuration of one or more containers
+    description: "Cập nhật cấu hình của một hoặc nhiều container"
     options:
       - names: ["--cpus"]
-        description: Number of CPUs
+        description: "Số CPU"
         args:
           - name: decimal
       - names: ["-m", "--memory"]
-        description: Memory limit
+        description: "Giới hạn bộ nhớ"
         args:
           - name: bytes
       - names: ["--memory-swap"]
-        description: Swap limit
+        description: "Giới hạn swap"
         args:
           - name: bytes
       - names: ["--restart"]
-        description: Restart policy
+        description: "Chính sách khởi động lại"
         args:
           - name: policy
       - names: ["--blkio-weight"]
-        description: Block IO weight
+        description: "Trọng số Block IO"
         args:
           - name: uint16
       - names: ["--cpu-shares"]
-        description: CPU shares
+        description: "CPU share"
         args:
           - name: int
       - names: ["--cpu-period"]
-        description: CPU CFS period
+        description: "Chu kỳ CPU CFS"
         args:
           - name: int
       - names: ["--cpu-quota"]
-        description: CPU CFS quota
+        description: "Quota CPU CFS"
         args:
           - name: int
       - names: ["--pids-limit"]
-        description: PID limit
+        description: "Giới hạn PID"
         args:
           - name: int
     args:
@@ -806,87 +813,91 @@ subcommands:
         variadic: true
 
   - name: wait
-    description: Block until one or more containers stop, then print exit codes
+    description: "Chặn đến khi một hoặc nhiều container dừng, rồi in mã thoát"
     args:
       - name: container
         generator: docker:all-containers
         variadic: true
 
   - name: version
-    description: Show the Docker version information
+    description: "Hiển thị thông tin phiên bản Docker"
     options:
       - names: ["-f", "--format"]
-        description: Format output
+        description: "Định dạng output"
         args:
           - name: string
 
   - name: image
-    description: Manage images
+    description: "Quản lý image"
     subcommands:
       - name: build
-        description: Build an image from a Dockerfile
+        description: "Build image từ Dockerfile"
         options:
           - names: ["-t", "--tag"]
-            description: Name and tag
+            description: "Tên và tag"
             args:
               - name: "name:tag"
           - names: ["-f", "--file"]
-            description: Dockerfile path
+            description: "Đường dẫn Dockerfile"
             args:
               - name: file
-                template: filesystem
+                sources:
+                  - type: path
+                    include: [folder, file]
           - names: ["--no-cache"]
-            description: Build without cache
+            description: "Build không dùng cache"
           - names: ["--pull"]
-            description: Always pull newer image
+            description: "Luôn pull image mới hơn"
           - names: ["--build-arg"]
-            description: Build-time variable
+            description: "Biến tại thời điểm build"
             args:
               - name: KEY=VALUE
           - names: ["--target"]
-            description: Build target stage
+            description: "Stage target khi build"
             args:
               - name: stage
           - names: ["--platform"]
-            description: Target platform
+            description: "Platform target"
             args:
               - name: platform
         args:
           - name: path
-            template: folder
+            sources:
+              - type: path
+                include: [folder]
       - name: history
-        description: Show image history
+        description: "Hiển thị lịch sử image"
         options:
           - names: ["--no-trunc"]
-            description: Don't truncate
+            description: "Không cắt ngắn"
           - names: ["-q", "--quiet"]
-            description: Only image IDs
+            description: "Chỉ image IDs"
           - names: ["--format"]
-            description: Format
+            description: "Định dạng"
             args:
               - name: template
         args:
           - name: image
             generator: docker:images
       - name: import
-        description: Import contents from a tarball to create a filesystem image
+        description: "Import nội dung từ tarball để tạo image hệ tệp"
         options:
           - names: ["-c", "--change"]
-            description: Apply Dockerfile instruction
+            description: "Áp dụng chỉ thị Dockerfile"
             args:
               - name: instruction
           - names: ["-m", "--message"]
-            description: Message
+            description: "Thông điệp"
             args:
               - name: message
         args:
           - name: "file|URL|-"
           - name: "repository:tag"
       - name: inspect
-        description: Display detailed information on images
+        description: "Hiển thị thông tin chi tiết về image"
         options:
           - names: ["-f", "--format"]
-            description: Go template
+            description: "Go template"
             args:
               - name: template
         args:
@@ -894,86 +905,88 @@ subcommands:
             generator: docker:images
             variadic: true
       - name: load
-        description: Load an image from a tar archive
+        description: "Load image từ archive tar"
         options:
           - names: ["-i", "--input"]
-            description: Read from file
+            description: "Đọc từ file"
             args:
               - name: file
-                template: filesystem
+                sources:
+                  - type: path
+                    include: [folder, file]
           - names: ["-q", "--quiet"]
-            description: Suppress output
+            description: "Ẩn output"
       - name: ls
-        description: List images
+        description: "Liệt kê image"
         options:
           - names: ["-a", "--all"]
-            description: Show all images
+            description: "Hiển thị tất cả image"
           - names: ["-q", "--quiet"]
-            description: Only show IDs
+            description: "Chỉ hiển thị ID"
           - names: ["-f", "--filter"]
-            description: Filter
+            description: "Bộ lọc"
             args:
               - name: filter
           - names: ["--format"]
-            description: Format
+            description: "Định dạng"
             args:
               - name: template
           - names: ["--no-trunc"]
-            description: Don't truncate
+            description: "Không cắt ngắn"
           - names: ["--digests"]
-            description: Show digests
+            description: "Hiển thị digest"
         args:
           - name: repository
       - name: prune
-        description: Remove unused images
+        description: "Xóa image không sử dụng"
         options:
           - names: ["-a", "--all"]
-            description: Remove all unused images
+            description: "Xóa tất cả image không sử dụng"
           - names: ["-f", "--force"]
-            description: Do not prompt
+            description: "Không hỏi xác nhận"
           - names: ["--filter"]
-            description: Filter
+            description: "Bộ lọc"
             args:
               - name: filter
       - name: pull
-        description: Pull an image or repository
+        description: "Pull image hoặc repository"
         options:
           - names: ["-a", "--all-tags"]
-            description: Pull all tags
+            description: "Pull tất cả tag"
           - names: ["-q", "--quiet"]
-            description: Suppress output
+            description: "Ẩn output"
           - names: ["--platform"]
-            description: Set platform
+            description: "Đặt platform"
             args:
               - name: platform
         args:
           - name: "name:tag"
       - name: push
-        description: Push an image or repository
+        description: "Push image hoặc repository"
         options:
           - names: ["-a", "--all-tags"]
-            description: Push all tags
+            description: "Push tất cả tag"
           - names: ["-q", "--quiet"]
-            description: Suppress output
+            description: "Ẩn output"
         args:
           - name: "name:tag"
             generator: docker:images
       - name: rm
-        description: Remove one or more images
+        description: "Xóa một hoặc nhiều image"
         options:
           - names: ["-f", "--force"]
-            description: Force remove
+            description: "Buộc xóa"
           - names: ["--no-prune"]
-            description: Do not delete untagged parents
+            description: "Không xóa parent chưa gắn tag"
         args:
           - name: image
             generator: docker:images
             variadic: true
       - name: save
-        description: Save images to tar archive
+        description: "Lưu image vào archive tar"
         options:
           - names: ["-o", "--output"]
-            description: Write to file
+            description: "Ghi tới file"
             args:
               - name: file
         args:
@@ -981,182 +994,182 @@ subcommands:
             generator: docker:images
             variadic: true
       - name: tag
-        description: Tag source image into target image
+        description: "Gắn tag image nguồn thành image đích"
         args:
           - name: source
             generator: docker:images
           - name: target
 
   - name: container
-    description: Manage containers
+    description: "Quản lý container"
     subcommands:
       - name: attach
-        description: Attach to running container
+        description: "Gắn vào container đang chạy"
         args:
           - name: container
             generator: docker:running-containers
       - name: commit
-        description: Create image from container changes
+        description: "Tạo image từ thay đổi của container"
         args:
           - name: container
             generator: docker:all-containers
           - name: "repository:tag"
       - name: cp
-        description: Copy files/folders
+        description: "Sao chép tệp/thư mục"
         args:
           - name: src
           - name: dest
       - name: create
-        description: Create a new container
+        description: "Tạo container mới"
         args:
           - name: image
             generator: docker:images
       - name: diff
-        description: Inspect filesystem changes
+        description: "Kiểm tra thay đổi hệ tệp"
         args:
           - name: container
             generator: docker:all-containers
       - name: exec
-        description: Execute command in container
+        description: "Thực thi lệnh trong container"
         args:
           - name: container
             generator: docker:running-containers
           - name: command
       - name: export
-        description: Export container filesystem
+        description: "Export hệ tệp container"
         args:
           - name: container
             generator: docker:all-containers
       - name: inspect
-        description: Display detailed info
+        description: "Hiển thị thông tin chi tiết"
         args:
           - name: container
             generator: docker:all-containers
             variadic: true
       - name: kill
-        description: Kill running containers
+        description: "Kill container đang chạy"
         args:
           - name: container
             generator: docker:running-containers
             variadic: true
       - name: logs
-        description: Fetch container logs
+        description: "Lấy log container"
         args:
           - name: container
             generator: docker:all-containers
       - name: ls
-        description: List containers
+        description: "Liệt kê container"
         options:
           - names: ["-a", "--all"]
-            description: Show all containers
+            description: "Hiển thị tất cả container"
           - names: ["-q", "--quiet"]
-            description: Only IDs
+            description: "Chỉ hiển thị ID"
       - name: pause
-        description: Pause container processes
+        description: "Tạm dừng tiến trình container"
         args:
           - name: container
             generator: docker:running-containers
             variadic: true
       - name: port
-        description: List port mappings
+        description: "Liệt kê ánh xạ port"
         args:
           - name: container
             generator: docker:all-containers
       - name: prune
-        description: Remove stopped containers
+        description: "Xóa container đã dừng"
         options:
           - names: ["-f", "--force"]
-            description: Do not prompt
+            description: "Không hỏi xác nhận"
       - name: rename
-        description: Rename a container
+        description: "Đổi tên container"
         args:
           - name: container
             generator: docker:all-containers
           - name: new_name
       - name: restart
-        description: Restart containers
+        description: "Khởi động lại container"
         args:
           - name: container
             generator: docker:all-containers
             variadic: true
       - name: rm
-        description: Remove containers
+        description: "Xóa container"
         options:
           - names: ["-f", "--force"]
-            description: Force remove
+            description: "Buộc xóa"
           - names: ["-v", "--volumes"]
-            description: Remove volumes
+            description: "Xóa volume"
         args:
           - name: container
             generator: docker:all-containers
             variadic: true
       - name: run
-        description: Run command in new container
+        description: "Chạy lệnh trong container mới"
         args:
           - name: image
             generator: docker:images
           - name: command
       - name: start
-        description: Start stopped containers
+        description: "Khởi động container đã dừng"
         args:
           - name: container
             generator: docker:all-containers
             variadic: true
       - name: stats
-        description: Live resource usage statistics
+        description: "Thống kê mức dùng resource trực tiếp"
         args:
           - name: container
             generator: docker:running-containers
       - name: stop
-        description: Stop running containers
+        description: "Dừng container đang chạy"
         args:
           - name: container
             generator: docker:running-containers
             variadic: true
       - name: top
-        description: Display running processes
+        description: "Hiển thị tiến trình đang chạy"
         args:
           - name: container
             generator: docker:running-containers
       - name: unpause
-        description: Unpause container processes
+        description: "Tiếp tục tiến trình container"
         args:
           - name: container
             generator: docker:all-containers
             variadic: true
       - name: update
-        description: Update container configuration
+        description: "Cập nhật cấu hình container"
         args:
           - name: container
             generator: docker:all-containers
             variadic: true
       - name: wait
-        description: Wait for containers to stop
+        description: "Chờ container dừng"
         args:
           - name: container
             generator: docker:all-containers
             variadic: true
 
   - name: network
-    description: Manage networks
+    description: "Quản lý network"
     subcommands:
       - name: connect
-        description: Connect a container to a network
+        description: "Kết nối một container tới một network"
         options:
           - names: ["--alias"]
-            description: Add network-scoped alias
+            description: "Thêm alias trong phạm vi network"
             args:
               - name: strings
           - names: ["--ip"]
-            description: IPv4 address
+            description: "Địa chỉ IPv4"
             args:
               - name: string
           - names: ["--ip6"]
-            description: IPv6 address
+            description: "Địa chỉ IPv6"
             args:
               - name: string
           - names: ["--link"]
-            description: Link to another container
+            description: "Liên kết tới container khác"
             args:
               - name: name
         args:
@@ -1165,113 +1178,113 @@ subcommands:
           - name: container
             generator: docker:all-containers
       - name: create
-        description: Create a network
+        description: "Tạo một network"
         options:
           - names: ["-d", "--driver"]
-            description: Driver (default bridge)
+            description: "Driver (mặc định bridge)"
             args:
               - name: driver
           - names: ["--subnet"]
-            description: Subnet in CIDR format
+            description: "Subnet ở định dạng CIDR"
             args:
               - name: string
           - names: ["--gateway"]
-            description: IPv4 or IPv6 gateway
+            description: "IPv4 hoặc IPv6 gateway"
             args:
               - name: string
           - names: ["--ip-range"]
-            description: IP range from subnet
+            description: "Dải IP từ subnet"
             args:
               - name: string
           - names: ["--internal"]
-            description: Restrict external access
+            description: "Hạn chế truy cập bên ngoài"
           - names: ["--attachable"]
-            description: Enable manual attachment
+            description: "Bật gắn thủ công"
           - names: ["--label"]
-            description: Set metadata
+            description: "Đặt metadata"
             args:
               - name: KEY=VALUE
         args:
           - name: network
       - name: disconnect
-        description: Disconnect a container from a network
+        description: "Ngắt kết nối container khỏi network"
         options:
           - names: ["-f", "--force"]
-            description: Force disconnect
+            description: "Buộc ngắt kết nối"
         args:
           - name: network
             generator: docker:networks
           - name: container
             generator: docker:all-containers
       - name: inspect
-        description: Display detailed network information
+        description: "Hiển thị thông tin network chi tiết"
         options:
           - names: ["-f", "--format"]
-            description: Go template
+            description: "Go template"
             args:
               - name: template
           - names: ["-v", "--verbose"]
-            description: Verbose output
+            description: "Output chi tiết"
         args:
           - name: network
             generator: docker:networks
             variadic: true
       - name: ls
-        description: List networks
+        description: "Liệt kê networks"
         options:
           - names: ["-f", "--filter"]
-            description: Filter
+            description: "Bộ lọc"
             args:
               - name: filter
           - names: ["--format"]
-            description: Format
+            description: "Định dạng"
             args:
               - name: template
           - names: ["-q", "--quiet"]
-            description: Only show IDs
+            description: "Chỉ hiển thị ID"
           - names: ["--no-trunc"]
-            description: Don't truncate
+            description: "Không cắt ngắn"
       - name: prune
-        description: Remove all unused networks
+        description: "Xóa tất cả network không sử dụng"
         options:
           - names: ["-f", "--force"]
-            description: Do not prompt
+            description: "Không hỏi xác nhận"
           - names: ["--filter"]
-            description: Filter
+            description: "Bộ lọc"
             args:
               - name: filter
       - name: rm
-        description: Remove one or more networks
+        description: "Xóa một hoặc nhiều network"
         args:
           - name: network
             generator: docker:networks
             variadic: true
 
   - name: volume
-    description: Manage volumes
+    description: "Quản lý volume"
     subcommands:
       - name: create
-        description: Create a volume
+        description: "Tạo một volume"
         options:
           - names: ["-d", "--driver"]
-            description: Volume driver (default local)
+            description: "Driver volume (mặc định local)"
             args:
               - name: driver
           - names: ["--label"]
-            description: Set metadata
+            description: "Đặt metadata"
             args:
               - name: KEY=VALUE
           - names: ["-o", "--opt"]
-            description: Driver specific options
+            description: "Tùy chọn riêng của driver"
             args:
               - name: KEY=VALUE
         args:
           - name: volume
       - name: inspect
-        description: Display detailed volume information
+        description: "Hiển thị thông tin volume chi tiết"
         options:
           - names: ["-f", "--format"]
-            description: Go template
+            description: "Go template"
             args:
               - name: template
         args:
@@ -1279,331 +1292,337 @@ subcommands:
             generator: docker:volumes
             variadic: true
       - name: ls
-        description: List volumes
+        description: "Liệt kê volume"
         options:
           - names: ["-f", "--filter"]
-            description: Filter
+            description: "Bộ lọc"
             args:
               - name: filter
           - names: ["--format"]
-            description: Format
+            description: "Định dạng"
             args:
               - name: template
           - names: ["-q", "--quiet"]
-            description: Only show names
+            description: "Chỉ hiển thị tên"
       - name: prune
-        description: Remove all unused local volumes
+        description: "Xóa tất cả volume local không sử dụng"
         options:
           - names: ["-f", "--force"]
-            description: Do not prompt
+            description: "Không hỏi xác nhận"
           - names: ["--filter"]
-            description: Filter
+            description: "Bộ lọc"
             args:
               - name: filter
       - name: rm
-        description: Remove one or more volumes
+        description: "Xóa một hoặc nhiều volume"
         options:
           - names: ["-f", "--force"]
-            description: Force removal
+            description: "Buộc xóa"
         args:
           - name: volume
             generator: docker:volumes
             variadic: true
 
   - name: system
-    description: Manage Docker
+    description: "Quản lý Docker"
     subcommands:
       - name: df
-        description: Show Docker disk usage
+        description: "Hiển thị mức dùng đĩa của Docker"
         options:
           - names: ["-v", "--verbose"]
-            description: Show detailed info
+            description: "Hiển thị thông tin chi tiết"
           - names: ["--format"]
-            description: Format
+            description: "Định dạng"
             args:
               - name: template
       - name: events
-        description: Get real time events from the server
+        description: "Lấy sự kiện thời gian thực từ server"
         options:
           - names: ["-f", "--filter"]
-            description: Filter
+            description: "Bộ lọc"
             args:
               - name: filter
           - names: ["--format"]
-            description: Format
+            description: "Định dạng"
             args:
               - name: template
           - names: ["--since"]
-            description: Since timestamp
+            description: "Timestamp bắt đầu"
             args:
               - name: string
           - names: ["--until"]
-            description: Until timestamp
+            description: "Timestamp kết thúc"
             args:
               - name: string
       - name: info
-        description: Display system-wide information
+        description: "Hiển thị thông tin toàn hệ thống"
         options:
           - names: ["-f", "--format"]
-            description: Format
+            description: "Định dạng"
             args:
               - name: template
       - name: prune
-        description: Remove unused data
+        description: "Xóa dữ liệu không sử dụng"
         options:
           - names: ["-a", "--all"]
-            description: Remove all unused images
+            description: "Xóa tất cả image không sử dụng"
           - names: ["-f", "--force"]
-            description: Do not prompt
+            description: "Không hỏi xác nhận"
           - names: ["--filter"]
-            description: Filter
+            description: "Bộ lọc"
             args:
               - name: filter
           - names: ["--volumes"]
-            description: Prune volumes
+            description: "Prune volume"
 
   - name: builder
-    description: Manage builds
+    description: "Quản lý build"
     subcommands:
       - name: build
-        description: Build an image from a Dockerfile
+        description: "Build image từ Dockerfile"
         options:
           - names: ["-t", "--tag"]
-            description: Name and tag
+            description: "Tên và tag"
             args:
               - name: "name:tag"
           - names: ["-f", "--file"]
-            description: Dockerfile path
+            description: "Đường dẫn Dockerfile"
             args:
               - name: file
-                template: filesystem
+                sources:
+                  - type: path
+                    include: [folder, file]
           - names: ["--no-cache"]
-            description: Build without cache
+            description: "Build không dùng cache"
         args:
           - name: path
-            template: folder
+            sources:
+              - type: path
+                include: [folder]
       - name: prune
-        description: Remove build cache
+        description: "Xóa build cache"
         options:
           - names: ["-a", "--all"]
-            description: Remove all unused cache
+            description: "Xóa tất cả cache không sử dụng"
           - names: ["-f", "--force"]
-            description: Do not prompt
+            description: "Không hỏi xác nhận"
           - names: ["--filter"]
-            description: Filter
+            description: "Bộ lọc"
             args:
               - name: filter
           - names: ["--keep-storage"]
-            description: Disk space to keep
+            description: "Dung lượng đĩa cần giữ"
             args:
               - name: bytes
 
   - name: context
-    description: Manage contexts
+    description: "Quản lý context"
     subcommands:
       - name: create
-        description: Create a context
+        description: "Tạo một context"
         args:
           - name: context
       - name: export
-        description: Export a context
+        description: "Export một context"
         args:
           - name: context
           - name: file
       - name: import
-        description: Import a context
+        description: "Import một context"
         args:
           - name: context
           - name: file
-            template: filesystem
+            sources:
+              - type: path
+                include: [folder, file]
       - name: inspect
-        description: Display context info
+        description: "Hiển thị thông tin context"
         args:
           - name: context
             variadic: true
       - name: ls
-        description: List contexts
+        description: "Liệt kê context"
         options:
           - names: ["--format"]
-            description: Format
+            description: "Định dạng"
             args:
               - name: template
       - name: rm
-        description: Remove one or more contexts
+        description: "Xóa một hoặc nhiều context"
         args:
           - name: context
             variadic: true
       - name: show
-        description: Print the name of the current context
+        description: "In tên context hiện tại"
       - name: update
-        description: Update a context
+        description: "Cập nhật một context"
         args:
           - name: context
       - name: use
-        description: Set the current docker context
+        description: "Đặt Docker context hiện tại"
         args:
           - name: context
 
   - name: compose
-    description: Docker Compose
+    description: "Docker Compose"
     subcommands:
       - name: up
-        description: Create and start containers
+        description: "Tạo và khởi động container"
         options:
           - names: ["-d", "--detach"]
-            description: Detached mode
+            description: "Chế độ tách nền"
           - names: ["--build"]
-            description: Build images before starting
+            description: "Build image trước khi khởi động"
           - names: ["--no-build"]
-            description: Don't build images
+            description: "Không build image"
           - names: ["--force-recreate"]
-            description: Recreate containers
+            description: "Tạo lại container"
           - names: ["--no-recreate"]
-            description: Don't recreate existing containers
+            description: "Không tạo lại container hiện có"
           - names: ["--remove-orphans"]
-            description: Remove orphan containers
+            description: "Xóa container orphan"
           - names: ["--scale"]
-            description: Scale service
+            description: "Scale service"
             args:
               - name: "service=n"
           - names: ["-t", "--timeout"]
-            description: Shutdown timeout
+            description: "Thời gian chờ tắt"
             args:
               - name: int
           - names: ["--wait"]
-            description: Wait until healthy
+            description: "Chờ đến khi healthy"
           - names: ["--no-color"]
-            description: No colors
+            description: "Không dùng màu"
           - names: ["-q", "--quiet-pull"]
-            description: Quiet pull
+            description: "Pull im lặng"
         args:
           - name: service
             variadic: true
       - name: down
-        description: "Stop and remove containers, networks"
+        description: "Dừng và xóa container, network"
         options:
           - names: ["--remove-orphans"]
-            description: Remove orphan containers
+            description: "Xóa container orphan"
           - names: ["--rmi"]
-            description: "Remove images (local|all)"
+            description: "Xóa image (local|all)"
             args:
               - name: type
           - names: ["-t", "--timeout"]
-            description: Shutdown timeout
+            description: "Thời gian chờ tắt"
             args:
               - name: int
           - names: ["-v", "--volumes"]
-            description: Remove volumes
+            description: "Xóa volume"
       - name: build
-        description: Build or rebuild services
+        description: "Build hoặc build lại service"
         options:
           - names: ["--no-cache"]
-            description: No cache
+            description: "Không dùng cache"
           - names: ["--pull"]
-            description: Always pull
+            description: "Luôn pull"
           - names: ["-q", "--quiet"]
-            description: Quiet
+            description: "Im lặng"
           - names: ["--build-arg"]
-            description: Build-time variables
+            description: "Biến tại thời điểm build"
             args:
               - name: KEY=VALUE
           - names: ["--progress"]
-            description: Progress type
+            description: "Kiểu tiến trình"
             args:
               - name: type
         args:
           - name: service
             variadic: true
       - name: logs
-        description: View output from containers
+        description: "Xem output từ container"
         options:
           - names: ["-f", "--follow"]
-            description: Follow log output
+            description: "Theo dõi output log"
           - names: ["-t", "--timestamps"]
-            description: Show timestamps
+            description: "Hiển thị timestamp"
           - names: ["--tail"]
-            description: Lines from end
+            description: "Số dòng tính từ cuối"
             args:
               - name: n
           - names: ["--since"]
-            description: Since timestamp
+            description: "Timestamp bắt đầu"
             args:
               - name: timestamp
           - names: ["--no-color"]
-            description: Monochrome output
+            description: "Output đơn sắc"
           - names: ["--no-log-prefix"]
-            description: Don't print prefix
+            description: "Không in tiền tố"
         args:
           - name: service
             variadic: true
       - name: ps
-        description: List containers
+        description: "Liệt kê container"
         options:
           - names: ["-a", "--all"]
-            description: Show all stopped containers
+            description: "Hiển thị tất cả container đã dừng"
           - names: ["-q", "--quiet"]
-            description: Only show IDs
+            description: "Chỉ hiển thị ID"
           - names: ["--services"]
-            description: Display services
+            description: "Hiển thị service"
           - names: ["--format"]
-            description: Format
+            description: "Định dạng"
             args:
               - name: template
           - names: ["--filter"]
-            description: Filter by property
+            description: "Lọc theo thuộc tính"
             args:
               - name: filter
         args:
           - name: service
             variadic: true
       - name: start
-        description: Start services
+        description: "Khởi động service"
         args:
           - name: service
             variadic: true
       - name: stop
-        description: Stop services
+        description: "Dừng service"
         options:
           - names: ["-t", "--timeout"]
-            description: Shutdown timeout
+            description: "Thời gian chờ tắt"
             args:
               - name: int
         args:
           - name: service
             variadic: true
       - name: restart
-        description: Restart containers
+        description: "Khởi động lại container"
         options:
           - names: ["-t", "--timeout"]
-            description: Shutdown timeout
+            description: "Thời gian chờ tắt"
             args:
               - name: int
         args:
           - name: service
             variadic: true
       - name: exec
-        description: Execute a command in a running container
+        description: "Thực thi lệnh trong container đang chạy"
         options:
           - names: ["-d", "--detach"]
-            description: Detached mode
+            description: "Chế độ tách nền"
           - names: ["-e", "--env"]
-            description: Set environment variables
+            description: "Đặt biến môi trường"
             args:
               - name: KEY=VALUE
           - names: ["-u", "--user"]
-            description: Run as user
+            description: "Chạy với người dùng"
             args:
               - name: user
           - names: ["-w", "--workdir"]
-            description: Working directory
+            description: "Thư mục làm việc"
             args:
               - name: dir
           - names: ["--privileged"]
-            description: Extended privileges
+            description: "Quyền mở rộng"
           - names: ["-T", "--no-TTY"]
-            description: Disable TTY
+            description: "Tắt TTY"
           - names: ["--index"]
-            description: Container index
+            description: "Chỉ số container"
             args:
               - name: int
         args:
@@ -1611,180 +1630,180 @@ subcommands:
           - name: command
             variadic: true
       - name: run
-        description: Run a one-off command on a service
+        description: "Chạy lệnh một lần trên service"
         options:
           - names: ["-d", "--detach"]
-            description: Detached mode
+            description: "Chế độ tách nền"
           - names: ["--rm"]
-            description: Remove container when exits
+            description: "Xóa container khi thoát"
           - names: ["-e", "--env"]
-            description: Set environment variables
+            description: "Đặt biến môi trường"
             args:
               - name: KEY=VALUE
           - names: ["-u", "--user"]
-            description: Run as user
+            description: "Chạy với người dùng"
             args:
               - name: user
           - names: ["-w", "--workdir"]
-            description: Working directory
+            description: "Thư mục làm việc"
             args:
               - name: dir
           - names: ["--entrypoint"]
-            description: Override entrypoint
+            description: "Ghi đè entrypoint"
             args:
               - name: cmd
           - names: ["--no-deps"]
-            description: Don't start linked services
+            description: "Không khởi động các service liên kết"
           - names: ["-p", "--publish"]
-            description: Publish ports
+            description: "Công bố port"
             args:
               - name: port
           - names: ["-l", "--label"]
-            description: Add label
+            description: "Thêm label"
             args:
               - name: KEY=VALUE
           - names: ["-T", "--no-TTY"]
-            description: Disable TTY
+            description: "Tắt TTY"
           - names: ["-v", "--volume"]
-            description: Bind mount volume
+            description: "Bind mount volume"
             args:
               - name: volume
           - names: ["--service-ports"]
-            description: Enable service's ports
+            description: "Bật các port của service"
         args:
           - name: service
           - name: command
             variadic: true
       - name: pull
-        description: Pull service images
+        description: "Pull image của service"
         options:
           - names: ["-q", "--quiet"]
-            description: Quiet
+            description: "Im lặng"
           - names: ["--ignore-pull-failures"]
-            description: Ignore pull failures
+            description: "Bỏ qua lỗi pull"
           - names: ["--include-deps"]
-            description: Pull dependencies too
+            description: "Pull cả dependency"
         args:
           - name: service
             variadic: true
       - name: push
-        description: Push service images
+        description: "Push image của service"
         options:
           - names: ["--ignore-push-failures"]
-            description: Ignore push failures
+            description: "Bỏ qua lỗi push"
         args:
           - name: service
             variadic: true
       - name: images
-        description: List images used by created containers
+        description: "Liệt kê image được container đã tạo sử dụng"
         args:
           - name: service
             variadic: true
       - name: rm
-        description: Remove stopped service containers
+        description: "Xóa container service đã dừng"
         options:
           - names: ["-f", "--force"]
-            description: Don't ask to confirm
+            description: "Không hỏi xác nhận"
           - names: ["-s", "--stop"]
-            description: Stop containers before removing
+            description: "Dừng container trước khi xóa"
           - names: ["-v", "--volumes"]
-            description: Remove anonymous volumes
+            description: "Xóa volume ẩn danh"
         args:
           - name: service
             variadic: true
       - name: pause
-        description: Pause services
+        description: "Tạm dừng service"
         args:
           - name: service
             variadic: true
       - name: unpause
-        description: Unpause services
+        description: "Tiếp tục service"
         args:
           - name: service
             variadic: true
       - name: top
-        description: Display running processes
+        description: "Hiển thị tiến trình đang chạy"
         args:
           - name: service
             variadic: true
       - name: kill
-        description: Force stop service containers
+        description: "Buộc dừng container service"
         options:
           - names: ["-s", "--signal"]
-            description: Signal to send
+            description: "Signal cần gửi"
             args:
               - name: signal
         args:
           - name: service
             variadic: true
       - name: ls
-        description: List running compose projects
+        description: "Liệt kê project Compose đang chạy"
         options:
           - names: ["-a", "--all"]
-            description: Show all stopped projects
+            description: "Hiển thị tất cả project đã dừng"
           - names: ["-q", "--quiet"]
-            description: Only IDs
+            description: "Chỉ hiển thị ID"
       - name: config
-        description: Parse, resolve and render compose file to canonical format
+        description: "Phân tích, resolve và render file compose sang định dạng chuẩn"
         options:
           - names: ["--format"]
-            description: "Output format (yaml|json)"
+            description: "Định dạng output (yaml|json)"
             args:
               - name: format
           - names: ["--images"]
-            description: Print image names
+            description: "In tên image"
           - names: ["--services"]
-            description: Print service names
+            description: "In tên service"
           - names: ["--volumes"]
-            description: Print volume names
+            description: "In tên volume"
           - names: ["--profiles"]
-            description: Print profile names
+            description: "In tên profile"
           - names: ["-q", "--quiet"]
-            description: Only validate
+            description: "Chỉ validate"
           - names: ["-o", "--output"]
-            description: Save to file
+            description: "Lưu vào tệp"
             args:
               - name: file
       - name: version
-        description: Show Docker Compose version
+        description: "Hiển thị phiên bản Docker Compose"
       - name: events
-        description: Receive real time events from containers
+        description: "Nhận sự kiện thời gian thực từ container"
         options:
           - names: ["--json"]
-            description: Output as JSON stream
+            description: "Output dạng stream JSON"
       - name: cp
-        description: Copy files/folders between service container and local filesystem
+        description: "Sao chép tệp/thư mục giữa container service và hệ tệp local"
         options:
           - names: ["-a", "--archive"]
-            description: Archive mode
+            description: "Chế độ archive"
           - names: ["-L", "--follow-link"]
-            description: Always follow symlinks
+            description: "Luôn đi theo symlink"
         args:
           - name: source path
           - name: dest path
       - name: create
-        description: Creates containers for a service
+        description: "Tạo container cho service"
         options:
           - names: ["--build"]
-            description: Build images before creating
+            description: "Build image trước khi tạo"
           - names: ["--force-recreate"]
-            description: Recreate containers
+            description: "Tạo lại container"
           - names: ["--no-build"]
-            description: Don't build images
+            description: "Không build image"
           - names: ["--no-recreate"]
-            description: Don't recreate existing
+            description: "Không tạo lại container hiện có"
         args:
           - name: service
             variadic: true
       - name: port
-        description: Print the public port for a port binding
+        description: "In port public cho một port binding"
         options:
           - names: ["--protocol"]
-            description: TCP or UDP
+            description: "TCP hoặc UDP"
             args:
               - name: proto
           - names: ["--index"]
-            description: Container index
+            description: "Chỉ số container"
             args:
               - name: int
         args:
@@ -1793,38 +1812,38 @@ subcommands:
 
 options:
   - names: ["--config"]
-    description: Location of client config files
+    description: "Location của client config file"
     args:
       - name: string
   - names: ["-D", "--debug"]
-    description: Enable debug mode
+    description: "Bật debug chế độ"
   - names: ["-H", "--host"]
-    description: Daemon socket to connect to
+    description: "Socket daemon để kết nối"
     args:
       - name: list
   - names: ["-l", "--log-level"]
-    description: "Log level (debug|info|warn|error|fatal)"
+    description: "Ghi log level (debug|info|warn|error|fatal)"
     args:
       - name: string
   - names: ["--tls"]
-    description: Use TLS
+    description: "Dùng TLS"
   - names: ["--tlscacert"]
-    description: Trust certs signed by this CA
+    description: "Tin cậy certs signed theo this CA"
     args:
       - name: string
   - names: ["--tlscert"]
-    description: Path to TLS certificate
+    description: "Đường dẫn tới TLS certificate"
     args:
       - name: string
   - names: ["--tlskey"]
-    description: Path to TLS key
+    description: "Đường dẫn tới TLS key"
     args:
       - name: string
   - names: ["--tlsverify"]
-    description: Use TLS and verify
+    description: "Dùng TLS và xác minh"
   - names: ["-v", "--version"]
-    description: Print version and quit
+    description: "In version và quit"
   - names: ["--context", "-c"]
-    description: Name of context to use
+    description: "Đặt tên của context tới dùng"
     args:
       - name: string

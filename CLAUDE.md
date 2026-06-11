@@ -158,7 +158,7 @@ stdout                                  — raw PTY bytes passed through unchang
 
 ### Option 1: YAML (recommended for complex specs)
 
-Create `internal/suggest/specs/data/<cmd>.yaml`:
+Create `suggest/<cmd>.yaml`:
 
 ```yaml
 name: mycmd

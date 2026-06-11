@@ -1,0 +1,41 @@
+name: fuser
+subcommands: []
+options:
+  - names: ["-k", "--kill"]
+    description: "Kill các tiến trình đang truy cập file"
+  - names: ["-v", "--verbose"]
+    description: "Output chi tiết"
+  - names: ["-s", "--silent"]
+    description: "Thao tác im lặng"
+  - names: ["-a", "--all"]
+    description: "Hiển thị tất cả file được chỉ định trên dòng lệnh"
+  - names: ["-u", "--user"]
+    description: "Thêm tên người dùng của chủ tiến trình"
+  - names: ["-m", "--mount"]
+    description: "Chỉ định file trên hệ tệp đã mount"
+  - names: ["-M", "--ismountpoint"]
+    description: "Chỉ thực hiện yêu cầu nếu tên là một điểm mount"
+  - names: ["-n", "--namespace"]
+    description: "Chọn namespace (file, udp, tcp)"
+    args:
+      - name: "file|udp|tcp"
+  - names: ["-4", "--ipv4"]
+    description: "Chỉ tìm socket IPv4"
+  - names: ["-6", "--ipv6"]
+    description: "Chỉ tìm socket IPv6"
+  - names: ["-c"]
+    description: "Giống -m (để tương thích POSIX)"
+  - names: ["-f"]
+    description: "Bị bỏ qua im lặng (để tương thích POSIX)"
+  - names: ["-SIGNAL"]
+    description: "Gửi signal thay vì SIGKILL (ví dụ -HUP, -TERM)"
+args:
+  - name: target
+    sources:
+      - type: port
+        protocols: [tcp, udp]
+        state: listening
+        format: port/proto
+      - type: path
+        include: [folder, file]
+    variadic: true

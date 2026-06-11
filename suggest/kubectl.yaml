@@ -1,0 +1,138 @@
+name: kubectl
+subcommands:
+  - name: get
+    description: "Hiển thị resource"
+    options:
+      - names: ["-o", "--output"]
+        description: "Định dạng output (yaml/json/wide)"
+      - names: ["-A", "--all-namespaces"]
+        description: "Tất cả namespace"
+      - names: ["-n", "--namespace"]
+        description: "Namespace"
+      - names: ["-w", "--watch"]
+        description: "Theo dõi thay đổi"
+      - names: ["--show-kind"]
+        description: "Hiển thị loại resource"
+      - names: ["-l", "--selector"]
+        description: "Selector label"
+
+  - name: describe
+    description: "Hiển thị chi tiết resource"
+    options:
+      - names: ["-A", "--all-namespaces"]
+        description: "Tất cả namespace"
+      - names: ["-n", "--namespace"]
+        description: "Namespace"
+
+  - name: apply
+    description: "Áp dụng cấu hình"
+    options:
+      - names: ["-f", "--filename"]
+        description: "Tên file hoặc URL"
+      - names: ["-k", "--kustomize"]
+        description: "Thư mục Kustomize"
+      - names: ["--dry-run"]
+        description: "Chạy thử"
+      - names: ["--validate"]
+        description: "Validate resource"
+
+  - name: delete
+    description: "Xóa resource"
+    options:
+      - names: ["-f", "--filename"]
+        description: "Tên file hoặc URL"
+      - names: ["--all"]
+        description: "Xóa tất cả resource"
+      - names: ["--cascade"]
+        description: "Xóa cascade"
+
+  - name: create
+    description: "Tạo resource"
+    options:
+      - names: ["-f", "--filename"]
+        description: "Tên file hoặc URL"
+      - names: ["--dry-run"]
+        description: "Chạy thử"
+
+  - name: edit
+    description: "Sửa resource"
+    options:
+      - names: ["--output"]
+        description: "Định dạng output"
+
+  - name: logs
+    description: "In log"
+    options:
+      - names: ["-f", "--follow"]
+        description: "Theo dõi log"
+      - names: ["-p", "--previous"]
+        description: "Container trước đó"
+      - names: ["--tail"]
+        description: "Số dòng cần hiển thị"
+      - names: ["-c", "--container"]
+        description: "Tên container"
+
+  - name: exec
+    description: "Thực thi lệnh trong container"
+    options:
+      - names: ["-it"]
+        description: "Tương tác"
+      - names: ["-c", "--container"]
+        description: "Tên container"
+
+  - name: port-forward
+    description: "Chuyển tiếp port"
+    options:
+      - names: ["--address"]
+        description: "Địa chỉ bind"
+
+  - name: scale
+    description: "Scale deployment"
+    options:
+      - names: ["--replicas"]
+        description: "Số replica"
+
+  - name: rollout
+    description: "Quản lý rollout"
+    options:
+      - names: ["status"]
+        description: "Kiểm tra trạng thái rollout"
+      - names: ["undo"]
+        description: "Hoàn tác rollout trước đó"
+      - names: ["restart"]
+        description: "Khởi động lại deployment"
+
+  - name: top
+    description: "Hiển thị mức dùng resource"
+    options:
+      - names: ["-A", "--all-namespaces"]
+        description: "Tất cả namespace"
+      - names: ["-n", "--namespace"]
+        description: "Namespace"
+
+  - name: explain
+    description: "Giải thích định nghĩa resource"
+
+  - name: config
+    description: "Quản lý config"
+    options:
+      - names: ["use-context"]
+        description: "Chuyển context"
+      - names: ["get-contexts"]
+        description: "Liệt kê context"
+      - names: ["current-context"]
+        description: "Context hiện tại"
+
+  - name: cluster
+    description: "Quản lý cluster"
+    options:
+      - names: ["info"]
+        description: "Thông tin cluster"
+
+  - name: api-resources
+    description: "Liệt kê API resource"
+    options:
+      - names: ["--api-group"]
+        description: "Nhóm API"
+      - names: ["-o", "--output"]
+        description: "Định dạng output"

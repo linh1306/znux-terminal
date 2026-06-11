@@ -213,7 +213,7 @@ func (p *Parser) GetCurrentContext(buf *LineBuf) Context {
 		return Context{Level: ContextSubcommandPartial, Command: command, Subcommand: last.Value}
 	}
 	// "git checkout ma" → partial arg after a known subcommand
-	return Context{Level: ContextArgPartial, Command: command, Subcommand: subcommand}
+	return Context{Level: ContextArgPartial, Command: command, Subcommand: subcommand, PartialWord: last.Value}
 }
 
 // Context represents what kind of suggestion to provide

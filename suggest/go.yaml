@@ -1,0 +1,138 @@
+name: go
+subcommands:
+  - name: run
+    description: "Biên dịch và chạy file Go"
+    options:
+      - names: ["-v", "--verbose"]
+        description: "Xuất chi tiết"
+      - names: ["-x"]
+        description: "In lệnh"
+
+  - name: build
+    description: "Biên dịch package"
+    options:
+      - names: ["-v", "--verbose"]
+        description: "Xuất chi tiết"
+      - names: ["-x"]
+        description: "In lệnh"
+      - names: ["-o", "--output"]
+        description: "File output"
+      - names: ["-a", "--all"]
+        description: "Buộc build lại"
+      - names: ["-race"]
+        description: "Bộ phát hiện race"
+      - names: ["-ldflags"]
+        description: "Flag cho linker"
+      - names: ["-gcflags"]
+        description: "Flag cho compiler"
+      - names: ["-tags"]
+        description: "Tag build"
+
+  - name: test
+    description: "Chạy test"
+    options:
+      - names: ["-v", "--verbose"]
+        description: "Xuất chi tiết"
+      - names: ["-run"]
+        description: "Chạy test khớp regex"
+      - names: ["-bench"]
+        description: "Chạy benchmark khớp regex"
+      - names: ["-benchtime"]
+        description: "Thời gian benchmark"
+      - names: ["-count"]
+        description: "Số lần chạy"
+      - names: ["-cover"]
+        description: "Độ phủ kiểm thử"
+      - names: ["-coverprofile"]
+        description: "Profile độ phủ"
+      - names: ["-race"]
+        description: "Bộ phát hiện race"
+      - names: ["-timeout"]
+        description: "Thời gian chờ"
+      - names: ["-short"]
+        description: "Chế độ ngắn"
+
+  - name: vet
+    description: "Chạy go vet"
+    options:
+      - names: ["-v"]
+        description: "Xuất chi tiết"
+
+  - name: fmt
+    description: "Định dạng package"
+    options:
+      - names: ["-l", "--list"]
+        description: "Liệt kê file"
+      - names: ["-w", "--write"]
+        description: "Ghi kết quả"
+      - names: ["-r"]
+        description: "Quy tắc rewrite"
+
+  - name: mod
+    description: "Bảo trì module"
+    options:
+      - names: ["init"]
+        description: "Khởi tạo go.mod"
+      - names: ["tidy"]
+        description: "Cập nhật go.mod"
+      - names: ["download"]
+        description: "Tải module"
+      - names: ["graph"]
+        description: "Đồ thị module"
+      - names: ["why"]
+        description: "Giải thích dependency"
+
+  - name: get
+    description: "Thêm dependency"
+    options:
+      - names: ["-v", "--verbose"]
+        description: "Xuất chi tiết"
+      - names: ["-u"]
+        description: "Cập nhật"
+
+  - name: install
+    description: "Build và cài đặt package"
+    options:
+      - names: ["-v"]
+        description: "Xuất chi tiết"
+      - names: ["-race"]
+        description: "Bộ phát hiện race"
+
+  - name: clean
+    description: "Dọn cache"
+    options:
+      - names: ["-cache"]
+        description: "Dọn cache build"
+      - names: ["-testcache"]
+        description: "Dọn cache test"
+      - names: ["-modcache"]
+        description: "Dọn cache module"
+
+  - name: doc
+    description: "Hiển thị tài liệu"
+    options:
+      - names: ["-v", "--verbose"]
+        description: "Xuất chi tiết"
+      - names: ["-all"]
+        description: "Hiển thị cả phần chưa export"
+
+  - name: list
+    description: "Liệt kê package"
+    options:
+      - names: ["-m"]
+        description: "Liệt kê module"
+      - names: ["-f"]
+        description: "Định dạng"
+      - names: ["-templates"]
+        description: "Mẫu"
+
+  - name: version
+    description: "In phiên bản Go"
+
+  - name: env
+    description: "In môi trường"
+    options:
+      - names: ["-json"]
+        description: "Xuất JSON"
+      - names: ["-w"]
+        description: "Đặt biến môi trường"

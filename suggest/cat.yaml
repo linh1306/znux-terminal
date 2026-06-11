@@ -1,0 +1,29 @@
+name: cat
+subcommands: []
+options:
+  - names: ["-A", "--show-all"]
+    description: "Tương đương -vET"
+  - names: ["-b", "--number-nonblank"]
+    description: "Đánh số các dòng xuất không rỗng"
+  - names: ["-e"]
+    description: "Tương đương -vE"
+  - names: ["-E", "--show-ends"]
+    description: "Hiển thị $ ở cuối mỗi dòng"
+  - names: ["-n", "--number"]
+    description: "Đánh số tất cả các dòng xuất"
+  - names: ["-s", "--squeeze-blank"]
+    description: "Ẩn các dòng xuất rỗng lặp lại"
+  - names: ["-t"]
+    description: "Tương đương -vT"
+  - names: ["-T", "--show-tabs"]
+    description: "Hiển thị ký tự tab dưới dạng ^I"
+  - names: ["-u"]
+    description: "Bị bỏ qua để tương thích POSIX"
+  - names: ["-v", "--show-nonprinting"]
+    description: "Dùng ký hiệu ^ và M- ngoại trừ LFD và TAB"
+args:
+  - name: file
+    sources:
+      - type: path
+        include: [file, folder]
+    variadic: true

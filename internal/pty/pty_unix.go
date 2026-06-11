@@ -64,7 +64,7 @@ func writeBashPromptRC() (string, error) {
 	rcPath := filepath.Join(dir, "bashrc")
 	home := os.Getenv("HOME")
 	content := fmt.Sprintf(
-		"if [ -f %s ]; then . %s; fi\nunset PROMPT_COMMAND\nPS1='\\[\\033[1;36m\\]◆\\[\\033[0m\\] \\[\\033[1;92m\\]\\W\\[\\033[0m\\] \\[\\033[1;36m\\]◆\\[\\033[0m\\] '\n",
+		"if [ -f %s ]; then . %s; fi\nunset PROMPT_COMMAND\n__znux_git_branch() {\n  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || return\n  local branch\n  branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null) || return\n  [ -n \"$branch\" ] && printf '(%%s)' \"$branch\"\n}\nPS1='\\[\\033[1;36m\\]◆\\[\\033[0m\\] \\[\\033[1;92m\\]\\W\\[\\033[0m\\]\\[\\033[1;33m\\]$(__znux_git_branch)\\[\\033[0m\\] \\[\\033[1;36m\\]◆\\[\\033[0m\\] '\n",
 		shellQuote(filepath.Join(home, ".bashrc")),
 		shellQuote(filepath.Join(home, ".bashrc")),
 	)
@@ -81,7 +81,7 @@ func writeZshPromptRC() (string, error) {
 	}
 	home := os.Getenv("HOME")
 	content := fmt.Sprintf(
-		"if [ -f %s ]; then source %s; fi\nPROMPT='%%{\\033[1;36m%%}◆%%{\\033[0m%%} %%{\\033[1;92m%%}%%1~%%{\\033[0m%%} %%{\\033[1;36m%%}◆%%{\\033[0m%%} '\nPS1=\"$PROMPT\"\n",
+		"if [ -f %s ]; then source %s; fi\nsetopt prompt_subst\n__znux_git_branch() {\n  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || return\n  local branch\n  branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null) || return\n  [ -n \"$branch\" ] && printf '(%%s)' \"$branch\"\n}\nPROMPT='%%{\\033[1;36m%%}◆%%{\\033[0m%%} %%{\\033[1;92m%%}%%1~%%{\\033[0m%%}%%{\\033[1;33m%%}$(__znux_git_branch)%%{\\033[0m%%} %%{\\033[1;36m%%}◆%%{\\033[0m%%} '\nPS1=\"$PROMPT\"\n",
 		shellQuote(filepath.Join(home, ".zshrc")),
 		shellQuote(filepath.Join(home, ".zshrc")),
 	)

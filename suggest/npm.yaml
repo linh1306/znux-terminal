@@ -1,0 +1,120 @@
+name: npm
+subcommands:
+  - name: install
+    description: "Cài đặt dependency"
+    options:
+      - names: ["-g", "--global"]
+        description: "Cài đặt global"
+      - names: ["--save"]
+        description: "Lưu vào dependencies"
+      - names: ["--save-dev"]
+        description: "Lưu vào devDependencies"
+      - names: ["--save-optional"]
+        description: "Lưu vào optionalDependencies"
+      - names: ["--no-save"]
+        description: "Không lưu"
+      - names: ["-D", "--save-dev"]
+        description: "Lưu vào devDependencies"
+      - names: ["-P", "--save-prod"]
+        description: "Lưu vào dependencies"
+      - names: ["-O", "--save-optional"]
+        description: "Lưu vào optionalDependencies"
+      - names: ["--legacy-peer-deps"]
+        description: "Cách xử lý peer deps kiểu cũ"
+      - names: ["--force"]
+        description: "Buộc cài đặt"
+
+  - name: uninstall
+    description: "Xóa dependency"
+    options:
+      - names: ["-g", "--global"]
+        description: "Gỡ cài đặt global"
+      - names: ["--save"]
+        description: "Xóa khỏi dependencies"
+      - names: ["--save-dev"]
+        description: "Xóa khỏi devDependencies"
+
+  - name: run
+    description: "Chạy script"
+    options:
+      - names: ["--if-present"]
+        description: "Chạy nếu script tồn tại"
+      - names: ["--ignore-scripts"]
+        description: "Bỏ qua script"
+
+  - name: test
+    description: "Chạy test"
+    options:
+      - names: ["--watch"]
+        description: "Chế độ theo dõi"
+
+  - name: start
+    description: "Chạy script start"
+
+  - name: dev
+    description: "Chạy script dev"
+
+  - name: build
+    description: "Chạy script build"
+
+  - name: publish
+    description: "Publish package lên registry"
+    options:
+      - names: ["--access"]
+        description: "Quyền truy cập (public/restricted)"
+      - names: ["--tag"]
+        description: "Tag phân phối"
+      - names: ["--dry-run"]
+        description: "Chạy thử"
+
+  - name: init
+    description: "Khởi tạo package"
+    options:
+      - names: ["-y", "--yes"]
+        description: "Chấp nhận giá trị mặc định"
+      - names: ["-n"]
+        description: "Không chỉnh sửa"
+
+  - name: version
+    description: "Tăng phiên bản"
+    options:
+      - names: ["--major"]
+        description: "Tăng major version"
+      - names: ["--minor"]
+        description: "Tăng minor version"
+      - names: ["--patch"]
+        description: "Tăng patch version"
+      - names: ["--git-tag-version"]
+        description: "Tag Git"
+
+  - name: audit
+    description: "Kiểm tra lỗ hổng bảo mật"
+    options:
+      - names: ["--fix"]
+        description: "Tự động sửa"
+
+  - name: ci
+    description: "Cài đặt sạch"
+    options:
+      - names: ["--legacy-peer-deps"]
+        description: "Cách xử lý peer deps kiểu cũ"
+
+  - name: update
+    description: "Cập nhật package"
+    options:
+      - names: ["-g", "--global"]
+        description: "Cập nhật global"
+
+  - name: list
+    description: "Liệt kê package đã cài"
+    options:
+      - names: ["-g", "--global"]
+        description: "Gói global"
+      - names: ["--depth"]
+        description: "Độ sâu tối đa"
+
+  - name: outdated
+    description: "Kiểm tra package đã lỗi thời"
+    options:
+      - names: ["--depth"]
+        description: "Độ sâu tối đa"

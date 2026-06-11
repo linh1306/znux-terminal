@@ -31,10 +31,10 @@ func (p *Popup) Render(suggestions []specs.Suggestion, selected int, col int) {
 	content := p.buildPopupContent(suggestions, selected)
 
 	seq := make([]byte, 0, 256)
-	seq = append(seq, "\033[s"...)          // Save cursor (at input line)
-	seq = append(seq, "\033[1B"...)         // Move down 1 line (to first popup line)
+	seq = append(seq, "\033[s"...)  // Save cursor (at input line)
+	seq = append(seq, "\033[1B"...) // Move down 1 line (to first popup line)
 	seq = append(seq, content...)
-	seq = append(seq, "\033[u"...)          // Restore cursor to input line
+	seq = append(seq, "\033[u"...) // Restore cursor to input line
 
 	p.output.WriteOp(OutputOp{Data: seq})
 }
@@ -63,23 +63,15 @@ func (p *Popup) buildPopupContent(suggestions []specs.Suggestion, selected int) 
 
 	var result []byte
 
-	// Find max name length for alignment
+	offset, height := visibleRange(len(suggestions), selected, height)
+
+	// Find max visible name length for aligning the description column.
 	maxNameLen := 0
 	for i := 0; i < height; i++ {
-		if len(suggestions[i].Name) > maxNameLen {
-			maxNameLen = len(suggestions[i].Name)
+		nameLen := runeLen(truncateRunes(suggestions[i+offset].Name, 18))
+		if nameLen > maxNameLen {
+			maxNameLen = nameLen
 		}
-	}
-	if maxNameLen > 18 {
-		maxNameLen = 18
-	}
-
-	// Compute the offset into suggestions[] that corresponds to the first
-	// visible line, so we can highlight the correct item when the list scrolls.
-	offset := selected - (selected % p.maxHeight)
-	// Clamp offset so we never read past the end of the array
-	if offset > len(suggestions)-height {
-		offset = len(suggestions) - height
 	}
 
 	for i := 0; i < height; i++ {
@@ -89,10 +81,7 @@ func (p *Popup) buildPopupContent(suggestions []specs.Suggestion, selected int) 
 			result = append(result, "\033[1B\r\033[K"...) // down + home + clear
 		}
 
-		name := suggestions[i+offset].Name
-		if len(name) > 18 {
-			name = name[:18]
-		}
+		name := truncateRunes(suggestions[i+offset].Name, 18)
 
 		bullet := "○ "
 		prefix := "│ "
@@ -106,16 +95,13 @@ func (p *Popup) buildPopupContent(suggestions []specs.Suggestion, selected int) 
 		result = append(result, []byte(bullet)...)
 		result = append(result, []byte(name)...)
 
-		// Show description only for selected item when > 5 options
-		if i+offset == selected && len(suggestions) > 5 {
-			desc := suggestions[i+offset].Description
-			if len(desc) > 40 {
-				desc = desc[:40]
-			}
-			if desc != "" {
-				result = append(result, []byte(" : ")...)
-				result = append(result, []byte(desc)...)
-			}
+		desc := suggestions[i+offset].Description
+		if desc != "" {
+			padding := maxNameLen - runeLen(name) + 2
+			result = append(result, []byte(fmt.Sprintf("%*s", padding, ""))...)
+			result = append(result, "\033[90m"...) // Gray description column
+			result = append(result, []byte(desc)...)
+			result = append(result, "\033[0m"...)
 		}
 	}
 
@@ -127,12 +113,52 @@ func (p *Popup) buildPopupContent(suggestions []specs.Suggestion, selected int) 
 		result = append(result, "\033[1B\r\033[K"...) // down + home + clear
 		result = append(result, "\033[1;36m"...)      // Cyan color
 		result = append(result, "◆ - "...)
-		result = append(result, "\033[1m"...)         // Bold
+		result = append(result, "\033[1m"...) // Bold
 		result = append(result, []byte(fmt.Sprintf("%d/%d quy tắc", selected+1, len(suggestions)))...)
-		result = append(result, "\033[0m"...)          // Reset attributes
+		result = append(result, "\033[0m"...) // Reset attributes
 	}
 
 	return result
+}
+
+func visibleRange(total, selected, height int) (offset, visible int) {
+	if total <= 0 || height <= 0 {
+		return 0, 0
+	}
+	if height > total {
+		height = total
+	}
+	if selected < 0 {
+		selected = 0
+	}
+	if selected >= total {
+		selected = total - 1
+	}
+
+	offset = selected - 1
+	if offset < 0 {
+		offset = 0
+	}
+	if maxOffset := total - height; offset > maxOffset {
+		offset = maxOffset
+	}
+	return offset, height
+}
+
+func truncateRunes(s string, max int) string {
+	if max <= 0 {
+		return ""
+	}
+
+	runes := []rune(s)
+	if len(runes) <= max {
+		return s
+	}
+	return string(runes[:max])
+}
+
+func runeLen(s string) int {
+	return len([]rune(s))
 }
 
 // AcceptAndRedraw erases popup + input line, then reprints with accepted suggestion.

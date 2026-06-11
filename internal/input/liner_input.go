@@ -450,15 +450,11 @@ func (d *Dispatcher) handleSubmitInteractive(line *liner.State) {
 	d.historyPos = len(d.history)
 	d.historySaved = ""
 
-	// Erase the input we echoed as the user typed. Keep the shell prompt to
-	// the left intact; the shell's readline will echo the submitted command
-	// starting from the cursor position after it runs.
-	d.eraseInputDisplay()
-
 	d.ptyWriteString(cmd)
 	d.ptyWrite([]byte{10})
 
 	d.linebuf.Reset()
+	d.screenCol = 0
 }
 
 // eraseInputDisplay removes the locally-echoed input characters from the

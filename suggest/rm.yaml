@@ -1,0 +1,31 @@
+name: rm
+subcommands: []
+options:
+  - names: ["-f", "--force"]
+    description: "Bỏ qua tệp và đối số không tồn tại, không bao giờ hỏi xác nhận"
+  - names: ["-i"]
+    description: "Hỏi xác nhận trước mỗi lần xóa"
+  - names: ["-I"]
+    description: "Hỏi xác nhận một lần trước khi xóa nhiều tệp hoặc xóa đệ quy"
+  - names: ["--interactive"]
+    description: "Hỏi xác nhận theo thời điểm: never, once hoặc always"
+    args:
+      - name: when
+  - names: ["--one-file-system"]
+    description: "Bỏ qua thư mục nằm trên hệ tệp khác khi xóa đệ quy"
+  - names: ["--no-preserve-root"]
+    description: "Không xử lý / theo cách đặc biệt"
+  - names: ["--preserve-root"]
+    description: "Từ chối xóa /, đây là hành vi mặc định"
+  - names: ["-r", "-R", "--recursive"]
+    description: "Xóa thư mục và nội dung bên trong theo đệ quy"
+  - names: ["-d", "--dir"]
+    description: "Xóa thư mục rỗng"
+  - names: ["-v", "--verbose"]
+    description: "Giải thích thao tác đang được thực hiện"
+args:
+  - name: file
+    sources:
+      - type: path
+        include: [folder, file]
+    variadic: true

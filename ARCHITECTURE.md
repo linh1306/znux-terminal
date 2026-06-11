@@ -341,25 +341,21 @@ func GetGenerator(name string) func() []Suggestion
 
 ### YAML Loading
 
-Specs được load từ YAML files trong `specs/data/`:
+Specs được load từ YAML files ngoài binary. Mặc định binary sẽ quét
+`suggest/` nằm cạnh executable, sau đó fallback sang `./suggest`
+khi chạy từ source tree:
 
 ```go
-//go:embed data/*.yaml
-var dataFS embed.FS
-
 func init() {
-    entries, _ := dataFS.ReadDir("data")
-    for _, entry := range entries {
-        data, _ := dataFS.ReadFile("data/" + entry.Name())
-        spec := MustLoadYAML(data)
-        Register(spec.Name, spec)
+    if err := LoadDefaultSpecs(); err != nil {
+        panic(err)
     }
 }
 ```
 
 ### Adding New Command Spec
 
-Tạo file `data/<command>.yaml`:
+Tạo file `suggest/<command>.yaml`:
 
 ```yaml
 name: mycmd

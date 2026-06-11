@@ -1,37 +1,108 @@
 package specs
 
 import (
-	"embed"
 	"fmt"
+	"os"
+	"path/filepath"
+	"sort"
 
 	"gopkg.in/yaml.v3"
 )
 
-//go:embed data/*.yaml
-var dataFS embed.FS
+const specsDirEnv = "ZNUX_SUGGEST_SPECS_DIR"
 
 func init() {
-	entries, err := dataFS.ReadDir("data")
-	if err != nil {
+	if err := LoadDefaultSpecs(); err != nil {
 		panic(err)
 	}
-	for _, entry := range entries {
-		data, err := dataFS.ReadFile("data/" + entry.Name())
+}
+
+// LoadDefaultSpecs loads command specs from an external directory.
+//
+// Search order:
+//   - $ZNUX_SUGGEST_SPECS_DIR
+//   - ./suggest next to the executable
+//   - ./suggest from the current working directory
+func LoadDefaultSpecs() error {
+	for _, dir := range defaultSpecDirs() {
+		loaded, err := LoadDir(dir)
 		if err != nil {
-			panic(err)
+			return err
 		}
-		spec := MustLoadYAML(data)
-		Register(spec.Name, spec)
+		if loaded > 0 {
+			return nil
+		}
 	}
+	return nil
+}
+
+func defaultSpecDirs() []string {
+	dirs := make([]string, 0, 8)
+	if envDir := os.Getenv(specsDirEnv); envDir != "" {
+		dirs = append(dirs, envDir)
+	}
+
+	if exe, err := os.Executable(); err == nil && exe != "" {
+		exeDir := filepath.Dir(exe)
+		dirs = append(dirs, filepath.Join(exeDir, "suggest"))
+	}
+
+	dirs = append(dirs, "suggest")
+
+	return dirs
+}
+
+// LoadDir loads all YAML spec files in dir and returns how many specs were loaded.
+func LoadDir(dir string) (int, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return 0, nil
+		}
+		return 0, fmt.Errorf("read specs dir %q: %w", dir, err)
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Name() < entries[j].Name()
+	})
+
+	loaded := 0
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".yaml" {
+			continue
+		}
+
+		path := filepath.Join(dir, entry.Name())
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return loaded, fmt.Errorf("read spec %q: %w", path, err)
+		}
+		spec, err := LoadYAML(data)
+		if err != nil {
+			return loaded, fmt.Errorf("load spec %q: %w", path, err)
+		}
+		Register(spec.Name, spec)
+		loaded++
+	}
+	return loaded, nil
 }
 
 // YAML intermediate types — mirrors Spec but uses strings for generator/template
 
 type yamlArgSpec struct {
-	Name      string `yaml:"name"`
-	Generator string `yaml:"generator,omitempty"`
-	Variadic  bool   `yaml:"variadic,omitempty"`
-	Template  string `yaml:"template,omitempty"`
+	Name      string           `yaml:"name"`
+	Generator string           `yaml:"generator,omitempty"`
+	Variadic  bool             `yaml:"variadic,omitempty"`
+	Template  string           `yaml:"template,omitempty"`
+	Sources   []yamlSourceSpec `yaml:"sources,omitempty"`
+}
+
+type yamlSourceSpec struct {
+	Type      string   `yaml:"type"`
+	Include   []string `yaml:"include,omitempty"`
+	Protocols []string `yaml:"protocols,omitempty"`
+	State     string   `yaml:"state,omitempty"`
+	Format    string   `yaml:"format,omitempty"`
 }
 
 type yamlOption struct {
@@ -67,12 +138,39 @@ func templateFromString(s string) Template {
 }
 
 func convertArgSpec(y yamlArgSpec) ArgSpec {
+	template := templateFromString(y.Template)
 	return ArgSpec{
 		Name:       y.Name,
 		Generator:  y.Generator,
 		IsVariadic: y.Variadic,
-		Template:   templateFromString(y.Template),
+		Template:   template,
+		Sources:    convertSourceSpecs(y.Sources, template),
 	}
+}
+
+func convertSourceSpecs(ys []yamlSourceSpec, template Template) []SourceSpec {
+	out := make([]SourceSpec, 0, len(ys)+1)
+	for _, y := range ys {
+		out = append(out, SourceSpec{
+			Type:      y.Type,
+			Include:   append([]string(nil), y.Include...),
+			Protocols: append([]string(nil), y.Protocols...),
+			State:     y.State,
+			Format:    y.Format,
+		})
+	}
+
+	switch template {
+	case TemplateFileSystem:
+		out = append(out, SourceSpec{Type: "path", Include: []string{"folder", "file"}})
+	case TemplateFolder:
+		out = append(out, SourceSpec{Type: "path", Include: []string{"folder"}})
+	}
+
+	if len(out) == 0 {
+		return nil
+	}
+	return out
 }
 
 func convertArgSpecs(ys []yamlArgSpec) []ArgSpec {

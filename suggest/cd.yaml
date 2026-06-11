@@ -1,0 +1,8 @@
+name: cd
+subcommands: []
+options: []
+args:
+  - name: directory
+    sources:
+      - type: path
+        include: [folder]

@@ -1,0 +1,1537 @@
+name: git
+subcommands:
+  - name: add
+    description: "Thêm nội dung file vào index"
+    options:
+      - names: ["-A", "--all"]
+        description: "Thêm tất cả file"
+      - names: ["-p", "--patch"]
+        description: "Chọn hunk theo cách tương tác"
+      - names: ["-n", "--dry-run"]
+        description: "Hiển thị những gì sẽ được thêm"
+      - names: ["-u", "--update"]
+        description: "Cập nhật file đã được theo dõi"
+      - names: ["-f", "--force"]
+        description: "Cho phép thêm file bị ignore"
+      - names: ["-i", "--interactive"]
+        description: "Chế độ tương tác"
+      - names: ["-e", "--edit"]
+        description: "Mở diff trong editor"
+      - names: ["--chmod"]
+        description: "Ghi đè mode file (+x hoặc -x)"
+    args:
+      - name: pathspec
+        sources:
+          - type: path
+            include: [folder, file]
+  - name: status
+    description: "Hiển thị trạng thái working tree"
+    options:
+      - names: ["-s", "--short"]
+        description: "Xuất ở định dạng ngắn"
+      - names: ["-b", "--branch"]
+        description: "Hiển thị nhánh và thông tin tracking"
+      - names: ["-u", "--untracked-files"]
+        description: "Hiển thị file chưa được theo dõi"
+      - names: ["--porcelain"]
+        description: "Output máy đọc được"
+      - names: ["--ignored"]
+        description: "Hiển thị file bị ignore"
+
+  - name: commit
+    description: "Ghi nhận thay đổi vào repository"
+    options:
+      - names: ["-m", "--message"]
+        description: "Thông điệp commit"
+        args:
+          - name: message
+      - names: ["-a", "--all"]
+        description: "Tự động stage file đã sửa"
+      - names: ["--amend"]
+        description: "Sửa commit trước đó"
+      - names: ["--no-edit"]
+        description: "Dùng thông điệp commit đã chọn mà không sửa"
+      - names: ["-C", "--reuse-message"]
+        description: "Dùng lại thông điệp commit"
+        args:
+          - name: commit
+            generator: git:branches
+      - names: ["--allow-empty"]
+        description: "Cho phép commit rỗng"
+      - names: ["--allow-empty-message"]
+        description: "Cho phép thông điệp commit rỗng"
+      - names: ["-s", "--signoff"]
+        description: "Thêm Signed-off-by"
+      - names: ["--no-gpg-sign"]
+        description: "Không ký GPG cho commit"
+      - names: ["-n", "--no-verify"]
+        description: "Bỏ qua hook pre-commit"
+      - names: ["--fixup"]
+        description: "Tạo commit fixup"
+        args:
+          - name: commit
+            generator: git:branches
+      - names: ["--squash"]
+        description: "Tạo commit squash"
+        args:
+          - name: commit
+            generator: git:branches
+
+  - name: push
+    description: "Cập nhật ref trên remote"
+    options:
+      - names: ["-u", "--set-upstream"]
+        description: "Đặt upstream cho nhánh"
+      - names: ["-f", "--force"]
+        description: "Buộc push"
+      - names: ["--force-with-lease"]
+        description: "Buộc push nếu remote khớp kỳ vọng"
+      - names: ["--tags"]
+        description: "Push tất cả tag"
+      - names: ["--all"]
+        description: "Push tất cả nhánh"
+      - names: ["-d", "--delete"]
+        description: "Xóa ref trên remote"
+      - names: ["--dry-run"]
+        description: "Hiển thị những gì sẽ được push"
+      - names: ["-n"]
+        description: "Chạy thử"
+      - names: ["--follow-tags"]
+        description: "Push các annotated tag có thể tới được"
+      - names: ["--no-verify"]
+        description: "Bỏ qua hook pre-push"
+      - names: ["--atomic"]
+        description: "Yêu cầu transaction atomic"
+    args:
+      - name: remote
+        generator: git:remotes
+      - name: branch
+        generator: git:branches
+
+  - name: pull
+    description: "Fetch và tích hợp với repository khác"
+    options:
+      - names: ["--rebase"]
+        description: "Rebase thay vì merge"
+      - names: ["--no-rebase"]
+        description: "Merge thay vì rebase"
+      - names: ["--no-commit"]
+        description: "Thực hiện merge nhưng không commit"
+      - names: ["--ff-only"]
+        description: "Chỉ fast-forward"
+      - names: ["--all"]
+        description: "Fetch tất cả remote"
+      - names: ["--tags"]
+        description: "Fetch tất cả tag"
+      - names: ["--prune"]
+        description: "Xóa nhánh remote đã bị xóa"
+      - names: ["--squash"]
+        description: "Squash thành một commit"
+      - names: ["-v", "--verbose"]
+        description: "Output chi tiết"
+    args:
+      - name: remote
+        generator: git:remotes
+      - name: branch
+        generator: git:branches
+
+  - name: fetch
+    description: "Tải object và ref từ repository khác"
+    options:
+      - names: ["--all"]
+        description: "Fetch tất cả remote"
+      - names: ["--prune"]
+        description: "Xóa nhánh remote đã bị xóa"
+      - names: ["--tags"]
+        description: "Fetch tất cả tag"
+      - names: ["-f", "--force"]
+        description: "Buộc fetch"
+      - names: ["-v", "--verbose"]
+        description: "Xuất chi tiết"
+      - names: ["--depth"]
+        description: "Tăng độ sâu fetch"
+        args:
+          - name: depth
+      - names: ["--unshallow"]
+        description: "Chuyển shallow thành đầy đủ"
+      - names: ["--dry-run"]
+        description: "Hiển thị những gì sẽ được fetch"
+    args:
+      - name: remote
+        generator: git:remotes
+
+  - name: checkout
+    description: "Chuyển nhánh hoặc khôi phục file trong working tree"
+    options:
+      - names: ["-b"]
+        description: "Tạo và chuyển sang nhánh mới"
+        args:
+          - name: branch
+      - names: ["-B"]
+        description: "Tạo/reset và chuyển sang một nhánh"
+        args:
+          - name: branch
+      - names: ["-t", "--track"]
+        description: "Thiết lập chế độ tracking"
+      - names: ["--orphan"]
+        description: "Tạo nhánh orphan"
+        args:
+          - name: branch
+      - names: ["-f", "--force"]
+        description: "Buộc checkout"
+      - names: ["-p", "--patch"]
+        description: "Chọn hunk theo cách tương tác"
+      - names: ["--"]
+        description: "Xem các đối số còn lại là đường dẫn file"
+    args:
+      - name: branch
+        generator: git:branches
+        variadic: true
+
+  - name: switch
+    description: "Chuyển nhánh"
+    options:
+      - names: ["-c", "--create"]
+        description: "Tạo và chuyển sang nhánh mới"
+        args:
+          - name: branch
+      - names: ["-C", "--force-create"]
+        description: "Tạo/reset và chuyển sang một nhánh"
+        args:
+          - name: branch
+      - names: ["-t", "--track"]
+        description: "Thiết lập tracking"
+      - names: ["--orphan"]
+        description: "Tạo nhánh orphan"
+        args:
+          - name: branch
+      - names: ["-d", "--detach"]
+        description: "Tách HEAD"
+      - names: ["-f", "--force"]
+        description: "Buộc chuyển nhánh"
+      - names: ["--discard-changes"]
+        description: "Loại bỏ thay đổi local"
+    args:
+      - name: branch
+        generator: git:branches
+
+  - name: branch
+    description: "Liệt kê, tạo hoặc xóa nhánh"
+    options:
+      - names: ["-a", "--all"]
+        description: "Liệt kê cả nhánh remote và local"
+      - names: ["-r", "--remotes"]
+        description: "Liệt kê nhánh remote"
+      - names: ["-d", "--delete"]
+        description: "Xóa nhánh"
+      - names: ["-D"]
+        description: "Buộc xóa nhánh"
+      - names: ["-m", "--move"]
+        description: "Đổi tên nhánh"
+      - names: ["-M"]
+        description: "Buộc đổi tên nhánh"
+      - names: ["-c", "--copy"]
+        description: "Sao chép nhánh"
+      - names: ["-v", "--verbose"]
+        description: "Hiển thị hash commit và subject"
+      - names: ["--merged"]
+        description: "Liệt kê nhánh đã merge vào HEAD"
+      - names: ["--no-merged"]
+        description: "Liệt kê nhánh chưa merge vào HEAD"
+      - names: ["--contains"]
+        description: "Liệt kê nhánh chứa commit"
+        args:
+          - name: commit
+      - names: ["-u", "--set-upstream-to"]
+        description: "Đặt upstream"
+        args:
+          - name: upstream
+      - names: ["--unset-upstream"]
+        description: "Xóa cấu hình upstream"
+      - names: ["--sort"]
+        description: "Thứ tự sắp xếp"
+        args:
+          - name: key
+    args:
+      - name: branch
+        generator: git:branches
+
+  - name: merge
+    description: "Kết hợp hai hoặc nhiều lịch sử phát triển"
+    options:
+      - names: ["--no-ff"]
+        description: "Tạo merge commit kể cả khi có thể fast-forward"
+      - names: ["--ff-only"]
+        description: "Chỉ fast-forward"
+      - names: ["--squash"]
+        description: "Squash tất cả commit thành một"
+      - names: ["--abort"]
+        description: "Hủy merge hiện tại"
+      - names: ["--continue"]
+        description: "Tiếp tục sau khi resolve conflict"
+      - names: ["-m"]
+        description: "Thông điệp commit"
+        args:
+          - name: message
+      - names: ["--strategy"]
+        description: "Chiến lược merge"
+        args:
+          - name: strategy
+      - names: ["-v", "--verbose"]
+        description: "Xuất chi tiết"
+      - names: ["--stat"]
+        description: "Hiển thị diffstat"
+      - names: ["--no-stat"]
+        description: "Không hiển thị diffstat"
+      - names: ["--log"]
+        description: "Bao gồm thông điệp log"
+    args:
+      - name: branch
+        generator: git:branches
+
+  - name: rebase
+    description: "Áp dụng lại commit lên một base khác"
+    options:
+      - names: ["-i", "--interactive"]
+        description: "Rebase tương tác"
+      - names: ["--continue"]
+        description: "Tiếp tục sau khi resolve conflict"
+      - names: ["--abort"]
+        description: "Hủy rebase"
+      - names: ["--skip"]
+        description: "Bỏ qua patch hiện tại"
+      - names: ["--quit"]
+        description: "Hủy nhưng giữ HEAD"
+      - names: ["--autosquash"]
+        description: "Tự động squash commit fixup"
+      - names: ["--autostash"]
+        description: "Stash trước khi rebase và pop sau đó"
+      - names: ["--no-autostash"]
+        description: "Không autostash"
+      - names: ["--onto"]
+        description: "Rebase lên"
+        args:
+          - name: newbase
+            generator: git:branches
+      - names: ["-m", "--merge"]
+        description: "Dùng chiến lược merge"
+      - names: ["--strategy"]
+        description: "Dùng chiến lược merge được chỉ định"
+        args:
+          - name: strategy
+      - names: ["--exec"]
+        description: "Thực thi lệnh sau mỗi commit"
+        args:
+          - name: cmd
+      - names: ["--root"]
+        description: "Rebase từ root"
+      - names: ["--keep-base"]
+        description: "Giữ commit base"
+    args:
+      - name: branch
+        generator: git:branches
+
+  - name: cherry-pick
+    description: "Áp dụng thay đổi được giới thiệu bởi các commit hiện có"
+    options:
+      - names: ["-e", "--edit"]
+        description: "Sửa thông điệp commit"
+      - names: ["-n", "--no-commit"]
+        description: "Áp dụng thay đổi mà không commit"
+      - names: ["-x"]
+        description: "Thêm thông tin commit nguồn vào thông điệp"
+      - names: ["-s", "--signoff"]
+        description: "Thêm Signed-off-by"
+      - names: ["--continue"]
+        description: "Tiếp tục sau khi resolve conflict"
+      - names: ["--abort"]
+        description: "Hủy cherry-pick"
+      - names: ["--quit"]
+        description: "Quên thao tác hiện tại"
+      - names: ["--skip"]
+        description: "Bỏ qua commit hiện tại"
+      - names: ["-m", "--mainline"]
+        description: "Số parent mainline"
+        args:
+          - name: parent-number
+      - names: ["--strategy"]
+        description: "Chiến lược merge"
+        args:
+          - name: strategy
+    args:
+      - name: commit
+        generator: git:branches
+        variadic: true
+
+  - name: log
+    description: "Hiển thị log commit"
+    options:
+      - names: ["--oneline"]
+        description: "Mỗi commit một dòng"
+      - names: ["--graph"]
+        description: "Hiển thị graph ASCII"
+      - names: ["-n", "--max-count"]
+        description: "Giới hạn số commit"
+        args:
+          - name: number
+      - names: ["--author"]
+        description: "Lọc theo tác giả"
+        args:
+          - name: author
+      - names: ["--since", "--after"]
+        description: "Hiển thị commit sau ngày"
+        args:
+          - name: date
+      - names: ["--until", "--before"]
+        description: "Hiển thị commit trước ngày"
+        args:
+          - name: date
+      - names: ["--grep"]
+        description: "Lọc theo thông điệp commit"
+        args:
+          - name: pattern
+      - names: ["-p", "--patch"]
+        description: "Hiển thị patch cho từng commit"
+      - names: ["--stat"]
+        description: "Hiển thị stats"
+      - names: ["--name-only"]
+        description: "Chỉ hiển thị tên file"
+      - names: ["--name-status"]
+        description: "Hiển thị tên file và trạng thái"
+      - names: ["--abbrev-commit"]
+        description: "Rút gọn hash commit"
+      - names: ["--decorate"]
+        description: "Hiển thị tên ref"
+      - names: ["--all"]
+        description: "Hiển thị tất cả nhánh"
+      - names: ["--follow"]
+        description: "Theo dõi đổi tên file"
+      - names: ["--merges"]
+        description: "Chỉ hiển thị commit merge"
+      - names: ["--no-merges"]
+        description: "Bỏ qua commit merge"
+      - names: ["--first-parent"]
+        description: "Chỉ theo parent đầu tiên"
+      - names: ["--reverse"]
+        description: "Hiển thị theo thứ tự ngược"
+      - names: ["-S"]
+        description: "Tìm thay đổi đối với chuỗi"
+        args:
+          - name: string
+      - names: ["--format", "--pretty"]
+        description: "Định dạng pretty-print"
+        args:
+          - name: format
+    args:
+      - name: revision
+
+  - name: diff
+    description: "Hiển thị thay đổi giữa commit, giữa commit và working tree, v.v."
+    options:
+      - names: ["--staged", "--cached"]
+        description: "Hiển thị thay đổi đã stage"
+      - names: ["--name-only"]
+        description: "Chỉ hiển thị tên file đã thay đổi"
+      - names: ["--name-status"]
+        description: "Hiển thị tên và trạng thái"
+      - names: ["--stat"]
+        description: "Hiển thị diffstat"
+      - names: ["-p", "--patch"]
+        description: "Tạo patch"
+      - names: ["--no-patch", "-s"]
+        description: "Ẩn output patch"
+      - names: ["-w", "--ignore-all-space"]
+        description: "Bỏ qua khoảng trắng"
+      - names: ["-b", "--ignore-space-change"]
+        description: "Bỏ qua thay đổi khoảng trắng"
+      - names: ["--word-diff"]
+        description: "Hiển thị diff theo từ"
+      - names: ["--color-words"]
+        description: "Tô sáng thay đổi theo từ"
+      - names: ["--check"]
+        description: "Kiểm tra lỗi khoảng trắng"
+      - names: ["--shortstat"]
+        description: "Chỉ shortstat"
+      - names: ["-U", "--unified"]
+        description: "Số dòng ngữ cảnh"
+        args:
+          - name: n
+    args:
+      - name: commit
+        generator: git:branches
+      - name: commit
+        generator: git:branches
+
+  - name: stash
+    description: "Stash thay đổi trong working directory đang bẩn"
+    subcommands:
+      - name: push
+        description: "Lưu thay đổi vào stash"
+        options:
+          - names: ["-m", "--message"]
+            description: "Thông điệp stash"
+            args:
+              - name: message
+          - names: ["-u", "--include-untracked"]
+            description: "Bao gồm file chưa theo dõi"
+          - names: ["-a", "--all"]
+            description: "Bao gồm file bị ignore"
+          - names: ["-p", "--patch"]
+            description: "Chọn tương tác"
+          - names: ["-k", "--keep-index"]
+            description: "Giữ index"
+        args:
+          - name: pathspec
+            sources:
+              - type: path
+                include: [folder, file]
+      - name: pop
+        description: "Áp dụng và xóa stash"
+        options:
+          - names: ["--index"]
+            description: "Thử khôi phục index"
+          - names: ["-q", "--quiet"]
+            description: "Im lặng"
+      - name: apply
+        description: "Áp dụng stash mà không xóa"
+        options:
+          - names: ["--index"]
+            description: "Khôi phục trạng thái index"
+      - name: list
+        description: "Liệt kê tất cả stash"
+      - name: drop
+        description: "Xóa stash"
+        args:
+          - name: stash
+      - name: show
+        description: "Hiển thị diff của stash"
+        options:
+          - names: ["-p", "--patch"]
+            description: "Hiển thị patch"
+          - names: ["--stat"]
+            description: "Hiển thị stat"
+        args:
+          - name: stash
+      - name: clear
+        description: "Xóa tất cả stash"
+      - name: branch
+        description: "Tạo nhánh từ stash"
+        args:
+          - name: branch
+          - name: stash
+
+  - name: reset
+    description: "Reset HEAD hiện tại về trạng thái được chỉ định"
+    options:
+      - names: ["--soft"]
+        description: "Giữ thay đổi ở trạng thái staged"
+      - names: ["--mixed"]
+        description: "Giữ thay đổi ở trạng thái unstaged (mặc định)"
+      - names: ["--hard"]
+        description: "Loại bỏ tất cả thay đổi"
+      - names: ["--merge"]
+        description: "Reset và giữ thay đổi chưa commit"
+      - names: ["--keep"]
+        description: "Reset nhưng giữ thay đổi local"
+      - names: ["-N", "--intent-to-add"]
+        description: "Ghi nhận ý định thêm"
+      - names: ["-p", "--patch"]
+        description: "Chọn tương tác"
+      - names: ["-q", "--quiet"]
+        description: "Im lặng"
+    args:
+      - name: commit
+        generator: git:branches
+      - name: pathspec
+        sources:
+          - type: path
+            include: [folder, file]
+  - name: restore
+    description: "Khôi phục file trong working tree"
+    options:
+      - names: ["-s", "--source"]
+        description: "Khôi phục từ nguồn"
+        args:
+          - name: tree
+      - names: ["-S", "--staged"]
+        description: "Khôi phục nội dung đã stage"
+      - names: ["-W", "--worktree"]
+        description: "Khôi phục working tree"
+      - names: ["-p", "--patch"]
+        description: "Chọn tương tác"
+      - names: ["--ours"]
+        description: "Dùng phiên bản ours khi conflict"
+      - names: ["--theirs"]
+        description: "Dùng phiên bản theirs khi conflict"
+    args:
+      - name: pathspec
+        sources:
+          - type: path
+            include: [folder, file]
+        variadic: true
+
+  - name: remote
+    description: "Quản lý tập repository được theo dõi"
+    subcommands:
+      - name: add
+        description: "Thêm remote"
+        options:
+          - names: ["-f", "--fetch"]
+            description: "Fetch sau khi thêm"
+          - names: ["-t"]
+            description: "Theo dõi nhánh"
+            args:
+              - name: branch
+        args:
+          - name: name
+          - name: url
+      - name: remove
+        description: "Xóa remote"
+        args:
+          - name: name
+            generator: git:remotes
+      - name: rename
+        description: "Đổi tên remote"
+        args:
+          - name: old
+            generator: git:remotes
+          - name: new
+      - name: set-url
+        description: "Đổi URL remote"
+        options:
+          - names: ["--push"]
+            description: "Đổi URL push"
+          - names: ["--add"]
+            description: "Thêm URL thay vì thay thế"
+          - names: ["--delete"]
+            description: "Xóa URL khớp"
+        args:
+          - name: name
+            generator: git:remotes
+          - name: newurl
+      - name: get-url
+        description: "Lấy URL remote"
+        options:
+          - names: ["--push"]
+            description: "Hiển thị URL push"
+          - names: ["--all"]
+            description: "Hiển thị tất cả URL"
+        args:
+          - name: name
+            generator: git:remotes
+      - name: show
+        description: "Hiển thị thông tin về remote"
+        args:
+          - name: name
+            generator: git:remotes
+      - name: prune
+        description: "Xóa nhánh remote-tracking đã cũ"
+        options:
+          - names: ["-n", "--dry-run"]
+            description: "Chạy thử"
+        args:
+          - name: name
+            generator: git:remotes
+      - name: update
+        description: "Fetch cập nhật cho remote"
+        args:
+          - name: group
+    options:
+      - names: ["-v", "--verbose"]
+        description: "Hiển thị URL remote"
+
+  - name: tag
+    description: "Tạo, liệt kê, xóa hoặc xác minh tag"
+    options:
+      - names: ["-a", "--annotate"]
+        description: "Tạo annotated tag"
+      - names: ["-d", "--delete"]
+        description: "Xóa tag"
+      - names: ["-m", "--message"]
+        description: "Thông điệp tag"
+        args:
+          - name: message
+      - names: ["-f", "--force"]
+        description: "Buộc thay thế tag hiện có"
+      - names: ["-l", "--list"]
+        description: "Liệt kê tag"
+      - names: ["-v", "--verify"]
+        description: "Xác minh chữ ký GPG"
+      - names: ["--sort"]
+        description: "Thứ tự sắp xếp"
+        args:
+          - name: key
+      - names: ["--contains"]
+        description: "Chỉ các tag chứa commit"
+        args:
+          - name: commit
+      - names: ["-n"]
+        description: "In các dòng annotation"
+        args:
+          - name: num
+    args:
+      - name: tagname
+
+  - name: show
+    description: "Hiển thị nhiều loại object"
+    options:
+      - names: ["--stat"]
+        description: "Hiển thị diffstat"
+      - names: ["--name-only"]
+        description: "Chỉ hiển thị tên file"
+      - names: ["--name-status"]
+        description: "Hiển thị tên và trạng thái"
+      - names: ["-p", "--patch"]
+        description: "Hiển thị patch"
+      - names: ["--no-patch", "-s"]
+        description: "Ẩn patch"
+      - names: ["--format", "--pretty"]
+        description: "Định dạng output"
+        args:
+          - name: format
+      - names: ["--abbrev-commit"]
+        description: "Rút gọn hash commit"
+    args:
+      - name: object
+        generator: git:branches
+
+  - name: blame
+    description: "Hiển thị revision và tác giả sửa từng dòng gần nhất"
+    options:
+      - names: ["-L"]
+        description: "Chỉ annotate khoảng dòng được chỉ định"
+        args:
+          - name: range
+      - names: ["-w"]
+        description: "Bỏ qua thay đổi khoảng trắng"
+      - names: ["-M"]
+        description: "Phát hiện dòng đã di chuyển"
+      - names: ["-C"]
+        description: "Phát hiện dòng đã sao chép"
+      - names: ["-e", "--show-email"]
+        description: "Hiển thị email tác giả"
+      - names: ["--date"]
+        description: "Định dạng ngày"
+        args:
+          - name: format
+      - names: ["-s"]
+        description: "Ẩn tên tác giả"
+      - names: ["-n", "--show-number"]
+        description: "Hiển thị số dòng gốc"
+      - names: ["-p", "--porcelain"]
+        description: "Output máy đọc được"
+    args:
+      - name: file
+        sources:
+          - type: path
+            include: [folder, file]
+  - name: bisect
+    description: "Dùng tìm kiếm nhị phân để tìm commit gây lỗi"
+    subcommands:
+      - name: start
+        description: "Bắt đầu phiên bisect"
+      - name: good
+        description: "Đánh dấu commit là tốt"
+        args:
+          - name: commit
+      - name: bad
+        description: "Đánh dấu commit là lỗi"
+        args:
+          - name: commit
+      - name: reset
+        description: "Reset trạng thái bisect"
+      - name: log
+        description: "Hiển thị log bisect"
+      - name: skip
+        description: "Bỏ qua commit"
+        args:
+          - name: commit
+            variadic: true
+      - name: run
+        description: "Tự động hóa bisect bằng script"
+        args:
+          - name: script
+      - name: visualize
+        description: "Mở gitk cho trạng thái bisect"
+      - name: replay
+        description: "Phát lại log bisect"
+        args:
+          - name: logfile
+
+  - name: submodule
+    description: "Khởi tạo, cập nhật hoặc kiểm tra submodule"
+    subcommands:
+      - name: add
+        description: "Thêm submodule"
+        options:
+          - names: ["-b", "--branch"]
+            description: "Nhánh cần track"
+            args:
+              - name: branch
+          - names: ["-f", "--force"]
+            description: "Buộc thêm"
+          - names: ["--name"]
+            description: "Tên logic"
+            args:
+              - name: name
+          - names: ["--depth"]
+            description: "Độ sâu clone shallow"
+            args:
+              - name: depth
+        args:
+          - name: repository
+          - name: path
+      - name: init
+        description: "Khởi tạo submodule"
+        args:
+          - name: path
+            variadic: true
+      - name: update
+        description: "Cập nhật submodule"
+        options:
+          - names: ["--init"]
+            description: "Khởi tạo trước khi cập nhật"
+          - names: ["--recursive"]
+            description: "Đệ quy vào submodule lồng nhau"
+          - names: ["--remote"]
+            description: "Dùng nhánh tracking remote"
+          - names: ["--force"]
+            description: "Loại bỏ thay đổi local"
+          - names: ["--rebase"]
+            description: "Rebase commit local"
+          - names: ["--merge"]
+            description: "Merge thay đổi remote"
+          - names: ["--depth"]
+            description: "Độ sâu clone shallow"
+            args:
+              - name: depth
+        args:
+          - name: path
+            variadic: true
+      - name: status
+        description: "Hiển thị trạng thái submodule"
+        options:
+          - names: ["--recursive"]
+            description: "Đệ quy vào submodule lồng nhau"
+          - names: ["--cached"]
+            description: "Dùng index thay vì HEAD"
+      - name: foreach
+        description: "Chạy lệnh trong từng submodule"
+        options:
+          - names: ["--recursive"]
+            description: "Đệ quy vào submodule lồng nhau"
+        args:
+          - name: command
+      - name: sync
+        description: "Đồng bộ URL submodule"
+        options:
+          - names: ["--recursive"]
+            description: "Đệ quy vào submodule lồng nhau"
+        args:
+          - name: path
+            variadic: true
+      - name: deinit
+        description: "Hủy đăng ký submodule"
+        options:
+          - names: ["-f", "--force"]
+            description: "Buộc deinit"
+          - names: ["--all"]
+            description: "Hủy đăng ký tất cả"
+        args:
+          - name: path
+            variadic: true
+      - name: absorbgitdirs
+        description: "Di chuyển thư mục .git của submodule vào superproject"
+      - name: set-branch
+        description: "Đặt nhánh cho submodule"
+        options:
+          - names: ["-b", "--branch"]
+            description: "Tên nhánh"
+            args:
+              - name: branch
+          - names: ["-d", "--default"]
+            description: "Xóa cấu hình nhánh"
+        args:
+          - name: path
+      - name: set-url
+        description: "Đặt URL cho submodule"
+        args:
+          - name: path
+          - name: newurl
+      - name: summary
+        description: "Hiển thị tóm tắt commit"
+        options:
+          - names: ["--cached"]
+            description: "Dùng index"
+          - names: ["-n"]
+            description: "Giới hạn commit"
+            args:
+              - name: n
+        args:
+          - name: commit
+    options:
+      - names: ["-q", "--quiet"]
+        description: "Im lặng"
+
+  - name: clean
+    description: "Xóa file chưa theo dõi khỏi working tree"
+    options:
+      - names: ["-n", "--dry-run"]
+        description: "Hiển thị những gì sẽ bị xóa"
+      - names: ["-d"]
+        description: "Xóa cả thư mục"
+      - names: ["-f", "--force"]
+        description: "Buộc clean"
+      - names: ["-x"]
+        description: "Xóa cả file bị ignore"
+      - names: ["-X"]
+        description: "Chỉ xóa file bị ignore"
+      - names: ["-i", "--interactive"]
+        description: "Chế độ tương tác"
+      - names: ["-q", "--quiet"]
+        description: "Im lặng"
+      - names: ["-e"]
+        description: "Mẫu loại trừ"
+        args:
+          - name: pattern
+    args:
+      - name: pathspec
+        sources:
+          - type: path
+            include: [folder, file]
+  - name: config
+    description: "Lấy và đặt tùy chọn repository hoặc global"
+    options:
+      - names: ["--global"]
+        description: "Dùng config global"
+      - names: ["--local"]
+        description: "Dùng config repository local"
+      - names: ["--system"]
+        description: "Dùng config hệ thống"
+      - names: ["--list", "-l"]
+        description: "Liệt kê toàn bộ config"
+      - names: ["--get"]
+        description: "Lấy giá trị cho key"
+        args:
+          - name: name
+      - names: ["--unset"]
+        description: "Xóa biến"
+        args:
+          - name: name
+      - names: ["--add"]
+        description: "Thêm mà không thay đổi giá trị hiện có"
+        args:
+          - name: name
+      - names: ["--edit"]
+        description: "Mở config trong editor"
+      - names: ["--type"]
+        description: "Kiểu giá trị"
+        args:
+          - name: type
+      - names: ["-e"]
+        description: "Mở config trong editor"
+    args:
+      - name: name
+      - name: value
+
+  - name: clone
+    description: "Clone repository vào thư mục mới"
+    options:
+      - names: ["--depth"]
+        description: "Độ sâu clone shallow"
+        args:
+          - name: depth
+      - names: ["-b", "--branch"]
+        description: "Nhánh cần clone"
+        args:
+          - name: branch
+      - names: ["--single-branch"]
+        description: "Chỉ clone một nhánh"
+      - names: ["--no-single-branch"]
+        description: "Clone tất cả nhánh"
+      - names: ["--recursive", "--recurse-submodules"]
+        description: "Clone cả submodule"
+      - names: ["--bare"]
+        description: "Tạo repository bare"
+      - names: ["--mirror"]
+        description: "Mirror repository"
+      - names: ["--origin", "-o"]
+        description: "Tên remote"
+        args:
+          - name: name
+      - names: ["--local", "-l"]
+        description: "Dùng hệ tệp local"
+      - names: ["-v", "--verbose"]
+        description: "Xuất chi tiết"
+      - names: ["-q", "--quiet"]
+        description: "Im lặng"
+      - names: ["--filter"]
+        description: "Bộ lọc partial clone"
+        args:
+          - name: filter
+      - names: ["--jobs", "-j"]
+        description: "Số tác vụ song song"
+        args:
+          - name: n
+    args:
+      - name: repository
+      - name: directory
+
+  - name: init
+    description: "Tạo repository Git rỗng"
+    options:
+      - names: ["-b", "--initial-branch"]
+        description: "Tên nhánh ban đầu"
+        args:
+          - name: name
+      - names: ["--bare"]
+        description: "Tạo repository bare"
+      - names: ["--shared"]
+        description: "Chia sẻ repository"
+      - names: ["--template"]
+        description: "Thư mục template"
+        args:
+          - name: dir
+            sources:
+              - type: path
+                include: [folder]
+      - names: ["-q", "--quiet"]
+        description: "Im lặng"
+    args:
+      - name: directory
+
+  - name: rm
+    description: "Xóa file khỏi working tree và index"
+    options:
+      - names: ["--cached"]
+        description: "Chỉ xóa khỏi index"
+      - names: ["-f", "--force"]
+        description: "Buộc xóa"
+      - names: ["-r"]
+        description: "Xóa đệ quy"
+      - names: ["-n", "--dry-run"]
+        description: "Chạy thử"
+      - names: ["-q", "--quiet"]
+        description: "Im lặng"
+    args:
+      - name: pathspec
+        sources:
+          - type: path
+            include: [folder, file]
+        variadic: true
+
+  - name: mv
+    description: "Di chuyển hoặc đổi tên file, thư mục hoặc symlink"
+    options:
+      - names: ["-f", "--force"]
+        description: "Buộc đổi tên"
+      - names: ["-n", "--dry-run"]
+        description: "Chạy thử"
+      - names: ["-k"]
+        description: "Bỏ qua lỗi"
+      - names: ["-v", "--verbose"]
+        description: "Xuất chi tiết"
+    args:
+      - name: source
+        sources:
+          - type: path
+            include: [folder, file]
+      - name: destination
+
+  - name: apply
+    description: "Áp dụng patch vào file"
+    options:
+      - names: ["--stat"]
+        description: "Hiển thị diffstat"
+      - names: ["--check"]
+        description: "Kiểm tra patch có áp dụng được không"
+      - names: ["--index"]
+        description: "Áp dụng vào index và working tree"
+      - names: ["--cached"]
+        description: "Chỉ áp dụng vào index"
+      - names: ["-R", "--reverse"]
+        description: "Áp dụng patch theo chiều ngược"
+      - names: ["--reject"]
+        description: "Để lại hunk bị từ chối trong file .rej"
+      - names: ["-v", "--verbose"]
+        description: "Xuất chi tiết"
+      - names: ["--ignore-space-change", "-l"]
+        description: "Bỏ qua khoảng trắng"
+      - names: ["--whitespace"]
+        description: "Cách xử lý khoảng trắng"
+        args:
+          - name: action
+      - names: ["--directory"]
+        description: "Thêm tiền tố đường dẫn"
+        args:
+          - name: root
+    args:
+      - name: patch
+        sources:
+          - type: path
+            include: [folder, file]
+        variadic: true
+
+  - name: am
+    description: "Áp dụng chuỗi patch từ mailbox"
+    options:
+      - names: ["--continue", "-r", "--resolved"]
+        description: "Tiếp tục sau conflict"
+      - names: ["--abort"]
+        description: "Hủy và khôi phục nhánh gốc"
+      - names: ["--skip"]
+        description: "Bỏ qua hiện tại patch"
+      - names: ["-3", "--3way"]
+        description: "Dùng merge 3-way"
+      - names: ["-s", "--signoff"]
+        description: "Thêm Signed-off-by"
+      - names: ["--no-verify"]
+        description: "Bỏ qua hook commit"
+      - names: ["-q", "--quiet"]
+        description: "Im lặng"
+      - names: ["-k", "--keep"]
+        description: "Giữ subject email"
+      - names: ["--keep-cr"]
+        description: "Giữ CR trong patch"
+    args:
+      - name: mbox
+        sources:
+          - type: path
+            include: [folder, file]
+  - name: format-patch
+    description: "Chuẩn bị patch để gửi qua email"
+    options:
+      - names: ["-n", "--numbered"]
+        description: "Đặt tên output theo định dạng [PATCH n/m]"
+      - names: ["-N", "--no-numbered"]
+        description: "Đặt tên output theo định dạng [PATCH]"
+      - names: ["-o", "--output-directory"]
+        description: "Thư mục output"
+        args:
+          - name: dir
+            sources:
+              - type: path
+                include: [folder]
+      - names: ["-s", "--signoff"]
+        description: "Thêm Signed-off-by"
+      - names: ["--cover-letter"]
+        description: "Tạo cover letter"
+      - names: ["--to"]
+        description: "Thêm header To"
+        args:
+          - name: email
+      - names: ["--cc"]
+        description: "Thêm header Cc"
+        args:
+          - name: email
+      - names: ["--subject-prefix"]
+        description: "Tiền tố chủ đề"
+        args:
+          - name: prefix
+      - names: ["--stdout"]
+        description: "In ra stdout"
+      - names: ["--base"]
+        description: "Ghi nhận commit base"
+        args:
+          - name: commit
+    args:
+      - name: revision range
+
+  - name: shortlog
+    description: "Tóm tắt output git log"
+    options:
+      - names: ["-s", "--summary"]
+        description: "Ẩn mô tả commit"
+      - names: ["-n", "--numbered"]
+        description: "Sắp xếp theo số commit"
+      - names: ["-e", "--email"]
+        description: "Hiển thị email của từng tác giả"
+      - names: ["-g", "--walk-reflogs"]
+        description: "Hiển thị entry reflog"
+
+  - name: grep
+    description: "In các dòng khớp mẫu"
+    options:
+      - names: ["-e"]
+        description: "Mẫu"
+        args:
+          - name: pattern
+      - names: ["-i", "--ignore-case"]
+        description: "Không phân biệt hoa thường"
+      - names: ["-v", "--invert-match"]
+        description: "Đảo kết quả khớp"
+      - names: ["-n", "--line-number"]
+        description: "Hiển thị số dòng"
+      - names: ["-l", "--files-with-matches", "--name-only"]
+        description: "Hiển thị tên file khớp"
+      - names: ["-L", "--files-without-match"]
+        description: "Hiển thị tên file không khớp"
+      - names: ["-c", "--count"]
+        description: "Hiển thị số lượng"
+      - names: ["-A"]
+        description: "Số dòng phía sau"
+        args:
+          - name: n
+      - names: ["-B"]
+        description: "Số dòng phía trước"
+        args:
+          - name: n
+      - names: ["-C"]
+        description: "Số dòng ngữ cảnh"
+        args:
+          - name: n
+      - names: ["-w", "--word-regexp"]
+        description: "Khớp nguyên từ"
+      - names: ["--heading"]
+        description: "Hiển thị heading tên file"
+    args:
+      - name: pattern
+      - name: pathspec
+        sources:
+          - type: path
+            include: [folder, file]
+  - name: notes
+    description: "Thêm hoặc kiểm tra note của object"
+    subcommands:
+      - name: add
+        description: "Thêm note"
+        args:
+          - name: object
+      - name: edit
+        description: "Sửa note"
+        args:
+          - name: object
+      - name: remove
+        description: "Xóa note"
+        args:
+          - name: object
+      - name: show
+        description: "Hiển thị note"
+        args:
+          - name: object
+      - name: list
+        description: "Liệt kê note"
+        args:
+          - name: object
+      - name: copy
+        description: "Sao chép note"
+        args:
+          - name: from
+          - name: to
+      - name: merge
+        description: "Merge note"
+        args:
+          - name: notes-ref
+      - name: prune
+        description: "Xóa note mồ côi"
+      - name: get-ref
+        description: "In ref note hiện tại"
+
+  - name: gc
+    description: "Dọn file không cần thiết và tối ưu repository local"
+    options:
+      - names: ["--aggressive"]
+        description: "Dành nhiều thời gian hơn để tối ưu"
+      - names: ["--auto"]
+        description: "Chỉ chạy nếu cần housekeeping"
+      - names: ["--prune"]
+        description: "Prune object rời"
+        args:
+          - name: date
+      - names: ["--quiet"]
+        description: "Im lặng"
+      - names: ["--force"]
+        description: "Buộc gc"
+      - names: ["--keep-largest-pack"]
+        description: "Bỏ qua --max-pack-size cho pack lớn nhất"
+
+  - name: fsck
+    description: "Xác minh tính kết nối và hợp lệ của object trong database"
+    options:
+      - names: ["--unreachable"]
+        description: "Hiển thị object không thể tới"
+      - names: ["--dangling"]
+        description: "In object dangling"
+      - names: ["--full"]
+        description: "Kiểm tra tất cả file object"
+      - names: ["--connectivity-only"]
+        description: "Chỉ kiểm tra tính kết nối"
+      - names: ["--strict"]
+        description: "Bật kiểm tra nghiêm ngặt hơn"
+      - names: ["--verbose"]
+        description: "Xuất chi tiết"
+      - names: ["--lost-found"]
+        description: "Ghi object dangling vào .git/lost-found/"
+      - names: ["--progress"]
+        description: "Hiển thị tiến trình"
+
+  - name: archive
+    description: "Tạo archive file từ tree được đặt tên"
+    options:
+      - names: ["--format"]
+        description: "Định dạng archive (tar, zip)"
+        args:
+          - name: fmt
+      - names: ["--prefix"]
+        description: "Thêm tiền tố vào từng tên file"
+        args:
+          - name: prefix
+      - names: ["-o", "--output"]
+        description: "Ghi tới file"
+        args:
+          - name: file
+      - names: ["--worktree-attributes"]
+        description: "Tra .gitattributes trong working directory"
+      - names: ["-v", "--verbose"]
+        description: "Xuất chi tiết"
+      - names: ["-9"]
+        description: "Nén tốt nhất"
+      - names: ["-0"]
+        description: "Chỉ lưu trữ"
+    args:
+      - name: tree-ish
+        generator: git:branches
+      - name: path
+        sources:
+          - type: path
+            include: [folder, file]
+  - name: rev-parse
+    description: "Trích xuất và xử lý tham số"
+    options:
+      - names: ["--is-inside-work-tree"]
+        description: "Kiểm tra có ở trong working tree không"
+      - names: ["--show-toplevel"]
+        description: "Hiển thị thư mục top-level"
+      - names: ["--git-dir"]
+        description: "Hiển thị thư mục .git"
+      - names: ["--abbrev-ref"]
+        description: "Rút gọn ref"
+      - names: ["--short"]
+        description: "Hash ngắn"
+      - names: ["--symbolic"]
+        description: "Dạng symbolic"
+      - names: ["--all"]
+        description: "Hiển thị tất cả ref"
+      - names: ["--branches"]
+        description: "Hiển thị nhánh"
+      - names: ["--tags"]
+        description: "Hiển thị tag"
+      - names: ["--remotes"]
+        description: "Hiển thị remote"
+      - names: ["--verify"]
+        description: "Xác minh ref hợp lệ"
+    args:
+      - name: name
+
+  - name: ls-files
+    description: "Hiển thị thông tin về file trong index và working tree"
+    options:
+      - names: ["--stage", "-s"]
+        description: "Hiển thị nội dung đã stage"
+      - names: ["--others", "-o"]
+        description: "Hiển thị file khác (chưa theo dõi)"
+      - names: ["-c", "--cached"]
+        description: "Hiển thị file cached"
+      - names: ["-m", "--modified"]
+        description: "Hiển thị file đã sửa"
+      - names: ["-d", "--deleted"]
+        description: "Hiển thị file đã xóa"
+      - names: ["-i", "--ignored"]
+        description: "Hiển thị file bị ignore"
+      - names: ["-t"]
+        description: "Xác định trạng thái file"
+      - names: ["--full-name"]
+        description: "Hiển thị đường dẫn đầy đủ"
+      - names: ["--error-unmatch"]
+        description: "Báo lỗi nếu file không nằm trong index"
+    args:
+      - name: pathspec
+        sources:
+          - type: path
+            include: [folder, file]
+  - name: ls-tree
+    description: "Liệt kê nội dung của object tree"
+    options:
+      - names: ["-r", "--recursive"]
+        description: "Đệ quy vào subtree"
+      - names: ["--name-only"]
+        description: "Chỉ hiển thị tên file"
+      - names: ["-l", "--long"]
+        description: "Hiển thị kích thước object"
+      - names: ["-t"]
+        description: "Hiển thị entry tree"
+      - names: ["--full-name"]
+        description: "Hiển thị đường dẫn đầy đủ"
+      - names: ["--full-tree"]
+        description: "Không giới hạn trong cwd"
+      - names: ["-z"]
+        description: "Ký tự kết thúc dòng NUL"
+    args:
+      - name: tree
+        generator: git:branches
+      - name: path
+        sources:
+          - type: path
+            include: [folder, file]
+  - name: describe
+    description: "Đặt tên dễ đọc cho object"
+    options:
+      - names: ["--always"]
+        description: "Hiển thị commit duy nhất"
+      - names: ["--tags"]
+        description: "Dùng tag"
+      - names: ["--long"]
+        description: "Luôn hiển thị định dạng dài"
+      - names: ["--abbrev"]
+        description: "Dùng n chữ số"
+        args:
+          - name: n
+      - names: ["--match"]
+        description: "Chỉ dùng tag khớp"
+        args:
+          - name: pattern
+      - names: ["--exclude"]
+        description: "Loại trừ tag khớp"
+        args:
+          - name: pattern
+      - names: ["--dirty"]
+        description: "Thêm -dirty nếu có thay đổi bẩn"
+        args:
+          - name: mark
+      - names: ["--all"]
+        description: "Dùng bất kỳ ref nào"
+    args:
+      - name: commit
+        generator: git:branches
+
+  - name: reflog
+    description: "Quản lý thông tin reflog"
+    subcommands:
+      - name: show
+        description: "Hiển thị reflog"
+        args:
+          - name: ref
+            generator: git:branches
+      - name: expire
+        description: "Prune entry cũ"
+        options:
+          - names: ["--expire"]
+            description: "Hết hạn entry cũ hơn"
+            args:
+              - name: time
+          - names: ["--all"]
+            description: "Xử lý tất cả ref"
+      - name: delete
+        description: "Xóa entry reflog"
+        args:
+          - name: ref
+      - name: exists
+        description: "Kiểm tra ref có reflog không"
+        args:
+          - name: ref
+    options:
+      - names: ["--date"]
+        description: "Định dạng ngày"
+        args:
+          - name: format
+    args:
+      - name: ref
+        generator: git:branches
+
+  - name: worktree
+    description: "Quản lý nhiều working tree"
+    subcommands:
+      - name: add
+        description: "Tạo worktree"
+        options:
+          - names: ["-b"]
+            description: "Tạo nhánh"
+            args:
+              - name: branch
+          - names: ["-B"]
+            description: "Tạo hoặc buộc tạo nhánh"
+            args:
+              - name: branch
+          - names: ["--detach"]
+            description: "Tách HEAD"
+          - names: ["--track"]
+            description: "Thiết lập tracking"
+          - names: ["-f", "--force"]
+            description: "Buộc thêm"
+        args:
+          - name: path
+          - name: commit-ish
+            generator: git:branches
+      - name: list
+        description: "Liệt kê worktree"
+      - name: remove
+        description: "Xóa worktree"
+        options:
+          - names: ["-f", "--force"]
+            description: "Buộc xóa"
+        args:
+          - name: worktree
+      - name: prune
+        description: "Prune thông tin worktree"
+        options:
+          - names: ["-n", "--dry-run"]
+            description: "Chạy thử"
+          - names: ["-v", "--verbose"]
+            description: "Xuất chi tiết"
+          - names: ["--expire"]
+            description: "Hết hạn file admin cũ hơn"
+            args:
+              - name: time
+      - name: lock
+        description: "Khóa worktree"
+        options:
+          - names: ["--reason"]
+            description: "Lý do khóa"
+            args:
+              - name: string
+        args:
+          - name: worktree
+      - name: unlock
+        description: "Mở khóa worktree"
+        args:
+          - name: worktree
+      - name: move
+        description: "Di chuyển worktree"
+        args:
+          - name: worktree
+          - name: new-path
+      - name: repair
+        description: "Sửa file admin của worktree"
+        args:
+          - name: path
+            variadic: true
+
+options:
+  - names: ["-C"]
+    description: "Chạy như thể được bắt đầu trong đường dẫn"
+    args:
+      - name: path
+  - names: ["--version"]
+    description: "In phiên bản git"
+  - names: ["--help"]
+    description: "In trợ giúp"
+  - names: ["-c"]
+    description: "Truyền tham số config"
+    args:
+      - name: name=value
+  - names: ["--exec-path"]
+    description: "Đường dẫn tới chương trình git core"
+  - names: ["--git-dir"]
+    description: "Đặt đường dẫn tới repository"
+    args:
+      - name: path
+  - names: ["--work-tree"]
+    description: "Đặt đường dẫn working tree"
+    args:
+      - name: path
+  - names: ["--no-pager"]
+    description: "Không pipe output qua pager"
+  - names: ["--paginate", "-p"]
+    description: "Pipe output qua pager"
+  - names: ["--no-replace-objects"]
+    description: "Không dùng replacement ref"

@@ -1,0 +1,516 @@
+name: docker-compose
+subcommands:
+  - name: up
+    description: "Tạo và khởi động container"
+    options:
+      - names: ["-d", "--detach"]
+        description: "Chế độ tách nền: chạy trong nền"
+      - names: ["--build"]
+        description: "Build image trước khi khởi động container"
+      - names: ["--no-build"]
+        description: "Không build image, kể cả khi image bị thiếu"
+      - names: ["--force-recreate"]
+        description: "Tạo lại container kể cả khi cấu hình không đổi"
+      - names: ["--no-recreate"]
+        description: "Không tạo lại container hiện có"
+      - names: ["--no-start"]
+        description: "Không khởi động service sau khi tạo"
+      - names: ["--remove-orphans"]
+        description: "Xóa container của các service không được định nghĩa"
+      - names: ["--scale"]
+        description: "Scale service lên NUM instance"
+        args:
+          - name: "service=n"
+      - names: ["-t", "--timeout"]
+        description: "Thời gian chờ tắt tính bằng giây"
+        args:
+          - name: int
+      - names: ["--wait"]
+        description: "Chờ service chạy hoặc đạt trạng thái healthy"
+      - names: ["--no-color"]
+        description: "Xuất đơn sắc"
+      - names: ["--no-log-prefix"]
+        description: "Không in tiền tố trong log"
+      - names: ["--no-deps"]
+        description: "Không khởi động các service liên kết"
+      - names: ["--abort-on-container-exit"]
+        description: "Dừng tất cả container nếu có container dừng"
+      - names: ["--exit-code-from"]
+        description: "Trả về mã thoát của service được chọn"
+        args:
+          - name: service
+      - names: ["--quiet-pull"]
+        description: "Pull mà không in tiến trình"
+      - names: ["-V", "--renew-anon-volumes"]
+        description: "Tạo lại volume ẩn danh"
+      - names: ["--always-recreate-deps"]
+        description: "Tạo lại container phụ thuộc"
+      - names: ["--attach"]
+        description: "Gắn vào output của service"
+        args:
+          - name: service
+      - names: ["--attach-dependencies"]
+        description: "Gắn vào các container phụ thuộc"
+    args:
+      - name: service
+        variadic: true
+
+  - name: down
+    description: "Dừng và xóa container, network"
+    options:
+      - names: ["--remove-orphans"]
+        description: "Xóa container của các service không được định nghĩa"
+      - names: ["--rmi"]
+        description: "Xóa image được service sử dụng (local|all)"
+        args:
+          - name: type
+      - names: ["-t", "--timeout"]
+        description: "Thời gian chờ tắt tính bằng giây"
+        args:
+          - name: int
+      - names: ["-v", "--volumes"]
+        description: "Xóa volume có tên và volume ẩn danh"
+
+  - name: build
+    description: "Build hoặc build lại service"
+    options:
+      - names: ["--no-cache"]
+        description: "Không dùng cache khi build"
+      - names: ["--pull"]
+        description: "Luôn thử pull image mới hơn"
+      - names: ["-q", "--quiet"]
+        description: "Không in gì ra STDOUT"
+      - names: ["--build-arg"]
+        description: "Đặt biến tại thời điểm build"
+        args:
+          - name: KEY=VALUE
+      - names: ["--progress"]
+        description: "Đặt kiểu output tiến trình (auto|tty|plain|quiet)"
+        args:
+          - name: type
+      - names: ["--ssh"]
+        description: "Đặt xác thực SSH"
+        args:
+          - name: ssh
+      - names: ["-m", "--memory"]
+        description: "Đặt giới hạn bộ nhớ cho container build"
+        args:
+          - name: memory
+    args:
+      - name: service
+        variadic: true
+
+  - name: logs
+    description: "Xem output từ container"
+    options:
+      - names: ["-f", "--follow"]
+        description: "Theo dõi output log"
+      - names: ["-t", "--timestamps"]
+        description: "Hiển thị timestamp"
+      - names: ["--tail"]
+        description: "Số dòng tính từ cuối"
+        args:
+          - name: lines
+      - names: ["--since"]
+        description: "Hiển thị log kể từ timestamp"
+        args:
+          - name: timestamp
+      - names: ["--until"]
+        description: "Hiển thị log trước timestamp"
+        args:
+          - name: timestamp
+      - names: ["--no-color"]
+        description: "Xuất đơn sắc"
+      - names: ["--no-log-prefix"]
+        description: "Không in tiền tố trong log"
+    args:
+      - name: service
+        variadic: true
+
+  - name: ps
+    description: "Liệt kê container"
+    options:
+      - names: ["-a", "--all"]
+        description: "Hiển thị tất cả container đã dừng"
+      - names: ["-q", "--quiet"]
+        description: "Chỉ hiển thị ID"
+      - names: ["--services"]
+        description: "Hiển thị service"
+      - names: ["--format"]
+        description: "Định dạng output (pretty|json)"
+        args:
+          - name: format
+      - names: ["--filter"]
+        description: "Lọc theo thuộc tính"
+        args:
+          - name: filter
+      - names: ["--status"]
+        description: "Lọc theo trạng thái"
+        args:
+          - name: status
+    args:
+      - name: service
+        variadic: true
+
+  - name: exec
+    description: "Thực thi lệnh trong container đang chạy"
+    options:
+      - names: ["-d", "--detach"]
+        description: "Chế độ tách nền"
+      - names: ["-e", "--env"]
+        description: "Đặt biến môi trường"
+        args:
+          - name: KEY=VALUE
+      - names: ["-u", "--user"]
+        description: "Chạy với người dùng"
+        args:
+          - name: user
+      - names: ["-w", "--workdir"]
+        description: "Thư mục làm việc"
+        args:
+          - name: dir
+      - names: ["--privileged"]
+        description: "Cấp quyền mở rộng"
+      - names: ["-T", "--no-TTY"]
+        description: "Tắt cấp phát pseudo-TTY"
+      - names: ["--index"]
+        description: "Chỉ số container nếu có nhiều instance"
+        args:
+          - name: int
+    args:
+      - name: service
+      - name: command
+        variadic: true
+
+  - name: run
+    description: "Chạy lệnh một lần trên service"
+    options:
+      - names: ["-d", "--detach"]
+        description: "Chạy container trong nền"
+      - names: ["--rm"]
+        description: "Tự động xóa container khi thoát"
+      - names: ["-e", "--env"]
+        description: "Đặt biến môi trường"
+        args:
+          - name: KEY=VALUE
+      - names: ["-u", "--user"]
+        description: "Chạy với người dùng"
+        args:
+          - name: user
+      - names: ["-w", "--workdir"]
+        description: "Thư mục làm việc"
+        args:
+          - name: dir
+      - names: ["--entrypoint"]
+        description: "Ghi đè entrypoint"
+        args:
+          - name: cmd
+      - names: ["--no-deps"]
+        description: "Không khởi động các service liên kết"
+      - names: ["-p", "--publish"]
+        description: "Công bố port"
+        args:
+          - name: port
+      - names: ["-l", "--label"]
+        description: "Thêm label"
+        args:
+          - name: KEY=VALUE
+      - names: ["-T", "--no-TTY"]
+        description: "Tắt pseudo-TTY"
+      - names: ["-v", "--volume"]
+        description: "Bind mount volume"
+        args:
+          - name: volume
+      - names: ["--service-ports"]
+        description: "Bật các port của service"
+      - names: ["--use-aliases"]
+        description: "Dùng alias mạng"
+      - names: ["--quiet-pull"]
+        description: "Pull im lặng"
+      - names: ["--name"]
+        description: "Gán tên container"
+        args:
+          - name: name
+    args:
+      - name: service
+      - name: command
+        variadic: true
+
+  - name: start
+    description: "Khởi động service"
+    args:
+      - name: service
+        variadic: true
+
+  - name: stop
+    description: "Dừng service"
+    options:
+      - names: ["-t", "--timeout"]
+        description: "Thời gian chờ tắt tính bằng giây"
+        args:
+          - name: int
+    args:
+      - name: service
+        variadic: true
+
+  - name: restart
+    description: "Khởi động lại container service"
+    options:
+      - names: ["-t", "--timeout"]
+        description: "Thời gian chờ tắt tính bằng giây"
+        args:
+          - name: int
+    args:
+      - name: service
+        variadic: true
+
+  - name: pull
+    description: "Pull image của service"
+    options:
+      - names: ["-q", "--quiet"]
+        description: "Pull mà không in tiến trình"
+      - names: ["--ignore-pull-failures"]
+        description: "Bỏ qua image pull thất bại"
+      - names: ["--include-deps"]
+        description: "Pull cả service được khai báo là phụ thuộc"
+    args:
+      - name: service
+        variadic: true
+
+  - name: push
+    description: "Push image của service"
+    options:
+      - names: ["--ignore-push-failures"]
+        description: "Push những gì có thể, bỏ qua lỗi"
+    args:
+      - name: service
+        variadic: true
+
+  - name: rm
+    description: "Xóa container service đã dừng"
+    options:
+      - names: ["-f", "--force"]
+        description: "Không hỏi xác nhận khi xóa"
+      - names: ["-s", "--stop"]
+        description: "Dừng container trước khi xóa"
+      - names: ["-v", "--volumes"]
+        description: "Xóa volume ẩn danh"
+    args:
+      - name: service
+        variadic: true
+
+  - name: kill
+    description: "Buộc dừng container service"
+    options:
+      - names: ["-s", "--signal"]
+        description: "Signal cần gửi (mặc định SIGKILL)"
+        args:
+          - name: signal
+    args:
+      - name: service
+        variadic: true
+
+  - name: pause
+    description: "Tạm dừng service"
+    args:
+      - name: service
+        variadic: true
+
+  - name: unpause
+    description: "Tiếp tục service"
+    args:
+      - name: service
+        variadic: true
+
+  - name: images
+    description: "Liệt kê image được các container đã tạo sử dụng"
+    options:
+      - names: ["-q", "--quiet"]
+        description: "Chỉ hiển thị ID"
+    args:
+      - name: service
+        variadic: true
+
+  - name: top
+    description: "Hiển thị tiến trình đang chạy"
+    args:
+      - name: service
+        variadic: true
+
+  - name: events
+    description: "Nhận sự kiện thời gian thực từ container"
+    options:
+      - names: ["--json"]
+        description: "Xuất sự kiện dưới dạng luồng object JSON"
+    args:
+      - name: service
+        variadic: true
+
+  - name: ls
+    description: "Liệt kê project Compose đang chạy"
+    options:
+      - names: ["-a", "--all"]
+        description: "Hiển thị tất cả project Compose đã dừng"
+      - names: ["-q", "--quiet"]
+        description: "Chỉ hiển thị ID"
+      - names: ["--filter"]
+        description: "Lọc output"
+        args:
+          - name: filter
+      - names: ["--format"]
+        description: "Định dạng output (pretty|json)"
+        args:
+          - name: format
+
+  - name: config
+    description: "Phân tích, resolve và render file compose sang định dạng chuẩn"
+    options:
+      - names: ["--format"]
+        description: "Định dạng output (yaml|json)"
+        args:
+          - name: format
+      - names: ["--hash"]
+        description: "In hash cấu hình service"
+        args:
+          - name: hash
+      - names: ["--images"]
+        description: "In tên image"
+      - names: ["--services"]
+        description: "In tên service"
+      - names: ["--volumes"]
+        description: "In tên volume"
+      - names: ["--profiles"]
+        description: "In tên profile"
+      - names: ["-q", "--quiet"]
+        description: "Chỉ validate, không in"
+      - names: ["--resolve-image-digests"]
+        description: "Ghim tag image vào digest"
+      - names: ["--no-interpolate"]
+        description: "Không nội suy biến môi trường"
+      - names: ["--no-normalize"]
+        description: "Không chuẩn hóa model compose"
+      - names: ["-o", "--output"]
+        description: "Lưu vào tệp"
+        args:
+          - name: file
+    args:
+      - name: service
+        variadic: true
+
+  - name: cp
+    description: "Sao chép tệp/thư mục giữa container service và hệ tệp local"
+    options:
+      - names: ["-a", "--archive"]
+        description: "Chế độ archive (sao chép toàn bộ thông tin uid/gid)"
+      - names: ["-L", "--follow-link"]
+        description: "Luôn đi theo liên kết tượng trưng trong SRC_PATH"
+      - names: ["--index"]
+        description: "Chỉ số container nếu có nhiều instance"
+        args:
+          - name: int
+    args:
+      - name: source path
+      - name: dest path
+
+  - name: create
+    description: "Tạo container cho service"
+    options:
+      - names: ["--build"]
+        description: "Build image trước khi khởi động"
+      - names: ["--force-recreate"]
+        description: "Tạo lại container"
+      - names: ["--no-build"]
+        description: "Không build image"
+      - names: ["--no-recreate"]
+        description: "Không tạo lại container hiện có"
+    args:
+      - name: service
+        variadic: true
+
+  - name: port
+    description: "In port public cho một port binding"
+    options:
+      - names: ["--protocol"]
+        description: "TCP hoặc UDP"
+        args:
+          - name: proto
+      - names: ["--index"]
+        description: "Chỉ số container"
+        args:
+          - name: int
+    args:
+      - name: service
+      - name: private_port
+
+  - name: version
+    description: "Hiển thị thông tin phiên bản Docker Compose"
+    options:
+      - names: ["-f", "--format"]
+        description: "Định dạng output (pretty|json)"
+        args:
+          - name: format
+      - names: ["--short"]
+        description: "Chỉ hiển thị số phiên bản"
+
+options:
+  - names: ["-f", "--file"]
+    description: "File cấu hình Compose"
+    args:
+      - name: file
+        sources:
+          - type: path
+            include: [folder, file]
+  - names: ["-p", "--project-name"]
+    description: "Tên project"
+    args:
+      - name: name
+  - names: ["--profile"]
+    description: "Chỉ định profile cần bật"
+    args:
+      - name: profile
+  - names: ["--env-file"]
+    description: "Chỉ định file môi trường thay thế"
+    args:
+      - name: file
+        sources:
+          - type: path
+            include: [folder, file]
+  - names: ["--project-directory"]
+    description: "Chỉ định thư mục làm việc thay thế"
+    args:
+      - name: dir
+        sources:
+          - type: path
+            include: [folder]
+  - names: ["--ansi"]
+    description: "Điều khiển output ANSI (never|always|auto)"
+    args:
+      - name: string
+  - names: ["--compatibility"]
+    description: "Chạy ở chế độ tương thích ngược"
+  - names: ["-v", "--version"]
+    description: "Hiển thị phiên bản"
+  - names: ["--verbose"]
+    description: "Hiển thị nhiều output hơn"
+  - names: ["-H", "--host"]
+    description: "Socket daemon để kết nối"
+    args:
+      - name: HOST
+  - names: ["--tls"]
+    description: "Dùng TLS"
+  - names: ["--tlscacert"]
+    description: "Tin cậy chứng chỉ do CA ký"
+    args:
+      - name: CA_PATH
+  - names: ["--tlscert"]
+    description: "Đường dẫn tới file chứng chỉ TLS"
+    args:
+      - name: CLIENT_CERT_PATH
+  - names: ["--tlskey"]
+    description: "Đường dẫn tới file khóa TLS"
+    args:
+      - name: TLS_KEY_PATH
+  - names: ["--tlsverify"]
+    description: "Dùng TLS và xác minh remote"
+  - names: ["--skip-hostname-check"]
+    description: "Không kiểm tra hostname của daemon"

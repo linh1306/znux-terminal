@@ -1,0 +1,17 @@
+name: mkdir
+subcommands: []
+options:
+  - names: ["-p", "--parents"]
+    description: "Tạo thư mục cha khi cần, không báo lỗi nếu đã tồn tại"
+  - names: ["-v", "--verbose"]
+    description: "In thông báo cho từng thư mục được tạo"
+  - names: ["-m", "--mode"]
+    description: "Đặt mode file (như trong chmod)"
+    args:
+      - name: mode
+args:
+  - name: directory
+    sources:
+      - type: path
+        include: [folder]
+    variadic: true

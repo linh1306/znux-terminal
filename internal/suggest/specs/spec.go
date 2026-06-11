@@ -28,12 +28,22 @@ type Suggestion struct {
 	Kind        SuggestionKind
 }
 
+// SourceSpec describes one dynamic suggestion source for an argument.
+type SourceSpec struct {
+	Type      string
+	Include   []string
+	Protocols []string
+	State     string
+	Format    string
+}
+
 // ArgSpec describes an argument specification
 type ArgSpec struct {
 	Name       string
 	Generator  string // name registered in generator registry; empty = no dynamic suggestion
 	IsVariadic bool
 	Template   Template
+	Sources    []SourceSpec
 }
 
 // Option describes a command-line option
