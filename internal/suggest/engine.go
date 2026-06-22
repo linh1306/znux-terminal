@@ -172,12 +172,27 @@ func (e *Engine) getArgSuggestions(ctx *buffer.Context) []specs.Suggestion {
 	if ctx.Subcommand != "" {
 		for _, sub := range spec.Subcommands {
 			if sub.Name == ctx.Subcommand {
-				return e.suggestFromArgSpecs(sub.Args, partial)
+				return e.suggestFromArgSpecs(selectArgSpecs(sub.Args, ctx.ArgIndex), partial)
 			}
 		}
 	}
 
-	return e.suggestFromArgSpecs(spec.Args, partial)
+	return e.suggestFromArgSpecs(selectArgSpecs(spec.Args, ctx.ArgIndex), partial)
+}
+
+func selectArgSpecs(args []specs.ArgSpec, index int) []specs.ArgSpec {
+	if len(args) == 0 {
+		return nil
+	}
+	if index < len(args) {
+		return []specs.ArgSpec{args[index]}
+	}
+
+	last := args[len(args)-1]
+	if last.IsVariadic {
+		return []specs.ArgSpec{last}
+	}
+	return nil
 }
 
 // suggestFromArgSpecs produces suggestions from a list of ArgSpec, filtered by partial.

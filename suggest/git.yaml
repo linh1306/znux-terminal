@@ -106,7 +106,7 @@ subcommands:
       - name: remote
         generator: git:remotes
       - name: branch
-        generator: git:branches
+        generator: git:local-branches
 
   - name: pull
     description: "Fetch và tích hợp với repository khác"

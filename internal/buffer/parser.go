@@ -200,7 +200,7 @@ func (p *Parser) GetCurrentContext(buf *LineBuf) Context {
 
 	if endsWithSpace {
 		// "git checkout " or "git checkout main " → suggest args/branches
-		return Context{Level: ContextArg, Command: command, Subcommand: subcommand}
+		return Context{Level: ContextArg, Command: command, Subcommand: subcommand, ArgIndex: p.argIndex(tokens, true)}
 	}
 
 	// Ends with a partial token being typed
@@ -213,7 +213,32 @@ func (p *Parser) GetCurrentContext(buf *LineBuf) Context {
 		return Context{Level: ContextSubcommandPartial, Command: command, Subcommand: last.Value}
 	}
 	// "git checkout ma" → partial arg after a known subcommand
-	return Context{Level: ContextArgPartial, Command: command, Subcommand: subcommand, PartialWord: last.Value}
+	return Context{Level: ContextArgPartial, Command: command, Subcommand: subcommand, ArgIndex: p.argIndex(tokens, false), PartialWord: last.Value}
+}
+
+func (p *Parser) argIndex(tokens []Token, endsWithSpace bool) int {
+	if len(tokens) <= 1 {
+		return 0
+	}
+
+	start := 1
+	if len(tokens) > 1 && len(tokens[1].Value) > 0 && tokens[1].Value[0] != '-' {
+		start = 2
+	}
+
+	end := len(tokens)
+	if !endsWithSpace {
+		end--
+	}
+
+	index := 0
+	for i := start; i < end; i++ {
+		if len(tokens[i].Value) > 0 && tokens[i].Value[0] == '-' {
+			continue
+		}
+		index++
+	}
+	return index
 }
 
 // Context represents what kind of suggestion to provide
@@ -221,6 +246,7 @@ type Context struct {
 	Level       ContextLevel
 	Command     string
 	Subcommand  string
+	ArgIndex    int
 	Flag        string
 	PartialWord string
 }

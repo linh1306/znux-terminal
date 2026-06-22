@@ -163,6 +163,47 @@ func TestGetSuggestionsFiltersArgPartial(t *testing.T) {
 	assertNoSuggestion(t, got, "beta.txt")
 }
 
+func TestGetSuggestionsUsesCurrentArgOnly(t *testing.T) {
+	specs.RegisterGenerator("test:first-arg", func() []specs.Suggestion {
+		return []specs.Suggestion{{Name: "origin", Kind: specs.KindValue}}
+	})
+	specs.RegisterGenerator("test:second-arg", func() []specs.Suggestion {
+		return []specs.Suggestion{
+			{Name: "main", Kind: specs.KindValue},
+			{Name: "origin/main", Kind: specs.KindValue},
+		}
+	})
+	specs.Register("split-command", &specs.Spec{
+		Name: "split-command",
+		Subcommands: []specs.Subcommand{{
+			Name: "push",
+			Args: []specs.ArgSpec{
+				{Name: "remote", Generator: "test:first-arg"},
+				{Name: "branch", Generator: "test:second-arg"},
+			},
+		}},
+	})
+
+	buf := buffer.NewLineBuf()
+	buf.SetString("split-command push ")
+	ctx := buffer.NewParser().GetCurrentContext(buf)
+
+	got := NewEngine().GetSuggestions(buf, &ctx)
+
+	assertHasSuggestion(t, got, "origin", specs.KindValue)
+	assertNoSuggestion(t, got, "main")
+	assertNoSuggestion(t, got, "origin/main")
+
+	buf.SetString("split-command push origin ")
+	ctx = buffer.NewParser().GetCurrentContext(buf)
+
+	got = NewEngine().GetSuggestions(buf, &ctx)
+
+	assertHasSuggestion(t, got, "main", specs.KindValue)
+	assertHasSuggestion(t, got, "origin/main", specs.KindValue)
+	assertNoSuggestion(t, got, "origin")
+}
+
 func TestParseSSListeningPorts(t *testing.T) {
 	out := []byte(`tcp LISTEN 0 4096 127.0.0.1:5432 0.0.0.0:* users:(("postgres",pid=1234,fd=7))
 udp UNCONN 0 0 0.0.0.0:5353 0.0.0.0:* users:(("mdns",pid=55,fd=4))

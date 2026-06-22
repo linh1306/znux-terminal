@@ -232,7 +232,7 @@ func (d *Dispatcher) handleEscape(byteCh <-chan readResult) {
 	seq := []byte{27}
 	timeout := time.After(50 * time.Millisecond)
 
-	for len(seq) < 6 {
+	for len(seq) < 8 {
 		select {
 		case res := <-byteCh:
 			if res.err != nil {
@@ -277,6 +277,10 @@ func isCompleteEscapeSeq(seq []byte) bool {
 		if len(seq) >= 5 && seq[2] == '2' && seq[3] == '0' && seq[4] == '1' {
 			return true
 		}
+		if len(seq) >= 6 && seq[2] == '1' && seq[3] == ';' && seq[4] >= '2' && seq[4] <= '8' {
+			b := seq[5]
+			return (b >= 'A' && b <= 'Z') || (b >= 'a' && b <= 'z')
+		}
 	}
 	if seq[1] == 'O' && len(seq) >= 3 {
 		b := seq[2]
@@ -317,16 +321,31 @@ func (d *Dispatcher) processEscapeSeq(seq []byte) {
 	// Arrow key navigation — always works, not just when showing suggestions
 	if len(seq) >= 3 && seq[0] == 27 {
 		var key rune
+		shift := false
 		if seq[1] == '[' {
-			switch seq[2] {
-			case 'A':
-				key = 'u' // up
-			case 'B':
-				key = 'd' // down
-			case 'C':
-				key = 'r' // right
-			case 'D':
-				key = 'l' // left
+			if len(seq) >= 6 && seq[2] == '1' && seq[3] == ';' {
+				shift = seq[4] == '2'
+				switch seq[5] {
+				case 'A':
+					key = 'u' // up
+				case 'B':
+					key = 'd' // down
+				case 'C':
+					key = 'r' // right
+				case 'D':
+					key = 'l' // left
+				}
+			} else {
+				switch seq[2] {
+				case 'A':
+					key = 'u' // up
+				case 'B':
+					key = 'd' // down
+				case 'C':
+					key = 'r' // right
+				case 'D':
+					key = 'l' // left
+				}
 			}
 		} else if seq[1] == 'O' && len(seq) >= 3 {
 			switch seq[2] {
@@ -339,6 +358,18 @@ func (d *Dispatcher) processEscapeSeq(seq []byte) {
 			case 'D':
 				key = 'l'
 			}
+		}
+
+		if shift {
+			switch key {
+			case 'u':
+				d.hideSuggestions()
+				d.outputChan.WriteOp(render.OutputOp{Kind: render.OutputOpHistoryPrev})
+			case 'd':
+				d.hideSuggestions()
+				d.outputChan.WriteOp(render.OutputOp{Kind: render.OutputOpHistoryNext})
+			}
+			return
 		}
 
 		switch key {
@@ -408,6 +439,7 @@ func (d *Dispatcher) handleRuneInteractive(r rune) {
 	}
 
 	// Printable character — add to buffer
+	d.clearOnNextEmptyEnter = false
 	d.linebuf.Append(r)
 
 	// Echo via output channel to ensure proper ordering
@@ -442,6 +474,13 @@ func (d *Dispatcher) handleSubmitInteractive(line *liner.State) {
 	}
 
 	cmd := d.linebuf.String()
+	if cmd == "" && d.clearOnNextEmptyEnter && !d.emulator.IsAltScreen() {
+		d.outputChan.WriteOp(render.OutputOp{Kind: render.OutputOpClearCurrent})
+		d.ptyWrite([]byte{12})
+		d.clearOnNextEmptyEnter = false
+		d.screenCol = 0
+		return
+	}
 
 	if cmd != "" {
 		line.AppendHistory(cmd)
@@ -455,6 +494,7 @@ func (d *Dispatcher) handleSubmitInteractive(line *liner.State) {
 
 	d.linebuf.Reset()
 	d.screenCol = 0
+	d.clearOnNextEmptyEnter = cmd != ""
 }
 
 // eraseInputDisplay removes the locally-echoed input characters from the

@@ -28,6 +28,94 @@ func (w *outputWriter) WriteOp(op render.OutputOp) {
 	w.ch <- op // blocking send — never drop output silently
 }
 
+type screenHistoryWriter struct {
+	current   []byte
+	history   [][]byte
+	viewIndex int
+}
+
+func newScreenHistoryWriter() *screenHistoryWriter {
+	return &screenHistoryWriter{viewIndex: -1}
+}
+
+func (w *screenHistoryWriter) handle(op render.OutputOp) bool {
+	switch op.Kind {
+	case render.OutputOpPTYWrite:
+		w.restoreCurrentIfViewing()
+		w.current = append(w.current, op.Data...)
+		return writeStdout(op.Data)
+	case render.OutputOpClearCurrent:
+		w.saveCurrent()
+		w.current = w.current[:0]
+		w.viewIndex = -1
+		return true
+	case render.OutputOpHistoryPrev:
+		w.showPrevious()
+		return true
+	case render.OutputOpHistoryNext:
+		w.showNext()
+		return true
+	default:
+		w.restoreCurrentIfViewing()
+		return writeStdout(op.Data)
+	}
+}
+
+func (w *screenHistoryWriter) saveCurrent() {
+	if len(w.current) == 0 {
+		return
+	}
+	snapshot := append([]byte(nil), w.current...)
+	w.history = append(w.history, snapshot)
+	if len(w.history) > 100 {
+		copy(w.history, w.history[1:])
+		w.history = w.history[:len(w.history)-1]
+	}
+}
+
+func (w *screenHistoryWriter) showPrevious() {
+	if len(w.history) == 0 {
+		return
+	}
+	if w.viewIndex == -1 {
+		w.viewIndex = len(w.history) - 1
+	} else if w.viewIndex > 0 {
+		w.viewIndex--
+	}
+	w.renderSnapshot(w.history[w.viewIndex])
+}
+
+func (w *screenHistoryWriter) showNext() {
+	if w.viewIndex == -1 {
+		return
+	}
+	if w.viewIndex < len(w.history)-1 {
+		w.viewIndex++
+		w.renderSnapshot(w.history[w.viewIndex])
+		return
+	}
+	w.viewIndex = -1
+	w.renderSnapshot(w.current)
+}
+
+func (w *screenHistoryWriter) restoreCurrentIfViewing() {
+	if w.viewIndex == -1 {
+		return
+	}
+	w.viewIndex = -1
+	w.renderSnapshot(w.current)
+}
+
+func (w *screenHistoryWriter) renderSnapshot(snapshot []byte) {
+	_ = writeStdout([]byte("\033[H\033[2J\033[3J"))
+	_ = writeStdout(snapshot)
+}
+
+func writeStdout(data []byte) bool {
+	_, err := os.Stdout.Write(data)
+	return err == nil
+}
+
 func main() {
 	clearScreen()
 
@@ -78,14 +166,18 @@ func main() {
 				return
 			}
 			emulator.Write(buf[:n])
-			ch <- render.OutputOp{Data: append([]byte(nil), buf[:n]...)}
+			ch <- render.OutputOp{
+				Kind: render.OutputOpPTYWrite,
+				Data: append([]byte(nil), buf[:n]...),
+			}
 		}
 	}()
 
 	// Output writer goroutine — single goroutine owns all stdout writes.
 	go func() {
+		writer := newScreenHistoryWriter()
 		for op := range ch {
-			if _, err := os.Stdout.Write(op.Data); err != nil {
+			if !writer.handle(op) {
 				return
 			}
 		}

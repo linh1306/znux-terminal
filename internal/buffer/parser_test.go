@@ -44,6 +44,28 @@ func TestParserFallsBackForIncompleteQuote(t *testing.T) {
 	}
 }
 
+func TestParserCountsPositionalArgs(t *testing.T) {
+	ctx := contextFor("git push origin ")
+
+	if ctx.Level != ContextArg {
+		t.Fatalf("level = %v, want %v", ctx.Level, ContextArg)
+	}
+	if ctx.ArgIndex != 1 {
+		t.Fatalf("arg index = %d, want 1", ctx.ArgIndex)
+	}
+}
+
+func TestParserCountsPartialPositionalArgs(t *testing.T) {
+	ctx := contextFor("git push ori")
+
+	if ctx.Level != ContextArgPartial {
+		t.Fatalf("level = %v, want %v", ctx.Level, ContextArgPartial)
+	}
+	if ctx.ArgIndex != 0 {
+		t.Fatalf("arg index = %d, want 0", ctx.ArgIndex)
+	}
+}
+
 func contextFor(input string) Context {
 	buf := NewLineBuf()
 	buf.SetString(input)
