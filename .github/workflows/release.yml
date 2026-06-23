@@ -1,0 +1,38 @@
+name: Release
+
+on: push
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Test
+        run: go test ./...
+
+      - name: Build znux
+        run: |
+          mkdir -p dist
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o dist/znux ./cmd
+
+      - name: Publish latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag -f latest "${GITHUB_SHA}"
+          git push -f origin latest
+          gh release view latest >/dev/null 2>&1 || gh release create latest --title "Latest znux" --notes "Latest znux Linux amd64 build."
+          gh release upload latest dist/znux --clobber

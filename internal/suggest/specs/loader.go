@@ -21,6 +21,7 @@ func init() {
 //
 // Search order:
 //   - $ZNUX_SUGGEST_SPECS_DIR
+//   - ~/.znux/suggest
 //   - ./suggest next to the executable
 //   - ./suggest from the current working directory
 func LoadDefaultSpecs() error {
@@ -40,6 +41,10 @@ func defaultSpecDirs() []string {
 	dirs := make([]string, 0, 8)
 	if envDir := os.Getenv(specsDirEnv); envDir != "" {
 		dirs = append(dirs, envDir)
+	}
+
+	if home, err := os.UserHomeDir(); err == nil && home != "" {
+		dirs = append(dirs, filepath.Join(home, ".znux", "suggest"))
 	}
 
 	if exe, err := os.Executable(); err == nil && exe != "" {

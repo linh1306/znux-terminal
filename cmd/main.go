@@ -117,6 +117,10 @@ func writeStdout(data []byte) bool {
 }
 
 func main() {
+	if handled, code := handleCLI(os.Args[1:]); handled {
+		os.Exit(code)
+	}
+
 	clearScreen()
 
 	shellPath := getShellPath()
