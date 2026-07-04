@@ -11,6 +11,7 @@ import (
 
 	"github.com/nguyenlinh13602/goshell/internal/buffer"
 	"github.com/nguyenlinh13602/goshell/internal/render"
+	"github.com/nguyenlinh13602/goshell/internal/suggest/specs"
 	"github.com/peterh/liner"
 	"golang.org/x/term"
 )
@@ -143,7 +144,11 @@ func (d *Dispatcher) RunWithLiner() error {
 		if b == 9 {
 			if d.showing && len(d.suggestions) > 0 {
 				s := d.suggestions[d.selected]
-				d.linebuf.ReplaceLastWord(s.Name)
+				if s.Kind == specs.KindInstall {
+					d.linebuf.SetString(s.Completion())
+				} else {
+					d.linebuf.ReplaceLastWord(s.Completion())
+				}
 				d.popup.Erase(len(d.suggestions))
 				d.showing = false
 				d.suggestions = nil
@@ -465,6 +470,18 @@ func (d *Dispatcher) refreshSuggestions(text string) {
 
 // handleSubmitInteractive submits the current command to the PTY.
 func (d *Dispatcher) handleSubmitInteractive(line *liner.State) {
+	if d.showing && len(d.suggestions) > 0 && d.selected < len(d.suggestions) {
+		s := d.suggestions[d.selected]
+		if s.Kind == specs.KindInstall {
+			d.popup.Erase(len(d.suggestions))
+			d.showing = false
+			d.suggestions = nil
+			d.linebuf.SetString(s.Completion())
+			d.redrawCurrentLine()
+			return
+		}
+	}
+
 	// Erase the popup area if visible; Enter always submits linebuf as-is,
 	// without auto-accepting any suggestion.
 	if d.showing {
@@ -594,7 +611,11 @@ func (d *Dispatcher) acceptSuggestionInteractive() {
 		return
 	}
 	s := d.suggestions[d.selected]
-	d.linebuf.AppendWord(s.Name)
+	if s.Kind == specs.KindInstall {
+		d.linebuf.SetString(s.Completion())
+	} else {
+		d.linebuf.AppendWord(s.Completion())
+	}
 	numLines := len(d.suggestions)
 	d.hideSuggestions()
 	d.popup.AcceptAndRedraw(d.linebuf.String(), numLines)

@@ -1,4 +1,5 @@
 name: git
+install: sudo apt install git
 subcommands:
   - name: add
     description: "Thêm nội dung file vào index"

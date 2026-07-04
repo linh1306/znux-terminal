@@ -204,6 +204,33 @@ func TestGetSuggestionsUsesCurrentArgOnly(t *testing.T) {
 	assertNoSuggestion(t, got, "origin")
 }
 
+func TestGetSuggestionsPrependsInstallForMissingCommand(t *testing.T) {
+	specs.Register("znux-missing-test-command", &specs.Spec{
+		Name:    "znux-missing-test-command",
+		Install: "sudo apt install znux-missing-test-command",
+		Subcommands: []specs.Subcommand{{
+			Name:        "run",
+			Description: "Run test command",
+		}},
+	})
+
+	buf := buffer.NewLineBuf()
+	buf.SetString("znux-missing")
+	ctx := buffer.NewParser().GetCurrentContext(buf)
+
+	got := NewEngine().GetSuggestions(buf, &ctx)
+
+	if len(got) < 2 {
+		t.Fatalf("suggestions len = %d, want at least 2: %#v", len(got), got)
+	}
+	if got[0].Kind != specs.KindInstall {
+		t.Fatalf("first suggestion = %#v, want install suggestion", got[0])
+	}
+	if got[0].Completion() != "sudo apt install znux-missing-test-command" {
+		t.Fatalf("install completion = %q", got[0].Completion())
+	}
+}
+
 func TestParseSSListeningPorts(t *testing.T) {
 	out := []byte(`tcp LISTEN 0 4096 127.0.0.1:5432 0.0.0.0:* users:(("postgres",pid=1234,fd=7))
 udp UNCONN 0 0 0.0.0.0:5353 0.0.0.0:* users:(("mdns",pid=55,fd=4))

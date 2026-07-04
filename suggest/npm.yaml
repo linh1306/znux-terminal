@@ -1,4 +1,5 @@
 name: npm
+install: sudo apt install npm
 subcommands:
   - name: install
     description: "Cài đặt dependency"

@@ -10,6 +10,7 @@ const (
 	KindFile
 	KindFolder
 	KindValue
+	KindInstall
 )
 
 // Template represents the type of argument template
@@ -26,6 +27,15 @@ type Suggestion struct {
 	Name        string
 	Description string
 	Kind        SuggestionKind
+	InsertText  string
+}
+
+// Completion returns the text inserted into the input when this suggestion is accepted.
+func (s Suggestion) Completion() string {
+	if s.InsertText != "" {
+		return s.InsertText
+	}
+	return s.Name
 }
 
 // SourceSpec describes one dynamic suggestion source for an argument.
@@ -65,6 +75,7 @@ type Subcommand struct {
 // Spec describes the complete specification for a command
 type Spec struct {
 	Name        string
+	Install     string
 	Subcommands []Subcommand
 	Options     []Option
 	Args        []ArgSpec

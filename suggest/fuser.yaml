@@ -1,4 +1,5 @@
 name: fuser
+install: sudo apt install psmisc
 subcommands: []
 options:
   - names: ["-k", "--kill"]

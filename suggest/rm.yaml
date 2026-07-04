@@ -1,4 +1,5 @@
 name: rm
+install: sudo apt install coreutils
 subcommands: []
 options:
   - names: ["-f", "--force"]

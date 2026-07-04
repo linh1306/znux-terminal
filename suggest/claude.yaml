@@ -1,0 +1,45 @@
+name: claude
+install: npm install -g @anthropic-ai/claude-code
+subcommands:
+  - name: login
+    description: "Đăng nhập Claude Code"
+  - name: logout
+    description: "Đăng xuất Claude Code"
+  - name: update
+    description: "Cập nhật Claude Code"
+  - name: config
+    description: "Quản lý cấu hình"
+    subcommands:
+      - name: get
+        description: "Đọc giá trị cấu hình"
+      - name: set
+        description: "Ghi giá trị cấu hình"
+      - name: list
+        description: "Liệt kê cấu hình"
+  - name: mcp
+    description: "Quản lý MCP servers"
+    subcommands:
+      - name: add
+        description: "Thêm MCP server"
+      - name: list
+        description: "Liệt kê MCP servers"
+      - name: remove
+        description: "Xóa MCP server"
+  - name: doctor
+    description: "Kiểm tra môi trường Claude Code"
+options:
+  - names: ["-h", "--help"]
+    description: "Hiển thị trợ giúp"
+  - names: ["-v", "--version"]
+    description: "Hiển thị phiên bản"
+  - names: ["--model"]
+    description: "Chọn model"
+    args:
+      - name: model
+  - names: ["--cwd"]
+    description: "Đặt thư mục làm việc"
+    args:
+      - name: dir
+        sources:
+          - type: path
+            include: [folder]

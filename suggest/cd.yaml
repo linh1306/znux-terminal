@@ -1,4 +1,5 @@
 name: cd
+install: sudo apt install bash
 subcommands: []
 options: []
 args:

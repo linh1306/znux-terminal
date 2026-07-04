@@ -1,4 +1,5 @@
 name: mkdir
+install: sudo apt install coreutils
 subcommands: []
 options:
   - names: ["-p", "--parents"]

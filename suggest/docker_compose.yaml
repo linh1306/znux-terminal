@@ -1,4 +1,5 @@
 name: docker-compose
+install: sudo apt install docker-compose
 subcommands:
   - name: up
     description: "Tạo và khởi động container"

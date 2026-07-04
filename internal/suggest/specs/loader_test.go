@@ -87,6 +87,23 @@ args:
 	}
 }
 
+func TestLoadYAMLParsesInstallCommand(t *testing.T) {
+	spec, err := LoadYAML([]byte(`
+name: codex
+install: npm install -g @openai/codex
+subcommands:
+  - name: login
+    description: Login
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if spec.Install != "npm install -g @openai/codex" {
+		t.Fatalf("install = %q, want npm install -g @openai/codex", spec.Install)
+	}
+}
+
 func TestLoadYAMLConvertsLegacyTemplateToPathSource(t *testing.T) {
 	spec, err := LoadYAML([]byte(`
 name: cd

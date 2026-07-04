@@ -1,4 +1,5 @@
 name: kubectl
+install: sudo snap install kubectl --classic
 subcommands:
   - name: get
     description: "Hiển thị resource"

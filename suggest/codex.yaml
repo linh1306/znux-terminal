@@ -1,0 +1,49 @@
+name: codex
+install: npm install -g @openai/codex
+subcommands:
+  - name: login
+    description: "Đăng nhập Codex CLI"
+  - name: logout
+    description: "Đăng xuất Codex CLI"
+  - name: resume
+    description: "Tiếp tục phiên làm việc trước"
+  - name: exec
+    description: "Chạy Codex ở chế độ non-interactive"
+    args:
+      - name: prompt
+        variadic: true
+  - name: mcp
+    description: "Quản lý MCP servers"
+    subcommands:
+      - name: add
+        description: "Thêm MCP server"
+      - name: list
+        description: "Liệt kê MCP servers"
+      - name: remove
+        description: "Xóa MCP server"
+  - name: completion
+    description: "Tạo shell completion"
+    args:
+      - name: shell
+  - name: debug
+    description: "Công cụ debug Codex CLI"
+options:
+  - names: ["-h", "--help"]
+    description: "Hiển thị trợ giúp"
+  - names: ["-V", "--version"]
+    description: "Hiển thị phiên bản"
+  - names: ["-m", "--model"]
+    description: "Chọn model"
+    args:
+      - name: model
+  - names: ["-c", "--config"]
+    description: "Ghi đè cấu hình"
+    args:
+      - name: key=value
+  - names: ["-C", "--cd"]
+    description: "Đặt thư mục làm việc"
+    args:
+      - name: dir
+        sources:
+          - type: path
+            include: [folder]

@@ -43,7 +43,7 @@ func (e *Engine) GetSuggestions(buf *buffer.LineBuf, ctx *buffer.Context) []spec
 	case buffer.ContextCommand:
 		// After pressing space, check for subcommand
 		if spec := specs.Get(ctx.Command); spec != nil {
-			return e.getSubcommandSuggestions(spec, "")
+			return e.withInstallSuggestion(spec, e.getSubcommandSuggestions(spec, ""))
 		}
 		return nil
 
@@ -59,11 +59,11 @@ func (e *Engine) GetSuggestions(buf *buffer.LineBuf, ctx *buffer.Context) []spec
 		// If the spec has subcommands, try matching them first.
 		if len(spec.Subcommands) > 0 {
 			if subs := e.getSubcommandSuggestions(spec, partial); len(subs) > 0 {
-				return subs
+				return e.withInstallSuggestion(spec, subs)
 			}
 		}
 		// No matching subcommands — the partial token is an arg (e.g. "cd ./").
-		return e.suggestFromArgSpecs(spec.Args, partial)
+		return e.withInstallSuggestion(spec, e.suggestFromArgSpecs(spec.Args, partial))
 
 	case buffer.ContextFlag, buffer.ContextFlagPartial:
 		return e.getFlagSuggestions(ctx)
@@ -83,6 +83,9 @@ func (e *Engine) matchCommand(prefix string) []specs.Suggestion {
 
 	for _, cmd := range specs.RegisteredCommands() {
 		if strings.HasPrefix(cmd, prefix) {
+			if spec := specs.Get(cmd); spec != nil && e.needsInstall(spec) {
+				suggestions = append(suggestions, e.installSuggestion(spec))
+			}
 			suggestions = append(suggestions, specs.Suggestion{
 				Name: cmd,
 				Kind: specs.KindSubcommand,
@@ -91,6 +94,33 @@ func (e *Engine) matchCommand(prefix string) []specs.Suggestion {
 	}
 
 	return suggestions
+}
+
+func (e *Engine) withInstallSuggestion(spec *specs.Spec, suggestions []specs.Suggestion) []specs.Suggestion {
+	if !e.needsInstall(spec) {
+		return suggestions
+	}
+	out := make([]specs.Suggestion, 0, len(suggestions)+1)
+	out = append(out, e.installSuggestion(spec))
+	out = append(out, suggestions...)
+	return out
+}
+
+func (e *Engine) needsInstall(spec *specs.Spec) bool {
+	if spec == nil || spec.Install == "" {
+		return false
+	}
+	_, err := exec.LookPath(spec.Name)
+	return err != nil
+}
+
+func (e *Engine) installSuggestion(spec *specs.Spec) specs.Suggestion {
+	return specs.Suggestion{
+		Name:        "Cài đặt " + spec.Name,
+		Description: "Chưa cài đặt. Chọn để hiện lệnh cài đặt",
+		Kind:        specs.KindInstall,
+		InsertText:  spec.Install,
+	}
 }
 
 // getSubcommandSuggestions returns subcommand suggestions

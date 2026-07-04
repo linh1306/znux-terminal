@@ -126,6 +126,7 @@ type yamlSubcommand struct {
 
 type yamlSpec struct {
 	Name        string           `yaml:"name"`
+	Install     string           `yaml:"install,omitempty"`
 	Subcommands []yamlSubcommand `yaml:"subcommands,omitempty"`
 	Options     []yamlOption     `yaml:"options,omitempty"`
 	Args        []yamlArgSpec    `yaml:"args,omitempty"`
@@ -237,6 +238,7 @@ func LoadYAML(data []byte) (*Spec, error) {
 	}
 	return &Spec{
 		Name:        ys.Name,
+		Install:     ys.Install,
 		Subcommands: convertSubcommands(ys.Subcommands),
 		Options:     convertOptions(ys.Options),
 		Args:        convertArgSpecs(ys.Args),

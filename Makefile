@@ -10,10 +10,8 @@ all: build
 build:
 	GOCACHE=$(GOCACHE) go build -o dist/$(BINARY) ./cmd
 
-install: build
-	mkdir -p $(BINDIR)
-	cp dist/$(BINARY) $(BINDIR)/$(BINARY)
-	@echo "Installed $(BINARY) to $(BINDIR)/$(BINARY)"
+install: 
+	go build -o /home/nguyenlinh13602/.local/bin/znux ./cmd
 
 test:
 	GOCACHE=$(GOCACHE) go test ./...

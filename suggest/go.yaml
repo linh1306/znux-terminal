@@ -1,4 +1,5 @@
 name: go
+install: sudo apt install golang-go
 subcommands:
   - name: run
     description: "Biên dịch và chạy file Go"

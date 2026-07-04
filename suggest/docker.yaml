@@ -1,4 +1,5 @@
 name: docker
+install: sudo apt install docker.io
 subcommands:
   - name: run
     description: "Chạy lệnh trong container mới"

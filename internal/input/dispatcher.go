@@ -215,7 +215,11 @@ func (d *Dispatcher) AcceptSuggestion() string {
 		return d.linebuf.String()
 	}
 	s := d.suggestions[d.selected]
-	d.linebuf.ReplaceLastWord(s.Name)
+	if s.Kind == specs.KindInstall {
+		d.linebuf.SetString(s.Completion())
+	} else {
+		d.linebuf.ReplaceLastWord(s.Completion())
+	}
 	numLines := len(d.suggestions)
 	d.hideSuggestions()
 	d.popup.AcceptAndRedraw(d.linebuf.String(), numLines)
@@ -227,7 +231,7 @@ func (d *Dispatcher) SelectedSuggestion() string {
 	if len(d.suggestions) == 0 || d.selected >= len(d.suggestions) {
 		return ""
 	}
-	return d.suggestions[d.selected].Name
+	return d.suggestions[d.selected].Completion()
 }
 
 // IsShowingSuggestions returns true if the suggestions popup is showing.
