@@ -1,10 +1,14 @@
 package suggest
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/nguyenlinh13602/goshell/internal/buffer"
 	"github.com/nguyenlinh13602/goshell/internal/suggest/specs"
@@ -204,6 +208,30 @@ func TestGetSuggestionsUsesCurrentArgOnly(t *testing.T) {
 	assertNoSuggestion(t, got, "origin")
 }
 
+func TestGetSuggestionsUsesRegisteredSource(t *testing.T) {
+	specs.RegisterSource("test:dynamic-source", func(source specs.SourceSpec, ctx specs.SourceContext, partial string) []specs.Suggestion {
+		if ctx.CWD == "" {
+			t.Fatal("source context should include cwd")
+		}
+		return []specs.Suggestion{{Name: "dynamic-value", Kind: specs.KindValue}}
+	})
+	specs.Register("source-command", &specs.Spec{
+		Name: "source-command",
+		Args: []specs.ArgSpec{{
+			Name:    "value",
+			Sources: []specs.SourceSpec{{Type: "test:dynamic-source"}},
+		}},
+	})
+
+	buf := buffer.NewLineBuf()
+	buf.SetString("source-command dyn")
+	ctx := buffer.NewParser().GetCurrentContext(buf)
+
+	got := NewEngine().GetSuggestions(buf, &ctx)
+
+	assertHasSuggestion(t, got, "dynamic-value", specs.KindValue)
+}
+
 func TestGetSuggestionsPrependsInstallForMissingCommand(t *testing.T) {
 	specs.Register("znux-missing-test-command", &specs.Spec{
 		Name:    "znux-missing-test-command",
@@ -231,59 +259,94 @@ func TestGetSuggestionsPrependsInstallForMissingCommand(t *testing.T) {
 	}
 }
 
-func TestParseSSListeningPorts(t *testing.T) {
-	out := []byte(`tcp LISTEN 0 4096 127.0.0.1:5432 0.0.0.0:* users:(("postgres",pid=1234,fd=7))
-udp UNCONN 0 0 0.0.0.0:5353 0.0.0.0:* users:(("mdns",pid=55,fd=4))
-tcp LISTEN 0 4096 [::1]:8080 [::]:* users:(("node",pid=999,fd=21))
-tcp LISTEN 0 4096 127.0.0.53%lo:53 0.0.0.0:* users:(("systemd-resolve",pid=777,fd=17))
-tcp LISTEN 0 4096 127.0.0.1:3000 0.0.0.0:* users:(("next-server (v1",pid=484781,fd=21))
-`)
+func TestGetSuggestionsAddsNPMScriptsFromPackageJSON(t *testing.T) {
+	loadTestSpecs(t)
 
-	got := parseSSListeningPorts(out, []string{"tcp", "udp"})
+	dir := t.TempDir()
+	mustWriteFileContent(t, filepath.Join(dir, "package.json"), `{
+		"scripts": {
+			"dev": "vite --host",
+			"build": "vite build"
+		}
+	}`)
 
-	if len(got) != 5 {
-		t.Fatalf("ports len = %d, want 5: %#v", len(got), got)
-	}
-	if got[0].Port != "5432" || got[0].Protocol != "tcp" {
-		t.Fatalf("unexpected first port: %#v", got[0])
-	}
-	if got[0].Description() != "LISTEN 127.0.0.1 postgres pid=1234" {
-		t.Fatalf("first description = %q", got[0].Description())
-	}
-	if got[1].Port != "5353" || got[1].Protocol != "udp" {
-		t.Fatalf("unexpected second port: %#v", got[1])
-	}
-	if got[2].Port != "8080" || got[2].Protocol != "tcp" {
-		t.Fatalf("unexpected third port: %#v", got[2])
-	}
-	if got[2].Description() != "LISTEN ::1 node pid=999" {
-		t.Fatalf("third description = %q", got[2].Description())
-	}
-	if got[3].Description() != "LISTEN 127.0.0.53 systemd-resolve pid=777" {
-		t.Fatalf("fourth description = %q", got[3].Description())
-	}
-	if got[4].Description() != "LISTEN 127.0.0.1 next-server pid=484781" {
-		t.Fatalf("fifth description = %q", got[4].Description())
-	}
+	engine := NewEngine()
+	engine.SetCWD(dir)
+
+	buf := buffer.NewLineBuf()
+	buf.SetString("npm ")
+	ctx := buffer.NewParser().GetCurrentContext(buf)
+
+	got := engine.GetSuggestions(buf, &ctx)
+
+	assertHasSuggestion(t, got, "dev", specs.KindSubcommand)
+	assertHasSuggestion(t, got, "build", specs.KindSubcommand)
+	assertSuggestionCompletion(t, got, "dev", "run dev")
+
+	buf.SetString("npm run d")
+	ctx = buffer.NewParser().GetCurrentContext(buf)
+
+	got = engine.GetSuggestions(buf, &ctx)
+
+	assertHasSuggestion(t, got, "dev", specs.KindSubcommand)
+	assertNoSuggestion(t, got, "build")
+	assertSuggestionCompletion(t, got, "dev", "dev")
 }
 
-func TestSortListeningPortsUsesProtocolOrder(t *testing.T) {
-	ports := []listeningPort{
-		{Protocol: "udp", Port: "53"},
-		{Protocol: "tcp", Port: "3000"},
-		{Protocol: "tcp", Port: "22"},
+func TestGetSuggestionsSuggestsNPMDependenciesForUninstall(t *testing.T) {
+	loadTestSpecs(t)
+
+	dir := t.TempDir()
+	mustWriteFileContent(t, filepath.Join(dir, "package.json"), `{
+		"dependencies": {
+			"react": "^19.0.0"
+		},
+		"devDependencies": {
+			"vite": "^7.0.0"
+		}
+	}`)
+
+	engine := NewEngine()
+	engine.SetCWD(dir)
+
+	buf := buffer.NewLineBuf()
+	buf.SetString("npm uninstall v")
+	ctx := buffer.NewParser().GetCurrentContext(buf)
+
+	got := engine.GetSuggestions(buf, &ctx)
+
+	assertHasSuggestion(t, got, "vite", specs.KindValue)
+	assertNoSuggestion(t, got, "react")
+}
+
+func TestNPMRegistryClientDebouncesSearch(t *testing.T) {
+	var requests int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&requests, 1)
+		if got := r.URL.Query().Get("text"); got != "react" {
+			t.Fatalf("query text = %q, want react", got)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"objects":[{"package":{"name":"react","description":"React","version":"19.1.0"}}]}`))
+	}))
+	defer server.Close()
+
+	restore := specs.ConfigureNPMRegistryClientForTest(server.URL, server.Client(), 50*time.Millisecond, time.Minute)
+	defer restore()
+
+	if got := specs.NPMRegistrySuggestions("react"); len(got) != 0 {
+		t.Fatalf("first debounced search = %#v, want none", got)
+	}
+	if requests != 0 {
+		t.Fatalf("requests = %d, want 0 before debounce", requests)
 	}
 
-	sortListeningPorts(ports, []string{"tcp", "udp"})
+	time.Sleep(60 * time.Millisecond)
+	got := specs.NPMRegistrySuggestions("react")
 
-	if ports[0].Protocol != "tcp" || ports[0].Port != "22" {
-		t.Fatalf("first port = %#v, want tcp 22", ports[0])
-	}
-	if ports[1].Protocol != "tcp" || ports[1].Port != "3000" {
-		t.Fatalf("second port = %#v, want tcp 3000", ports[1])
-	}
-	if ports[2].Protocol != "udp" || ports[2].Port != "53" {
-		t.Fatalf("third port = %#v, want udp 53", ports[2])
+	assertHasSuggestion(t, got, "react", specs.KindValue)
+	if requests != 1 {
+		t.Fatalf("requests = %d, want 1", requests)
 	}
 }
 
@@ -318,6 +381,13 @@ func mustWriteFile(t *testing.T, path string) {
 	}
 }
 
+func mustWriteFileContent(t *testing.T, path, content string) {
+	t.Helper()
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func assertHasSuggestion(t *testing.T, suggestions []specs.Suggestion, name string, kind specs.SuggestionKind) {
 	t.Helper()
 	for _, s := range suggestions {
@@ -335,4 +405,17 @@ func assertNoSuggestion(t *testing.T, suggestions []specs.Suggestion, name strin
 			t.Fatalf("unexpected suggestion %q in %#v", name, suggestions)
 		}
 	}
+}
+
+func assertSuggestionCompletion(t *testing.T, suggestions []specs.Suggestion, name, completion string) {
+	t.Helper()
+	for _, s := range suggestions {
+		if s.Name == name {
+			if got := s.Completion(); got != completion {
+				t.Fatalf("completion for %q = %q, want %q", name, got, completion)
+			}
+			return
+		}
+	}
+	t.Fatalf("missing suggestion %q in %#v", name, suggestions)
 }

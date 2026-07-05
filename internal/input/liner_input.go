@@ -577,6 +577,7 @@ func (d *Dispatcher) updateSuggestionsFromText(text string) {
 	d.linebuf.SetCursor(len(text))
 
 	ctx := d.parser.GetCurrentContext(d.linebuf)
+	d.suggestEngine.SetCWD(d.currentCWD)
 	suggestions := d.suggestEngine.GetSuggestions(d.linebuf, &ctx)
 
 	if len(suggestions) == 0 {
@@ -593,6 +594,7 @@ func (d *Dispatcher) updateSuggestionsFromText(text string) {
 // showSuggestionsFromCurrentLine shows suggestions based on current linebuf.
 func (d *Dispatcher) showSuggestionsFromCurrentLine() {
 	ctx := d.parser.GetCurrentContext(d.linebuf)
+	d.suggestEngine.SetCWD(d.currentCWD)
 	suggestions := d.suggestEngine.GetSuggestions(d.linebuf, &ctx)
 
 	if len(suggestions) == 0 {

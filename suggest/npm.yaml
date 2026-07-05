@@ -1,8 +1,17 @@
 name: npm
 install: sudo apt install npm
+args:
+  - name: script
+    sources:
+      - type: npm-scripts
 subcommands:
   - name: install
     description: "Cài đặt dependency"
+    args:
+      - name: package
+        variadic: true
+        sources:
+          - type: npm-registry
     options:
       - names: ["-g", "--global"]
         description: "Cài đặt global"
@@ -27,6 +36,11 @@ subcommands:
 
   - name: uninstall
     description: "Xóa dependency"
+    args:
+      - name: package
+        variadic: true
+        sources:
+          - type: npm-dependencies
     options:
       - names: ["-g", "--global"]
         description: "Gỡ cài đặt global"
@@ -37,26 +51,15 @@ subcommands:
 
   - name: run
     description: "Chạy script"
+    args:
+      - name: script
+        sources:
+          - type: npm-scripts
     options:
       - names: ["--if-present"]
         description: "Chạy nếu script tồn tại"
       - names: ["--ignore-scripts"]
         description: "Bỏ qua script"
-
-  - name: test
-    description: "Chạy test"
-    options:
-      - names: ["--watch"]
-        description: "Chế độ theo dõi"
-
-  - name: start
-    description: "Chạy script start"
-
-  - name: dev
-    description: "Chạy script dev"
-
-  - name: build
-    description: "Chạy script build"
 
   - name: publish
     description: "Publish package lên registry"

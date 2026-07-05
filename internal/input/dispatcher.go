@@ -139,6 +139,7 @@ func (d *Dispatcher) hideSuggestions() {
 // showSuggestions displays the autocomplete popup
 func (d *Dispatcher) showSuggestions() {
 	ctx := d.parser.GetCurrentContext(d.linebuf)
+	d.suggestEngine.SetCWD(d.currentCWD)
 	d.suggestions = d.suggestEngine.GetSuggestions(d.linebuf, &ctx)
 	if len(d.suggestions) > 0 {
 		d.selected = 0
@@ -183,6 +184,7 @@ func (d *Dispatcher) GetSuggestions(text string) []specs.Suggestion {
 	d.linebuf.SetString(text)
 	d.linebuf.SetCursor(len(text))
 	ctx := d.parser.GetCurrentContext(d.linebuf)
+	d.suggestEngine.SetCWD(d.currentCWD)
 	return d.suggestEngine.GetSuggestions(d.linebuf, &ctx)
 }
 
