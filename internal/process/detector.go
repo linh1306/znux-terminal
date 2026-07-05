@@ -3,8 +3,11 @@
 package process
 
 import (
+	"os"
 	"os/exec"
 	"syscall"
+
+	"golang.org/x/sys/unix"
 )
 
 // IsForegroundProcess checks if current process group ID matches the process's PID
@@ -26,26 +29,25 @@ func IsForegroundProcess(pid int32) (bool, error) {
 	return pgid == myPgid, nil
 }
 
-// ForegroundChecker monitors foreground process state
-type ForegroundChecker struct {
-	lastPID int32
-	isFg    bool
-	err     error
-}
+// ForegroundChecker monitors foreground process state.
+type ForegroundChecker struct{}
 
 // NewForegroundChecker creates a new foreground checker
 func NewForegroundChecker() *ForegroundChecker {
 	return &ForegroundChecker{}
 }
 
-// Check returns whether the given PID is in foreground
-func (f *ForegroundChecker) Check(pid int32) (bool, error) {
-	if f.lastPID == pid && f.err == nil {
-		return f.isFg, nil
+// CheckPTY returns whether pid's process group owns the foreground of pty.
+func (f *ForegroundChecker) CheckPTY(pty *os.File, pid int) (bool, error) {
+	fgPgrp, err := unix.IoctlGetInt(int(pty.Fd()), unix.TIOCGPGRP)
+	if err != nil {
+		return false, err
 	}
-	f.lastPID = pid
-	f.isFg, f.err = IsForegroundProcess(pid)
-	return f.isFg, f.err
+	pgrp, err := syscall.Getpgid(pid)
+	if err != nil {
+		return false, err
+	}
+	return fgPgrp == pgrp, nil
 }
 
 // IsInteractiveShell checks if the command is running in an interactive shell

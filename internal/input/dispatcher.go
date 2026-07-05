@@ -8,6 +8,7 @@ import (
 
 	"github.com/nguyenlinh13602/goshell/internal/buffer"
 	"github.com/nguyenlinh13602/goshell/internal/config"
+	"github.com/nguyenlinh13602/goshell/internal/process"
 	"github.com/nguyenlinh13602/goshell/internal/render"
 	"github.com/nguyenlinh13602/goshell/internal/suggest"
 	"github.com/nguyenlinh13602/goshell/internal/suggest/specs"
@@ -20,6 +21,8 @@ import (
 type Dispatcher struct {
 	ptyOut     *os.File
 	ptyMu      *sync.Mutex // protects PTY writes from concurrent resize
+	shellPID   int
+	foreground *process.ForegroundChecker
 	stopOnce   sync.Once
 	emulator   *terminal.Emulator
 	outputChan render.OutputChan
@@ -61,10 +64,12 @@ type Dispatcher struct {
 }
 
 // NewDispatcher creates a new input dispatcher
-func NewDispatcher(ptyOut *os.File, emulator *terminal.Emulator, output render.OutputChan, ptyMu *sync.Mutex) *Dispatcher {
+func NewDispatcher(ptyOut *os.File, shellPID int, emulator *terminal.Emulator, output render.OutputChan, ptyMu *sync.Mutex) *Dispatcher {
 	d := &Dispatcher{
 		ptyOut:        ptyOut,
 		ptyMu:         ptyMu,
+		shellPID:      shellPID,
+		foreground:    process.NewForegroundChecker(),
 		emulator:      emulator,
 		outputChan:    output,
 		config:        config.DefaultConfig(),
@@ -124,6 +129,17 @@ func (d *Dispatcher) ptyWriteString(s string) {
 // IsAltScreen returns true if the emulator is in alt screen mode.
 func (d *Dispatcher) IsAltScreen() bool {
 	return d.emulator.IsAltScreen()
+}
+
+func (d *Dispatcher) shouldPassThroughInput() bool {
+	if d.emulator.IsAltScreen() {
+		return true
+	}
+	if d.ptyOut == nil || d.shellPID <= 0 || d.foreground == nil {
+		return false
+	}
+	shellForeground, err := d.foreground.CheckPTY(d.ptyOut, d.shellPID)
+	return err == nil && !shellForeground
 }
 
 // hideSuggestions hides the suggestions popup

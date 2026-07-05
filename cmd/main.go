@@ -132,6 +132,10 @@ func main() {
 	}
 	defer ptm.Close()
 
+	if err := gshell_pty.Resizepty(ptm); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: Resizepty failed: %v\n", err)
+	}
+
 	// Disable PTY echo: goshell echoes every keystroke itself, so leaving the
 	// shell's termios echo on would produce a second copy of the submitted
 	// command that races with our own output on Enter.
@@ -157,7 +161,7 @@ func main() {
 	output := &outputWriter{ch: ch}
 	emulator := terminal.NewEmulator()
 
-	dispatcher := goshell_input.NewDispatcher(ptm, emulator, output, ptyMu)
+	dispatcher := goshell_input.NewDispatcher(ptm, cmd.Process.Pid, emulator, output, ptyMu)
 
 	// PTY → serialized output goroutine
 	go func() {

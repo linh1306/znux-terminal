@@ -1,13 +1,52 @@
 package suggest
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 
 	"github.com/nguyenlinh13602/goshell/internal/buffer"
 	"github.com/nguyenlinh13602/goshell/internal/suggest/specs"
 )
+
+// builtinCache caches results of isShellBuiltin to avoid repeated shell forks.
+var (
+	builtinCacheMu sync.Mutex
+	builtinCache   = map[string]bool{}
+)
+
+// isShellBuiltin returns true if name is a builtin of the user's current shell.
+// It asks the shell itself via `$SHELL -c "type <name>"` and checks whether
+// the reply contains the word "builtin". Results are cached per process.
+func isShellBuiltin(name string) bool {
+	builtinCacheMu.Lock()
+	if cached, ok := builtinCache[name]; ok {
+		builtinCacheMu.Unlock()
+		return cached
+	}
+	builtinCacheMu.Unlock()
+
+	shell := os.Getenv("SHELL")
+	if shell == "" {
+		shell = "/bin/sh"
+	}
+
+	var out bytes.Buffer
+	cmd := exec.Command(shell, "-c", "type "+name)
+	cmd.Stdout = &out
+	// Ignore errors: non-zero exit means "not found", which is fine.
+	_ = cmd.Run()
+
+	result := strings.Contains(out.String(), "builtin")
+
+	builtinCacheMu.Lock()
+	builtinCache[name] = result
+	builtinCacheMu.Unlock()
+
+	return result
+}
 
 // Engine provides suggestions based on current input
 type Engine struct {
@@ -107,8 +146,16 @@ func (e *Engine) needsInstall(spec *specs.Spec) bool {
 	if spec == nil || spec.Install == "" {
 		return false
 	}
-	_, err := exec.LookPath(spec.Name)
-	return err != nil
+	// Check PATH first (fastest path).
+	if _, err := exec.LookPath(spec.Name); err == nil {
+		return false
+	}
+	// Not in PATH — could still be a shell builtin (e.g. cd, echo).
+	// Ask the user's actual shell so the result is correct for any shell/distro.
+	if isShellBuiltin(spec.Name) {
+		return false
+	}
+	return true
 }
 
 func (e *Engine) installSuggestion(spec *specs.Spec) specs.Suggestion {

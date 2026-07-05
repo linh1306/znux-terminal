@@ -2,7 +2,10 @@
 
 package process
 
-import "os/exec"
+import (
+	"os"
+	"os/exec"
+)
 
 // IsForegroundProcess is not implemented on Windows yet.
 func IsForegroundProcess(pid int32) (bool, error) {
@@ -17,9 +20,9 @@ func NewForegroundChecker() *ForegroundChecker {
 	return &ForegroundChecker{}
 }
 
-// Check returns whether the given PID is in foreground.
-func (f *ForegroundChecker) Check(pid int32) (bool, error) {
-	return false, nil
+// CheckPTY returns whether pid's process group owns the foreground of pty.
+func (f *ForegroundChecker) CheckPTY(_ *os.File, _ int) (bool, error) {
+	return true, nil
 }
 
 // IsInteractiveShell checks if the command is running in an interactive shell.

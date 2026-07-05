@@ -108,6 +108,11 @@ func (d *Dispatcher) RunWithLiner() error {
 		}
 		b := res.b
 
+		if d.shouldPassThroughInput() {
+			d.ptyWrite([]byte{b})
+			continue
+		}
+
 		// Handle escape sequences (arrow keys, etc.)
 		if b == 27 {
 			d.handleEscape(byteCh)
@@ -430,8 +435,7 @@ func (d *Dispatcher) moveCursorRight() {
 
 // handleRuneInteractive processes a printable Unicode rune.
 func (d *Dispatcher) handleRuneInteractive(r rune) {
-	// Pass through in alt screen mode
-	if d.emulator.IsAltScreen() {
+	if d.shouldPassThroughInput() {
 		var buf [utf8.UTFMax]byte
 		n := utf8.EncodeRune(buf[:], r)
 		d.ptyWrite(buf[:n])
