@@ -58,9 +58,9 @@ type Dispatcher struct {
 	// currentCWD tracks the shell's current working directory via OSC 6973
 	currentCWD string
 
-	// clearOnNextEmptyEnter is set after a non-empty command submit. Pressing
-	// Enter on an empty prompt then clears the current screen through the shell.
-	clearOnNextEmptyEnter bool
+	// emptyEnterCount tracks consecutive empty submits. Two empty Enter presses
+	// clear the current screen through the shell.
+	emptyEnterCount int
 }
 
 // NewDispatcher creates a new input dispatcher

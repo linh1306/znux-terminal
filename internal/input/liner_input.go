@@ -448,7 +448,7 @@ func (d *Dispatcher) handleRuneInteractive(r rune) {
 	}
 
 	// Printable character — add to buffer
-	d.clearOnNextEmptyEnter = false
+	d.emptyEnterCount = 0
 	d.linebuf.Append(r)
 
 	// Echo via output channel to ensure proper ordering
@@ -495,12 +495,17 @@ func (d *Dispatcher) handleSubmitInteractive(line *liner.State) {
 	}
 
 	cmd := d.linebuf.String()
-	if cmd == "" && d.clearOnNextEmptyEnter && !d.emulator.IsAltScreen() {
-		d.outputChan.WriteOp(render.OutputOp{Kind: render.OutputOpClearCurrent})
-		d.ptyWrite([]byte{12})
-		d.clearOnNextEmptyEnter = false
-		d.screenCol = 0
-		return
+	if cmd == "" && !d.emulator.IsAltScreen() {
+		d.emptyEnterCount++
+		if d.emptyEnterCount >= 2 {
+			d.outputChan.WriteOp(render.OutputOp{Kind: render.OutputOpClearCurrent})
+			d.ptyWrite([]byte{12})
+			d.emptyEnterCount = 0
+			d.screenCol = 0
+			return
+		}
+	} else {
+		d.emptyEnterCount = 0
 	}
 
 	if cmd != "" {
@@ -515,7 +520,6 @@ func (d *Dispatcher) handleSubmitInteractive(line *liner.State) {
 
 	d.linebuf.Reset()
 	d.screenCol = 0
-	d.clearOnNextEmptyEnter = cmd != ""
 }
 
 // eraseInputDisplay removes the locally-echoed input characters from the
